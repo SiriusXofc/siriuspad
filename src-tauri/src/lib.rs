@@ -2,7 +2,7 @@ mod commands;
 mod models;
 mod storage;
 
-use commands::{fs, runner, search};
+use commands::{fs, history, platform, runner, search};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -37,6 +37,10 @@ pub fn run() {
             fs::create_workspace,
             fs::rename_workspace,
             fs::delete_workspace,
+            history::list_note_history,
+            history::read_note_version,
+            history::restore_note_version,
+            platform::get_platform,
             runner::run_snippet,
             search::search_notes,
         ])

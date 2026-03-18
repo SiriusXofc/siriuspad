@@ -32,6 +32,17 @@ export interface RunResult {
   timed_out?: boolean
 }
 
+export interface NoteHistoryEntry {
+  timestamp: string
+  size_bytes: number
+}
+
+export interface NoteTab {
+  id: string
+  title: string
+  isDirty: boolean
+}
+
 export interface Workspace {
   id: string
   name: string
@@ -40,8 +51,19 @@ export interface Workspace {
   createdAt: string
 }
 
+export type AppLanguage = 'en' | 'pt-BR' | 'es'
+export type AppTheme = 'dark' | 'dark-dimmed' | 'midnight'
+export type AppPlatform = 'linux' | 'windows' | 'macos'
+export type PreviewMode = 'editor' | 'split' | 'preview'
+
+export interface ThemeDefinition {
+  id: AppTheme
+  name: string
+  vars: Record<string, string>
+}
+
 export interface Settings {
-  theme: 'dark'
+  theme: AppTheme
   fontSize: number
   fontFamily: string
   tabSize: 2 | 4
@@ -52,6 +74,7 @@ export interface Settings {
   defaultWorkspace: string
   githubToken: string
   variables: Record<string, string>
+  language: AppLanguage
 }
 
 export type SaveStatus = 'saved' | 'dirty' | 'saving' | 'error'
@@ -67,10 +90,37 @@ export interface ToastItem {
   actionHref?: string
 }
 
+export interface CursorInfo {
+  line: number
+  col: number
+  wordCount: number
+  charCount: number
+}
+
+export interface ConfirmDialogOptions {
+  title: string
+  description?: string
+  confirmLabel?: string
+  cancelLabel?: string
+  secondaryLabel?: string
+  danger?: boolean
+  onConfirm: () => void | Promise<void>
+  onSecondary?: () => void | Promise<void>
+}
+
+export interface PromptDialogOptions {
+  title: string
+  placeholder?: string
+  defaultValue?: string
+  confirmLabel?: string
+  cancelLabel?: string
+  onConfirm: (value: string) => void | Promise<void>
+}
+
 export interface CommandItem {
   id: string
   label: string
-  group: 'Notas' | 'Navegacao' | 'Acoes' | 'App'
+  group: string
   keywords?: string[]
   perform: () => void | Promise<void>
 }

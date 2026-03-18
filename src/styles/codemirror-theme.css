@@ -14,6 +14,67 @@
   padding: 0 0.18rem;
 }
 
+.cm-editor .cm-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  border-top: 1px solid var(--border) !important;
+  background: var(--bg-elevated) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.cm-editor .cm-search label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--text-secondary);
+}
+
+.cm-editor .cm-search input,
+.cm-editor .cm-search select {
+  min-width: 140px;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.5rem !important;
+  background: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+  padding: 0.45rem 0.65rem !important;
+}
+
+.cm-editor .cm-search button {
+  border: 1px solid var(--border) !important;
+  border-radius: 0.5rem !important;
+  background: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+  padding: 0.45rem 0.7rem !important;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.cm-editor .cm-search button:hover {
+  border-color: var(--border-focus) !important;
+  background: var(--bg-active) !important;
+}
+
+.cm-editor .cm-search input:focus,
+.cm-editor .cm-search select:focus,
+.cm-editor .cm-search button:focus {
+  outline: none;
+  border-color: var(--border-focus) !important;
+}
+
+.cm-editor .cm-search .cm-button {
+  margin: 0 !important;
+}
+
+.cm-editor .cm-searchMatch {
+  background: rgba(124, 106, 247, 0.18);
+  outline: 1px solid rgba(124, 106, 247, 0.28);
+}
+
+.cm-editor .cm-searchMatch.cm-searchMatch-selected {
+  background: rgba(124, 106, 247, 0.32);
+}
+
 .command-group {
   margin-top: 0.5rem;
 }

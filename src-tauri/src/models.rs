@@ -42,3 +42,9 @@ pub struct RunResult {
     pub duration_ms: u64,
     pub timed_out: bool,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NoteHistoryEntry {
+    pub timestamp: String,
+    pub size_bytes: u64,
+}

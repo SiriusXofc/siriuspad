@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import { FONT_OPTIONS } from '@/lib/constants'
+import { FONT_OPTIONS, LANGUAGE_OPTIONS } from '@/lib/constants'
+import { THEMES } from '@/lib/themes'
 import { Modal } from '@/components/ui/Modal'
-import type { Settings, Workspace } from '@/types'
+import type { AppLanguage, Settings, Workspace } from '@/types'
 
 interface SettingsModalProps {
   open: boolean
@@ -13,7 +15,13 @@ interface SettingsModalProps {
   onSetVariable: (key: string, value: string) => Promise<void>
   onRemoveVariable: (key: string) => Promise<void>
   onResetSection: (
-    section: 'editor' | 'appearance' | 'variables' | 'integrations' | 'shortcuts',
+    section:
+      | 'editor'
+      | 'appearance'
+      | 'variables'
+      | 'integrations'
+      | 'shortcuts'
+      | 'language',
   ) => Promise<void>
 }
 
@@ -21,10 +29,12 @@ function Section({
   title,
   description,
   onReset,
+  resetLabel,
   children,
 }: React.PropsWithChildren<{
   title: string
   description: string
+  resetLabel: string
   onReset: () => Promise<void>
 }>) {
   return (
@@ -39,7 +49,7 @@ function Section({
           className="rounded-md border border-border px-2.5 py-1 text-[11px] uppercase tracking-wide text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={() => void onReset()}
         >
-          Reset
+          {resetLabel}
         </button>
       </div>
       <div className="grid gap-4">{children}</div>
@@ -82,18 +92,40 @@ export function SettingsModal({
   onRemoveVariable,
   onResetSection,
 }: SettingsModalProps) {
+  const { t } = useTranslation()
   const [variableKey, setVariableKey] = useState('')
   const [variableValue, setVariableValue] = useState('')
 
+  const shortcuts = [
+    { key: 'Ctrl+N', action: t('commands.newNote') },
+    { key: 'Ctrl+K', action: t('commands.commandPalette') },
+    { key: 'Ctrl+F', action: t('titlebar.search') },
+    { key: 'Ctrl+S', action: t('common.save') },
+    { key: 'Ctrl+Enter', action: t('runner.run') },
+    { key: 'Ctrl+W', action: t('commands.closeNote') },
+    { key: 'Ctrl+,', action: t('settings.title') },
+    { key: 'Ctrl+Shift+C', action: t('commands.copyNote') },
+    { key: 'Ctrl+Shift+G', action: t('commands.exportGist') },
+    { key: 'Ctrl+D', action: t('commands.duplicateNote') },
+    { key: 'Ctrl+Shift+P', action: t('commands.pinNote') },
+    { key: 'Ctrl+Shift+Z', action: t('commands.zenMode') },
+    { key: 'Ctrl+Shift+F', action: t('commands.focusMode') },
+    { key: 'Ctrl+Shift+M', action: t('commands.markdownPreview') },
+    { key: 'Ctrl+H', action: t('commands.findReplace') },
+    { key: 'F11', action: t('commands.toggleFullscreen') },
+    { key: 'Alt+1..9', action: t('commands.switchWorkspace') },
+  ]
+
   return (
-    <Modal open={open} onClose={onClose} title="Settings" widthClassName="max-w-5xl">
+    <Modal open={open} onClose={onClose} title={t('settings.title')} widthClassName="max-w-5xl">
       <Section
-        title="Editor"
-        description="Font, wrapping, autosave, and editor ergonomics."
+        title={t('settings.sections.editor.title')}
+        description={t('settings.sections.editor.description')}
         onReset={() => onResetSection('editor')}
+        resetLabel={t('settings.reset')}
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Font size">
+          <Field label={t('settings.fields.fontSize')}>
             <input
               className={controlClassName()}
               type="number"
@@ -105,7 +137,7 @@ export function SettingsModal({
               }
             />
           </Field>
-          <Field label="Tab size">
+          <Field label={t('settings.fields.tabSize')}>
             <select
               className={controlClassName()}
               value={settings.tabSize}
@@ -113,20 +145,22 @@ export function SettingsModal({
                 void onUpdate({ tabSize: Number(event.target.value) as 2 | 4 })
               }
             >
-              <option value={2}>2 spaces</option>
-              <option value={4}>4 spaces</option>
+              <option value={2}>{t('settings.fields.tabSize2')}</option>
+              <option value={4}>{t('settings.fields.tabSize4')}</option>
             </select>
           </Field>
-          <Field label="Word wrap">
+          <Field label={t('settings.fields.wordWrap')}>
             <button
               type="button"
               className={`${controlClassName()} text-left`}
               onClick={() => void onUpdate({ wordWrap: !settings.wordWrap })}
             >
-              {settings.wordWrap ? 'Enabled' : 'Disabled'}
+              {settings.wordWrap
+                ? t('settings.fields.enabled')
+                : t('settings.fields.disabled')}
             </button>
           </Field>
-          <Field label="Line numbers">
+          <Field label={t('settings.fields.lineNumbers')}>
             <button
               type="button"
               className={`${controlClassName()} text-left`}
@@ -134,19 +168,23 @@ export function SettingsModal({
                 void onUpdate({ showLineNumbers: !settings.showLineNumbers })
               }
             >
-              {settings.showLineNumbers ? 'Visible' : 'Hidden'}
+              {settings.showLineNumbers
+                ? t('settings.fields.visible')
+                : t('settings.fields.hidden')}
             </button>
           </Field>
-          <Field label="Autosave">
+          <Field label={t('settings.fields.autosave')}>
             <button
               type="button"
               className={`${controlClassName()} text-left`}
               onClick={() => void onUpdate({ autosave: !settings.autosave })}
             >
-              {settings.autosave ? 'Enabled' : 'Disabled'}
+              {settings.autosave
+                ? t('settings.fields.enabled')
+                : t('settings.fields.disabled')}
             </button>
           </Field>
-          <Field label="Autosave delay (ms)">
+          <Field label={t('settings.fields.autosaveDelay')}>
             <input
               className={controlClassName()}
               type="number"
@@ -163,15 +201,31 @@ export function SettingsModal({
       </Section>
 
       <Section
-        title="Appearance"
-        description="SiriusPad stays dark only, but you can adjust the editor font."
+        title={t('settings.sections.appearance.title')}
+        description={t('settings.sections.appearance.description')}
         onReset={() => onResetSection('appearance')}
+        resetLabel={t('settings.reset')}
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Theme">
-            <input className={controlClassName()} value="dark" disabled />
+          <Field label={t('settings.fields.theme')}>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {THEMES.map((theme) => (
+                <button
+                  key={theme.id}
+                  type="button"
+                  className={`rounded-xl border px-3 py-2 text-sm transition ${
+                    settings.theme === theme.id
+                      ? 'border-accent bg-accent/10 text-text-primary'
+                      : 'border-border bg-surface text-text-secondary hover:border-focus hover:bg-hover'
+                  }`}
+                  onClick={() => void onUpdate({ theme: theme.id })}
+                >
+                  {theme.name}
+                </button>
+              ))}
+            </div>
           </Field>
-          <Field label="Font family">
+          <Field label={t('settings.fields.fontFamily')}>
             <select
               className={controlClassName()}
               value={settings.fontFamily}
@@ -190,37 +244,47 @@ export function SettingsModal({
       </Section>
 
       <Section
-        title="Shortcuts"
-        description="Local shortcuts are active inside the app. Global palette is bound to Ctrl+Shift+K when available."
+        title={t('settings.sections.language.title')}
+        description={t('settings.sections.language.description')}
+        onReset={() => onResetSection('language')}
+        resetLabel={t('settings.reset')}
+      >
+        <Field label={t('settings.fields.language')}>
+          <select
+            className={controlClassName()}
+            value={settings.language}
+            onChange={(event) =>
+              void onUpdate({ language: event.target.value as AppLanguage })
+            }
+          >
+            {LANGUAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </Section>
+
+      <Section
+        title={t('settings.sections.shortcuts.title')}
+        description={t('settings.sections.shortcuts.description')}
         onReset={() => onResetSection('shortcuts')}
+        resetLabel={t('settings.reset')}
       >
         <div className="grid gap-3 md:grid-cols-2">
-          {[
-            'Ctrl+N - New note',
-            'Ctrl+K - Command palette',
-            'Ctrl+F - Focus search',
-            'Ctrl+S - Save',
-            'Ctrl+Enter - Run snippet',
-            'Ctrl+W - Close note',
-            'Ctrl+, - Open settings',
-            'Ctrl+Shift+C - Copy with variables',
-            'Ctrl+Shift+G - Export Gist',
-            'Ctrl+D - Duplicate note',
-            'Ctrl+Shift+P - Pin or unpin',
-            'Alt+1..9 - Switch workspace',
-          ].map((item) => (
+          {shortcuts.map((item) => (
             <div
-              key={item}
+              key={item.key}
               className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-secondary"
             >
-              {item}
+              <span className="font-medium text-text-primary">{item.key}</span>
+              <span className="mx-2 text-text-muted">-</span>
+              <span>{item.action}</span>
             </div>
           ))}
         </div>
-        <Field
-          label="Default workspace"
-          description="New notes use this workspace unless you create them inside another filter."
-        >
+        <Field label={t('settings.fields.defaultWorkspace')}>
           <select
             className={controlClassName()}
             value={settings.defaultWorkspace}
@@ -238,9 +302,10 @@ export function SettingsModal({
       </Section>
 
       <Section
-        title="Global Variables"
-        description="These are substituted in snippets, copies, and exports."
+        title={t('settings.sections.variables.title')}
+        description={t('settings.sections.variables.description')}
         onReset={() => onResetSection('variables')}
+        resetLabel={t('settings.reset')}
       >
         <div className="grid gap-3">
           {Object.entries(settings.variables).length ? (
@@ -258,13 +323,13 @@ export function SettingsModal({
                   className="rounded-md border border-border px-2 py-1 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
                   onClick={() => void onRemoveVariable(key)}
                 >
-                  Remove
+                  {t('settings.variables.remove')}
                 </button>
               </div>
             ))
           ) : (
             <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
-              No global variables yet.
+              {t('settings.variables.empty')}
             </div>
           )}
         </div>
@@ -272,13 +337,13 @@ export function SettingsModal({
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
           <input
             className={controlClassName()}
-            placeholder="API_URL"
+            placeholder={t('settings.variables.keyPlaceholder')}
             value={variableKey}
             onChange={(event) => setVariableKey(event.target.value.toUpperCase())}
           />
           <input
             className={controlClassName()}
-            placeholder="https://api.example.com"
+            placeholder={t('settings.variables.valuePlaceholder')}
             value={variableValue}
             onChange={(event) => setVariableValue(event.target.value)}
           />
@@ -295,28 +360,29 @@ export function SettingsModal({
               setVariableValue('')
             }}
           >
-            Add
+            {t('settings.variables.add')}
           </button>
         </div>
       </Section>
 
       <Section
-        title="Integrations"
-        description="GitHub Gist export uses a token with the gist scope."
+        title={t('settings.sections.integrations.title')}
+        description={t('settings.sections.integrations.description')}
         onReset={() => onResetSection('integrations')}
+        resetLabel={t('settings.reset')}
       >
         <Field
-          label="GitHub token"
-          description="Stored locally in SiriusPad's Tauri store."
+          label={t('settings.fields.githubToken')}
+          description={t('settings.fields.githubTokenHint')}
         >
-          <input
-            className={controlClassName()}
-            type="password"
-            placeholder="ghp_..."
-            value={settings.githubToken}
-            onChange={(event) =>
-              void onUpdate({ githubToken: event.target.value })
-            }
+            <input
+              className={controlClassName()}
+              type="password"
+              placeholder={t('settings.fields.githubTokenPlaceholder')}
+              value={settings.githubToken}
+              onChange={(event) =>
+                void onUpdate({ githubToken: event.target.value })
+              }
           />
         </Field>
       </Section>

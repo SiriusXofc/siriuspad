@@ -1,6 +1,8 @@
 import { formatDistanceToNow } from 'date-fns'
 import { Pin, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
+import { getDateFnsLocale } from '@/lib/date'
 import type { NoteMetadata } from '@/types'
 
 interface NoteListProps {
@@ -20,11 +22,13 @@ export function NoteList({
   onCreateNote,
   onTagClick,
 }: NoteListProps) {
+  const { t, i18n } = useTranslation()
+
   return (
     <section className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
-          Notes
+          {t('sidebar.notes')}
         </h2>
         <button
           type="button"
@@ -57,11 +61,15 @@ export function NoteList({
                   <p className="mt-1 text-xs text-text-secondary">
                     {formatDistanceToNow(new Date(note.updated_at), {
                       addSuffix: true,
+                      locale: getDateFnsLocale(i18n.language),
                     })}
                   </p>
                 </div>
                 {note.pinned ? (
-                  <Pin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow" />
+                  <Pin
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow"
+                    aria-label={t('note.pinned')}
+                  />
                 ) : null}
               </div>
 
@@ -88,6 +96,11 @@ export function NoteList({
             </button>
           )
         })}
+        {!notes.length ? (
+          <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
+            {t('sidebar.noNotes')}
+          </div>
+        ) : null}
       </div>
     </section>
   )

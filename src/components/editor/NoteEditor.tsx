@@ -2,31 +2,44 @@ import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { useEffect, useRef, type CSSProperties } from 'react'
 
-import { createEditorExtensions } from '@/lib/codemirror'
-import type { Settings } from '@/types'
+import {
+  createEditorCompartments,
+  createEditorExtensions,
+  getCursorInfo,
+  openEditorSearchPanel,
+  reconfigureLineNumbers,
+  reconfigureTabSize,
+  reconfigureWordWrap,
+} from '@/lib/codemirror'
+import type { CursorInfo, Settings } from '@/types'
 
 interface NoteEditorProps {
   noteId: string
   value: string
   settings: Settings
+  findReplaceNonce?: number
   onChange: (value: string) => void
   onSave: () => void | Promise<void>
   onRun: () => void | Promise<void>
+  onCursorChange?: (cursorInfo: CursorInfo) => void
 }
 
 export function NoteEditor({
   noteId,
   value,
   settings,
+  findReplaceNonce = 0,
   onChange,
   onSave,
   onRun,
+  onCursorChange,
 }: NoteEditorProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
-  const handlersRef = useRef({ onChange, onSave, onRun })
+  const compartmentsRef = useRef(createEditorCompartments())
+  const handlersRef = useRef({ onChange, onSave, onRun, onCursorChange })
 
-  handlersRef.current = { onChange, onSave, onRun }
+  handlersRef.current = { onChange, onSave, onRun, onCursorChange }
 
   useEffect(() => {
     if (!hostRef.current) {
@@ -38,11 +51,16 @@ export function NoteEditor({
 
     const state = EditorState.create({
       doc: value,
-      extensions: createEditorExtensions(settings, {
-        onChange: (nextValue) => handlersRef.current.onChange(nextValue),
-        onSave: () => handlersRef.current.onSave(),
-        onRun: () => handlersRef.current.onRun(),
-      }),
+      extensions: createEditorExtensions(
+        settings,
+        {
+          onChange: (nextValue) => handlersRef.current.onChange(nextValue),
+          onSave: () => handlersRef.current.onSave(),
+          onRun: () => handlersRef.current.onRun(),
+          onCursorChange: (cursorInfo) => handlersRef.current.onCursorChange?.(cursorInfo),
+        },
+        compartmentsRef.current,
+      ),
     })
 
     const view = new EditorView({
@@ -51,18 +69,48 @@ export function NoteEditor({
     })
 
     viewRef.current = view
+    handlersRef.current.onCursorChange?.(getCursorInfo(view))
 
     return () => {
       view.destroy()
     }
-  }, [
-    noteId,
-    settings.fontFamily,
-    settings.fontSize,
-    settings.showLineNumbers,
-    settings.tabSize,
-    settings.wordWrap,
-  ])
+  }, [noteId])
+
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) {
+      return
+    }
+
+    view.dispatch({
+      effects: reconfigureLineNumbers(
+        compartmentsRef.current,
+        settings.showLineNumbers,
+      ),
+    })
+  }, [settings.showLineNumbers])
+
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) {
+      return
+    }
+
+    view.dispatch({
+      effects: reconfigureWordWrap(compartmentsRef.current, settings.wordWrap),
+    })
+  }, [settings.wordWrap])
+
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) {
+      return
+    }
+
+    view.dispatch({
+      effects: reconfigureTabSize(compartmentsRef.current, settings.tabSize),
+    })
+  }, [settings.tabSize])
 
   useEffect(() => {
     const view = viewRef.current
@@ -83,6 +131,15 @@ export function NoteEditor({
       },
     })
   }, [value])
+
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view || !findReplaceNonce) {
+      return
+    }
+
+    openEditorSearchPanel(view)
+  }, [findReplaceNonce])
 
   return (
     <div

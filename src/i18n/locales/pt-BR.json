@@ -1,0 +1,208 @@
+{
+  "app": {
+    "name": "SiriusPad",
+    "tagline": "Bloco de notas para dev. Rápido, escuro e local."
+  },
+  "common": {
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "discard": "Descartar",
+    "private": "Privado",
+    "public": "Público",
+    "close": "Fechar",
+    "rename": "Renomear",
+    "delete": "Excluir",
+    "allNotes": "Todas as notas",
+    "untitled": "Sem título",
+    "none": "—",
+    "unknownError": "Erro desconhecido."
+  },
+  "titlebar": {
+    "search": "Buscar",
+    "settings": "Configurações"
+  },
+  "sidebar": {
+    "searchPlaceholder": "Buscar título ou conteúdo",
+    "workspaces": "Espaços",
+    "notes": "Notas",
+    "search": "Busca",
+    "newNote": "Nova nota",
+    "newWorkspace": "Novo espaço",
+    "noNotes": "Nenhuma nota neste espaço.",
+    "noResults": "Sem resultados para \"{{query}}\".",
+    "loading": "Buscando..."
+  },
+  "note": {
+    "copySuffix": "cópia",
+    "titlePlaceholder": "Título da nota",
+    "addTag": "Adicionar tag",
+    "deleteConfirm": "Mover \"{{title}}\" para a lixeira?",
+    "closeDirtyTitle": "Esta nota tem alterações não salvas.",
+    "closeDirtyDescription": "Você quer salvar antes de fechar?",
+    "closeWindowTitle": "Fechar o SiriusPad com alterações não salvas?",
+    "closeWindowDescription": "A nota ativa ainda tem alterações não salvas.",
+    "pinned": "Fixada",
+    "noActive": "Nenhuma nota ativa",
+    "noActiveDescription": "Crie uma nota pela sidebar ou use Ctrl+N para começar.",
+    "open": "Abrir nota: {{title}}"
+  },
+  "workspace": {
+    "name": "Nome do espaço",
+    "renamePrompt": "Renomear espaço",
+    "deleteConfirm": "Excluir o espaço \"{{name}}\" e mover as notas para \"{{fallback}}\"?",
+    "goTo": "Ir para espaço: {{name}}",
+    "nextColor": "Próxima cor",
+    "nextIcon": "Próximo ícone"
+  },
+  "gist": {
+    "publicConfirm": "Escolha como esse Gist deve ser criado.",
+    "success": "Gist criado e URL copiada",
+    "openGist": "Abrir Gist",
+    "failed": "Falha ao exportar Gist",
+    "tokenRequired": "Um token do GitHub é necessário para exportar um Gist.",
+    "createFailed": "Não foi possível criar o Gist."
+  },
+  "runner": {
+    "title": "Snippet Runner",
+    "run": "Executar",
+    "running": "Executando...",
+    "clearOutput": "Limpar",
+    "copyOutput": "Copiar saída",
+    "stdout": "stdout",
+    "stderr": "stderr",
+    "noStdout": "Sem stdout ainda.",
+    "noStderr": "Sem stderr ainda.",
+    "timedOut": "Execução atingiu o tempo limite.",
+    "noInterpreter": "Nenhum interpretador encontrado para {{language}}.",
+    "exitCode": "Código de saída: {{code}}",
+    "duration": "Duração: {{ms}}ms",
+    "timeout": "Timeout"
+  },
+  "commands": {
+    "groups": {
+      "notes": "Notas",
+      "navigation": "Navegação",
+      "actions": "Ações",
+      "app": "App"
+    },
+    "newNote": "Nova nota",
+    "commandPalette": "Paleta de comandos",
+    "duplicateNote": "Duplicar nota ativa",
+    "deleteNote": "Mover nota ativa para a lixeira",
+    "pinNote": "Fixar nota ativa",
+    "unpinNote": "Desafixar nota ativa",
+    "copyNote": "Copiar nota com variáveis",
+    "copyAsCode": "Copiar nota como bloco de código",
+    "exportGist": "Exportar nota ativa para Gist",
+    "exportMarkdown": "Exportar nota ativa como .md",
+    "exportTxt": "Exportar nota ativa como .txt",
+    "exportJson": "Exportar nota ativa como .json",
+    "openSettings": "Abrir configurações",
+    "toggleLineNumbers": "Alternar números de linha",
+    "toggleWordWrap": "Alternar quebra de linha",
+    "toggleFullscreen": "Alternar tela cheia",
+    "zenMode": "Alternar modo zen",
+    "focusMode": "Alternar modo foco",
+    "markdownPreview": "Alternar preview markdown",
+    "findReplace": "Buscar e substituir",
+    "closeNote": "Fechar nota",
+    "switchWorkspace": "Trocar de espaço"
+  },
+  "settings": {
+    "title": "Configurações",
+    "sections": {
+      "editor": {
+        "title": "Editor",
+        "description": "Fonte, quebra de linha, autosave e ergonomia do editor."
+      },
+      "appearance": {
+        "title": "Aparência",
+        "description": "Tema e família da fonte do editor."
+      },
+      "shortcuts": {
+        "title": "Atalhos",
+        "description": "Atalhos locais ativos no app. A paleta global é Ctrl+Shift+K."
+      },
+      "variables": {
+        "title": "Variáveis globais",
+        "description": "Substituídas em snippets, cópias e exportações."
+      },
+      "integrations": {
+        "title": "Integrações",
+        "description": "O export para Gist usa um token com o escopo gist."
+      },
+      "language": {
+        "title": "Idioma",
+        "description": "Idioma da interface."
+      }
+    },
+    "fields": {
+      "fontSize": "Tamanho da fonte",
+      "tabSize": "Tamanho do tab",
+      "tabSize2": "2 espaços",
+      "tabSize4": "4 espaços",
+      "wordWrap": "Quebra de linha",
+      "lineNumbers": "Números de linha",
+      "autosave": "Salvamento automático",
+      "autosaveDelay": "Delay do autosave (ms)",
+      "theme": "Tema",
+      "fontFamily": "Família da fonte",
+      "defaultWorkspace": "Espaço padrão",
+      "githubToken": "Token do GitHub",
+      "githubTokenHint": "Armazenado localmente. Requer escopo gist.",
+      "githubTokenPlaceholder": "ghp_...",
+      "language": "Idioma",
+      "enabled": "Ativado",
+      "disabled": "Desativado",
+      "visible": "Visível",
+      "hidden": "Oculto"
+    },
+    "variables": {
+      "empty": "Nenhuma variável global ainda.",
+      "keyPlaceholder": "API_URL",
+      "valuePlaceholder": "https://api.example.com",
+      "add": "Adicionar",
+      "remove": "Remover"
+    },
+    "reset": "Restaurar"
+  },
+  "statusBar": {
+    "workspace": "espaço",
+    "saved": "salvo",
+    "unsaved": "não salvo",
+    "saving": "salvando...",
+    "error": "erro",
+    "line": "Ln {{line}}",
+    "column": "Col {{col}}",
+    "words": "{{count}}p",
+    "chars": "{{count}}ch"
+  },
+  "searchPanel": {
+    "placeholder": "Digite um comando ou procure notas...",
+    "recent": "Recentes",
+    "empty": "Nenhum comando encontrado."
+  },
+  "preview": {
+    "editor": "Editor",
+    "split": "Dividido",
+    "preview": "Preview"
+  },
+  "history": {
+    "title": "Histórico",
+    "empty": "Nenhuma versão salva ainda.",
+    "restore": "Restaurar esta versão",
+    "bytes": "{{count}} bytes",
+    "restored": "Versão restaurada",
+    "restoreFailed": "Não foi possível restaurar a versão"
+  },
+  "toasts": {
+    "copied": "Conteúdo da nota copiado",
+    "copiedAsCode": "Copiado como bloco de código",
+    "noteTrashed": "Nota movida para a lixeira",
+    "initError": "Não foi possível inicializar o SiriusPad",
+    "exportedMarkdown": "Arquivo Markdown exportado",
+    "exportedTxt": "Arquivo de texto exportado",
+    "exportedJson": "Arquivo JSON exportado"
+  }
+}

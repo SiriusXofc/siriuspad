@@ -2,6 +2,7 @@ import { Command } from 'cmdk'
 import { Search } from 'lucide-react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 import type { CommandItem } from '@/types'
 
@@ -20,6 +21,8 @@ export function CommandPalette({
   onOpenChange,
   onCommandRun,
 }: CommandPaletteProps) {
+  const { t } = useTranslation()
+
   useEffect(() => {
     if (!open) {
       return
@@ -45,20 +48,13 @@ export function CommandPalette({
     .map((id) => commands.find((command) => command.id === id))
     .filter((command): command is CommandItem => Boolean(command))
   const recentIds = new Set(recents.map((command) => command.id))
-  const grouped = {
-    Notas: commands.filter(
-      (command) => command.group === 'Notas' && !recentIds.has(command.id),
-    ),
-    Navegacao: commands.filter(
-      (command) => command.group === 'Navegacao' && !recentIds.has(command.id),
-    ),
-    Acoes: commands.filter(
-      (command) => command.group === 'Acoes' && !recentIds.has(command.id),
-    ),
-    App: commands.filter(
-      (command) => command.group === 'App' && !recentIds.has(command.id),
-    ),
-  }
+  const grouped = commands
+    .filter((command) => !recentIds.has(command.id))
+    .reduce<Record<string, CommandItem[]>>((accumulator, command) => {
+      accumulator[command.group] ??= []
+      accumulator[command.group].push(command)
+      return accumulator
+    }, {})
 
   const runCommand = async (command: CommandItem) => {
     await command.perform()
@@ -77,24 +73,24 @@ export function CommandPalette({
       >
         <Command
           loop
-          label="SiriusPad Command Palette"
+          label={t('commands.commandPalette')}
           className="overflow-hidden"
         >
           <div className="flex items-center gap-3 border-b border-border px-4 py-4">
             <Search className="h-4 w-4 text-text-secondary" />
             <Command.Input
               autoFocus
-              placeholder="Type a command or search notes..."
+              placeholder={t('searchPanel.placeholder')}
               className="w-full bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
             />
           </div>
           <Command.List className="max-h-[60vh] overflow-y-auto p-2">
             <Command.Empty className="px-3 py-6 text-sm text-text-secondary">
-              No matching commands.
+              {t('searchPanel.empty')}
             </Command.Empty>
 
             {recents.length ? (
-              <Command.Group heading="Recent" className="command-group">
+              <Command.Group heading={t('searchPanel.recent')} className="command-group">
                 {recents.map((command) => (
                   <Command.Item
                     key={command.id}

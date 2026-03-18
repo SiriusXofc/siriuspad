@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import type { Note } from '@/types'
 
 function sanitizeFilename(input: string) {
@@ -41,7 +42,7 @@ export async function exportNoteToGist(
   isPublic: boolean,
 ) {
   if (!token.trim()) {
-    throw new Error('A GitHub token is required to export a Gist.')
+    throw new Error(i18n.t('gist.tokenRequired'))
   }
 
   const extension = resolveExtension(note.language)
@@ -69,7 +70,7 @@ export async function exportNoteToGist(
       | { message?: string }
       | null
 
-    throw new Error(payload?.message ?? 'Unable to create the Gist.')
+    throw new Error(payload?.message ?? i18n.t('gist.createFailed'))
   }
 
   const payload = (await response.json()) as { html_url: string }

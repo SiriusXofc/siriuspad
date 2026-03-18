@@ -1,28 +1,46 @@
 import { invoke } from '@tauri-apps/api/core'
 import { create } from 'zustand'
 
+import i18n from '@/i18n'
 import { DEFAULT_WORKSPACE_ID } from '@/lib/constants'
 import { createEmptyNote, sortNotes, toMetadata } from '@/lib/parser'
 import { useSettingsStore } from '@/store/settings'
-import type { Note, NoteMetadata, SaveStatus } from '@/types'
+import type {
+  Note,
+  NoteMetadata,
+  NoteTab,
+  SaveStatus,
+} from '@/types'
+
+const MAX_OPEN_TABS = 8
 
 interface NotesState {
   notes: NoteMetadata[]
+  noteDrafts: Record<string, Note>
+  openTabs: NoteTab[]
   activeNote: Note | null
   activeNoteId: string | null
   activeTag: string | null
   saveStatus: SaveStatus
+  saveStatuses: Record<string, SaveStatus>
   ready: boolean
   loadNotes: (workspace?: string | null) => Promise<void>
   openNote: (id: string) => Promise<void>
+  openInTab: (id: string) => Promise<void>
+  setActiveTab: (id: string) => Promise<void>
+  closeTab: (id: string) => Promise<void>
+  closeActiveNote: () => Promise<void>
   createNote: (seed?: Partial<Note>) => Promise<void>
   updateActiveNote: (patch: Partial<Note>) => void
   updateActiveContent: (content: string) => void
   saveActiveNote: () => Promise<void>
+  saveNote: (id: string) => Promise<void>
+  saveAllDirtyTabs: () => Promise<void>
   duplicateActiveNote: () => Promise<void>
   trashActiveNote: () => Promise<void>
-  closeActiveNote: () => Promise<void>
   setActiveTag: (tag: string | null) => void
+  replaceWorkspaceId: (currentId: string, nextId: string) => void
+  hydrateNote: (note: Note, status?: SaveStatus) => void
 }
 
 function mergeMetadata(notes: NoteMetadata[], note: Note) {
@@ -38,12 +56,49 @@ function mergeMetadata(notes: NoteMetadata[], note: Note) {
   return sortNotes(next)
 }
 
+function syncActiveState(
+  activeNoteId: string | null,
+  noteDrafts: Record<string, Note>,
+  saveStatuses: Record<string, SaveStatus>,
+) {
+  return {
+    activeNote: activeNoteId ? noteDrafts[activeNoteId] ?? null : null,
+    saveStatus: activeNoteId ? saveStatuses[activeNoteId] ?? 'saved' : 'saved',
+  }
+}
+
+function upsertTab(tabs: NoteTab[], note: Note, isDirty: boolean) {
+  const nextTab: NoteTab = {
+    id: note.id,
+    title: note.title,
+    isDirty,
+  }
+  const existingIndex = tabs.findIndex((tab) => tab.id === note.id)
+
+  if (existingIndex === -1) {
+    return [...tabs, nextTab]
+  }
+
+  const next = [...tabs]
+  next.splice(existingIndex, 1, nextTab)
+  return next
+}
+
+function removeFromRecord<T>(record: Record<string, T>, key: string) {
+  const next = { ...record }
+  delete next[key]
+  return next
+}
+
 export const useNotesStore = create<NotesState>((set, get) => ({
   notes: [],
+  noteDrafts: {},
+  openTabs: [],
   activeNote: null,
   activeNoteId: null,
   activeTag: null,
   saveStatus: 'saved',
+  saveStatuses: {},
   ready: false,
   async loadNotes(workspace = null) {
     const notes = sortNotes(
@@ -52,36 +107,131 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       }),
     )
 
-    const currentId = get().activeNoteId
-    const stillExists = currentId ? notes.some((note) => note.id === currentId) : false
+    const availableIds = new Set(notes.map((note) => note.id))
+    const currentState = get()
+    const openTabs = currentState.openTabs.filter((tab) => availableIds.has(tab.id))
+    const noteDrafts = Object.fromEntries(
+      Object.entries(currentState.noteDrafts).filter(([id]) => availableIds.has(id)),
+    )
+    const saveStatuses = Object.fromEntries(
+      Object.entries(currentState.saveStatuses).filter(([id]) => availableIds.has(id)),
+    )
+
+    let activeNoteId =
+      currentState.activeNoteId && availableIds.has(currentState.activeNoteId)
+        ? currentState.activeNoteId
+        : openTabs[0]?.id ?? null
+
+    if (!activeNoteId && notes[0]) {
+      activeNoteId = notes[0].id
+    }
 
     set({
       notes,
+      noteDrafts,
+      openTabs,
+      saveStatuses,
       ready: true,
+      activeNoteId,
+      ...syncActiveState(activeNoteId, noteDrafts, saveStatuses),
     })
 
-    if (stillExists) {
-      return
+    if (activeNoteId && !noteDrafts[activeNoteId]) {
+      await get().openInTab(activeNoteId)
     }
-
-    if (notes[0]) {
-      await get().openNote(notes[0].id)
-      return
-    }
-
-    set({
-      activeNote: null,
-      activeNoteId: null,
-    })
   },
   async openNote(id) {
+    await get().openInTab(id)
+  },
+  async openInTab(id) {
+    const state = get()
+    const existingDraft = state.noteDrafts[id]
+
+    if (existingDraft) {
+      set({
+        activeNoteId: id,
+        ...syncActiveState(id, state.noteDrafts, state.saveStatuses),
+      })
+      return
+    }
+
+    let nextTabs = [...state.openTabs]
+    let nextDrafts = { ...state.noteDrafts }
+    let nextStatuses = { ...state.saveStatuses }
+
+    if (nextTabs.length >= MAX_OPEN_TABS) {
+      const evictedTab =
+        nextTabs.find((tab) => tab.id !== state.activeNoteId) ?? nextTabs[0] ?? null
+
+      if (evictedTab) {
+        if (evictedTab.isDirty) {
+          await get().saveNote(evictedTab.id)
+        }
+
+        const refreshed = get()
+        nextTabs = refreshed.openTabs.filter((tab) => tab.id !== evictedTab.id)
+        nextDrafts = removeFromRecord(refreshed.noteDrafts, evictedTab.id)
+        nextStatuses = removeFromRecord(refreshed.saveStatuses, evictedTab.id)
+      }
+    }
+
     const note = await invoke<Note>('read_note', { id })
+    nextDrafts[note.id] = note
+    nextStatuses[note.id] = nextStatuses[note.id] ?? 'saved'
+    nextTabs = upsertTab(nextTabs, note, nextStatuses[note.id] === 'dirty')
 
     set({
-      activeNote: note,
+      noteDrafts: nextDrafts,
+      saveStatuses: nextStatuses,
+      openTabs: nextTabs,
       activeNoteId: note.id,
-      saveStatus: 'saved',
+      ...syncActiveState(note.id, nextDrafts, nextStatuses),
     })
+  },
+  async setActiveTab(id) {
+    const state = get()
+    if (!state.openTabs.some((tab) => tab.id === id)) {
+      await get().openInTab(id)
+      return
+    }
+
+    set({
+      activeNoteId: id,
+      ...syncActiveState(id, state.noteDrafts, state.saveStatuses),
+    })
+  },
+  async closeTab(id) {
+    const state = get()
+    const tabIndex = state.openTabs.findIndex((tab) => tab.id === id)
+
+    if (tabIndex === -1) {
+      return
+    }
+
+    const nextTabs = state.openTabs.filter((tab) => tab.id !== id)
+    const nextDrafts = removeFromRecord(state.noteDrafts, id)
+    const nextStatuses = removeFromRecord(state.saveStatuses, id)
+
+    const nextActiveId =
+      state.activeNoteId === id
+        ? nextTabs[tabIndex]?.id ?? nextTabs[tabIndex - 1]?.id ?? null
+        : state.activeNoteId
+
+    set({
+      openTabs: nextTabs,
+      noteDrafts: nextDrafts,
+      saveStatuses: nextStatuses,
+      activeNoteId: nextActiveId,
+      ...syncActiveState(nextActiveId, nextDrafts, nextStatuses),
+    })
+  },
+  async closeActiveNote() {
+    const activeNoteId = get().activeNoteId
+    if (!activeNoteId) {
+      return
+    }
+
+    await get().closeTab(activeNoteId)
   },
   async createNote(seed = {}) {
     const defaultWorkspace =
@@ -91,12 +241,26 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     const note = createEmptyNote(defaultWorkspace, seed)
 
     await invoke('write_note', { note })
-    set((state) => ({
-      notes: mergeMetadata(state.notes, note),
-      activeNote: note,
-      activeNoteId: note.id,
-      saveStatus: 'saved',
-    }))
+
+    set((state) => {
+      const noteDrafts = {
+        ...state.noteDrafts,
+        [note.id]: note,
+      }
+      const saveStatuses = {
+        ...state.saveStatuses,
+        [note.id]: 'saved' as const,
+      }
+
+      return {
+        notes: mergeMetadata(state.notes, note),
+        noteDrafts,
+        saveStatuses,
+        openTabs: upsertTab(state.openTabs, note, false),
+        activeNoteId: note.id,
+        ...syncActiveState(note.id, noteDrafts, saveStatuses),
+      }
+    })
   },
   updateActiveNote(patch) {
     const current = get().activeNote
@@ -112,36 +276,96 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       updated_at: new Date().toISOString(),
     }
 
-    set((state) => ({
-      activeNote: next,
-      notes: mergeMetadata(state.notes, next),
-      saveStatus: 'dirty',
-    }))
+    set((state) => {
+      const noteDrafts = {
+        ...state.noteDrafts,
+        [next.id]: next,
+      }
+      const saveStatuses = {
+        ...state.saveStatuses,
+        [next.id]: 'dirty' as const,
+      }
+
+      return {
+        activeNote: next,
+        noteDrafts,
+        notes: mergeMetadata(state.notes, next),
+        openTabs: upsertTab(state.openTabs, next, true),
+        saveStatuses,
+        saveStatus: 'dirty',
+      }
+    })
   },
   updateActiveContent(content) {
     get().updateActiveNote({ content })
   },
   async saveActiveNote() {
-    const current = get().activeNote
+    const activeNoteId = get().activeNoteId
+
+    if (!activeNoteId) {
+      return
+    }
+
+    await get().saveNote(activeNoteId)
+  },
+  async saveNote(id) {
+    const current = get().noteDrafts[id]
 
     if (!current) {
       return
     }
 
-    set({ saveStatus: 'saving' })
+    set((state) => {
+      const saveStatuses = {
+        ...state.saveStatuses,
+        [id]: 'saving' as const,
+      }
+
+      return {
+        saveStatuses,
+        ...syncActiveState(state.activeNoteId, state.noteDrafts, saveStatuses),
+      }
+    })
 
     try {
       await invoke('write_note', {
         note: current,
       })
 
-      set((state) => ({
-        notes: mergeMetadata(state.notes, current),
-        saveStatus: 'saved',
-      }))
+      set((state) => {
+        const saveStatuses = {
+          ...state.saveStatuses,
+          [id]: 'saved' as const,
+        }
+
+        return {
+          notes: mergeMetadata(state.notes, current),
+          openTabs: upsertTab(state.openTabs, current, false),
+          saveStatuses,
+          ...syncActiveState(state.activeNoteId, state.noteDrafts, saveStatuses),
+        }
+      })
     } catch (error) {
       console.error(error)
-      set({ saveStatus: 'error' })
+
+      set((state) => {
+        const saveStatuses = {
+          ...state.saveStatuses,
+          [id]: 'error' as const,
+        }
+
+        return {
+          saveStatuses,
+          ...syncActiveState(state.activeNoteId, state.noteDrafts, saveStatuses),
+        }
+      })
+    }
+  },
+  async saveAllDirtyTabs() {
+    const dirtyTabs = get().openTabs.filter((tab) => tab.isDirty)
+
+    for (const tab of dirtyTabs) {
+      await get().saveNote(tab.id)
     }
   },
   async duplicateActiveNote() {
@@ -152,7 +376,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     }
 
     await get().createNote({
-      title: `${current.title} copy`,
+      title: `${current.title} ${i18n.t('note.copySuffix')}`,
       workspace: current.workspace,
       language: current.language,
       tags: current.tags,
@@ -171,37 +395,69 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       id: current.id,
     })
 
-    const remaining = get().notes.filter((note) => note.id !== current.id)
-    const nextActiveId = remaining[0]?.id ?? null
+    const state = get()
+    const remainingNotes = state.notes.filter((note) => note.id !== current.id)
+    const nextTabs = state.openTabs.filter((tab) => tab.id !== current.id)
+    const nextDrafts = removeFromRecord(state.noteDrafts, current.id)
+    const nextStatuses = removeFromRecord(state.saveStatuses, current.id)
+    const nextActiveId =
+      nextTabs[0]?.id ?? remainingNotes.find((note) => note.id !== current.id)?.id ?? null
 
     set({
-      notes: remaining,
-      activeNote: null,
+      notes: remainingNotes,
+      openTabs: nextTabs,
+      noteDrafts: nextDrafts,
+      saveStatuses: nextStatuses,
       activeNoteId: nextActiveId,
-      saveStatus: 'saved',
+      ...syncActiveState(nextActiveId, nextDrafts, nextStatuses),
     })
 
-    if (nextActiveId) {
-      await get().openNote(nextActiveId)
-    }
-  },
-  async closeActiveNote() {
-    const notes = get().notes
-    const currentId = get().activeNoteId
-    const currentIndex = notes.findIndex((note) => note.id === currentId)
-    const nextNote = notes[currentIndex + 1] ?? notes[currentIndex - 1] ?? null
-
-    set({
-      activeNote: null,
-      activeNoteId: nextNote?.id ?? null,
-      saveStatus: 'saved',
-    })
-
-    if (nextNote) {
-      await get().openNote(nextNote.id)
+    if (nextActiveId && !nextDrafts[nextActiveId]) {
+      await get().openInTab(nextActiveId)
     }
   },
   setActiveTag(tag) {
     set({ activeTag: tag })
+  },
+  replaceWorkspaceId(currentId, nextId) {
+    set((state) => {
+      const noteDrafts = Object.fromEntries(
+        Object.entries(state.noteDrafts).map(([id, note]) => [
+          id,
+          note.workspace === currentId
+            ? {
+                ...note,
+                workspace: nextId,
+              }
+            : note,
+        ]),
+      )
+
+      return {
+        noteDrafts,
+        ...syncActiveState(state.activeNoteId, noteDrafts, state.saveStatuses),
+      }
+    })
+  },
+  hydrateNote(note, status = 'saved') {
+    set((state) => {
+      const noteDrafts = {
+        ...state.noteDrafts,
+        [note.id]: note,
+      }
+      const saveStatuses = {
+        ...state.saveStatuses,
+        [note.id]: status,
+      }
+
+      return {
+        noteDrafts,
+        notes: mergeMetadata(state.notes, note),
+        openTabs: upsertTab(state.openTabs, note, status === 'dirty'),
+        saveStatuses,
+        activeNoteId: note.id,
+        ...syncActiveState(note.id, noteDrafts, saveStatuses),
+      }
+    })
   },
 }))

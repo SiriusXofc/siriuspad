@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import type { SearchResult } from '@/types'
 
 interface SearchResultsProps {
@@ -38,15 +40,17 @@ export function SearchResults({
   activeNoteId,
   onOpenNote,
 }: SearchResultsProps) {
+  const { t } = useTranslation()
+
   return (
     <section className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
-          Search
+          {t('sidebar.search')}
         </h2>
         {loading ? (
           <span className="text-[11px] uppercase tracking-wide text-text-muted">
-            Searching...
+            {t('sidebar.loading')}
           </span>
         ) : null}
       </div>
@@ -74,7 +78,7 @@ export function SearchResults({
           ))
         ) : (
           <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
-            No matches for "{query}".
+            {t('sidebar.noResults', { query })}
           </div>
         )}
       </div>

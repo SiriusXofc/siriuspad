@@ -2,7 +2,13 @@ import { create } from 'zustand'
 
 import { INITIAL_COMMAND_HISTORY_LIMIT } from '@/lib/constants'
 import { getAppStore } from '@/lib/storage'
-import type { ToastItem } from '@/types'
+import type {
+  AppPlatform,
+  ConfirmDialogOptions,
+  PreviewMode,
+  PromptDialogOptions,
+  ToastItem,
+} from '@/types'
 
 interface UiState {
   commandPaletteOpen: boolean
@@ -11,14 +17,35 @@ interface UiState {
   focusSearchNonce: number
   toasts: ToastItem[]
   commandHistory: string[]
+  platform: AppPlatform
+  isFullscreen: boolean
+  isZenMode: boolean
+  isFocusMode: boolean
+  previewMode: PreviewMode
+  previewSplitRatio: number
+  historyPanelOpen: boolean
+  confirm: (ConfirmDialogOptions & { open: boolean }) | null
+  prompt: (PromptDialogOptions & { open: boolean }) | null
   initialize: () => Promise<void>
   setCommandPaletteOpen: (open: boolean) => void
   setSettingsOpen: (open: boolean) => void
   setSidebarWidth: (width: number) => void
+  setPlatform: (platform: AppPlatform) => void
+  setFullscreen: (value: boolean) => void
+  toggleZenMode: () => void
+  toggleFocusMode: () => void
+  setPreviewMode: (mode: PreviewMode) => void
+  cyclePreviewMode: () => void
+  setPreviewSplitRatio: (ratio: number) => void
+  setHistoryPanelOpen: (open: boolean) => void
   focusSearch: () => void
   pushToast: (toast: Omit<ToastItem, 'id'>) => void
   dismissToast: (id: string) => void
   rememberCommand: (commandId: string) => Promise<void>
+  showConfirm: (options: ConfirmDialogOptions) => void
+  closeConfirm: () => void
+  showPrompt: (options: PromptDialogOptions) => void
+  closePrompt: () => void
 }
 
 async function persistCommandHistory(history: string[]) {
@@ -34,6 +61,15 @@ export const useUiStore = create<UiState>((set, get) => ({
   focusSearchNonce: 0,
   toasts: [],
   commandHistory: [],
+  platform: 'linux',
+  isFullscreen: false,
+  isZenMode: false,
+  isFocusMode: false,
+  previewMode: 'editor',
+  previewSplitRatio: 0.5,
+  historyPanelOpen: false,
+  confirm: null,
+  prompt: null,
   async initialize() {
     const store = await getAppStore()
     const commandHistory =
@@ -49,6 +85,45 @@ export const useUiStore = create<UiState>((set, get) => ({
   },
   setSidebarWidth(width) {
     set({ sidebarWidth: width })
+  },
+  setPlatform(platform) {
+    set({ platform })
+  },
+  setFullscreen(value) {
+    set({ isFullscreen: value })
+  },
+  toggleZenMode() {
+    set((state) => ({
+      isZenMode: !state.isZenMode,
+      isFocusMode: false,
+    }))
+  },
+  toggleFocusMode() {
+    set((state) => ({
+      isFocusMode: !state.isFocusMode,
+      isZenMode: false,
+    }))
+  },
+  setPreviewMode(mode) {
+    set({ previewMode: mode })
+  },
+  cyclePreviewMode() {
+    set((state) => ({
+      previewMode:
+        state.previewMode === 'editor'
+          ? 'split'
+          : state.previewMode === 'split'
+            ? 'preview'
+            : 'editor',
+    }))
+  },
+  setPreviewSplitRatio(ratio) {
+    set({
+      previewSplitRatio: Math.min(0.8, Math.max(0.2, ratio)),
+    })
+  },
+  setHistoryPanelOpen(open) {
+    set({ historyPanelOpen: open })
   },
   focusSearch() {
     set((state) => ({
@@ -78,5 +153,27 @@ export const useUiStore = create<UiState>((set, get) => ({
 
     set({ commandHistory: history })
     await persistCommandHistory(history)
+  },
+  showConfirm(options) {
+    set({
+      confirm: {
+        open: true,
+        ...options,
+      },
+    })
+  },
+  closeConfirm() {
+    set({ confirm: null })
+  },
+  showPrompt(options) {
+    set({
+      prompt: {
+        open: true,
+        ...options,
+      },
+    })
+  },
+  closePrompt() {
+    set({ prompt: null })
   },
 }))

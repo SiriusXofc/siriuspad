@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 
 import { DEFAULT_WORKSPACE_ID } from '@/lib/constants'
+import i18n from '@/i18n/index'
 import type { Note, NoteMetadata } from '@/types'
 
 const FRONTMATTER_PATTERN = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
@@ -36,7 +37,7 @@ export function createEmptyNote(
 
   return {
     id: overrides.id ?? uuidv4(),
-    title: overrides.title?.trim() || 'Untitled note',
+    title: overrides.title?.trim() || i18n.t('common.untitled'),
     workspace: overrides.workspace?.trim() || workspace,
     language: overrides.language?.trim() || 'markdown',
     tags: cleanTags(overrides.tags),

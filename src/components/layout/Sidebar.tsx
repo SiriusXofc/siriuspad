@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { NoteList } from '@/components/sidebar/NoteList'
 import { SearchResults } from '@/components/sidebar/SearchResults'
@@ -53,6 +54,7 @@ export function Sidebar({
   onTagClick,
   onResize,
 }: SidebarProps) {
+  const { t } = useTranslation()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const resizeStateRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
@@ -98,7 +100,7 @@ export function Sidebar({
           <input
             ref={searchInputRef}
             className="w-full bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
-            placeholder="Search title or content"
+            placeholder={t('sidebar.searchPlaceholder')}
             value={searchQuery}
             onChange={(event) => onSearchQueryChange(event.target.value)}
           />

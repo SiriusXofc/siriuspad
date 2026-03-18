@@ -9,10 +9,11 @@ use regex::Regex;
 use uuid::Uuid;
 use walkdir::WalkDir;
 
-use crate::models::{Note, NoteMetadata};
+use crate::models::{Note, NoteHistoryEntry, NoteMetadata};
 
 const APP_DIR_NAME: &str = "siriuspad";
-const DEFAULT_WORKSPACE: &str = "geral";
+const DEFAULT_WORKSPACE: &str = "general";
+const LEGACY_DEFAULT_WORKSPACE: &str = "geral";
 
 fn frontmatter_regex() -> Regex {
     Regex::new(r"(?s)\A---\r?\n(.*?)\r?\n---\r?\n?").expect("valid frontmatter regex")
@@ -62,12 +63,28 @@ pub fn trash_dir() -> Result<PathBuf, String> {
     Ok(app_data_dir()?.join("trash"))
 }
 
+pub fn history_dir() -> Result<PathBuf, String> {
+    Ok(app_data_dir()?.join("history"))
+}
+
 fn default_workspace_dir() -> Result<PathBuf, String> {
     Ok(notes_dir()?.join(DEFAULT_WORKSPACE))
 }
 
+fn legacy_default_workspace_dir() -> Result<PathBuf, String> {
+    Ok(notes_dir()?.join(LEGACY_DEFAULT_WORKSPACE))
+}
+
 fn note_path_for(workspace: &str, id: &str) -> Result<PathBuf, String> {
     Ok(notes_dir()?.join(workspace).join(format!("{id}.md")))
+}
+
+fn note_history_dir(note_id: &str) -> Result<PathBuf, String> {
+    Ok(history_dir()?.join(note_id))
+}
+
+fn version_path_for(note_id: &str, timestamp: &str) -> Result<PathBuf, String> {
+    Ok(note_history_dir(note_id)?.join(format!("{timestamp}.md")))
 }
 
 fn parse_note_from_file(path: &Path, content: &str) -> Note {
@@ -80,7 +97,7 @@ fn parse_note_from_file(path: &Path, content: &str) -> Note {
 
     let base = Note {
         id: Uuid::new_v4().to_string(),
-        title: "Untitled note".into(),
+        title: "Untitled".into(),
         workspace,
         language: "markdown".into(),
         tags: vec![],
@@ -167,6 +184,32 @@ fn write_note_to_path(note: &Note, path: &Path) -> Result<(), String> {
     fs::write(path, serialized).map_err(|error| error.to_string())
 }
 
+fn record_note_history(note: &Note) -> Result<(), String> {
+    let history_dir = note_history_dir(&note.id)?;
+    fs::create_dir_all(&history_dir).map_err(|error| error.to_string())?;
+
+    let timestamp = Utc::now().format("%Y%m%dT%H%M%S%.3fZ").to_string();
+    let history_path = history_dir.join(format!("{timestamp}.md"));
+    write_note_to_path(note, &history_path)?;
+
+    let mut entries = fs::read_dir(&history_dir)
+        .map_err(|error| error.to_string())?
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().is_file())
+        .collect::<Vec<_>>();
+
+    entries.sort_by_key(|entry| entry.file_name());
+
+    let excess = entries.len().saturating_sub(20);
+    if excess > 0 {
+        for entry in entries.into_iter().take(excess) {
+            let _ = fs::remove_file(entry.path());
+        }
+    }
+
+    Ok(())
+}
+
 fn to_metadata(note: &Note) -> NoteMetadata {
     NoteMetadata {
         id: note.id.clone(),
@@ -242,6 +285,15 @@ pub fn load_all_notes() -> Result<Vec<Note>, String> {
 pub fn ensure_directories() -> Result<(), String> {
     fs::create_dir_all(notes_dir()?).map_err(|error| error.to_string())?;
     fs::create_dir_all(trash_dir()?).map_err(|error| error.to_string())?;
+    fs::create_dir_all(history_dir()?).map_err(|error| error.to_string())?;
+
+    let legacy_default_dir = legacy_default_workspace_dir()?;
+    let default_dir = default_workspace_dir()?;
+
+    if legacy_default_dir.exists() && !default_dir.exists() {
+        fs::rename(&legacy_default_dir, &default_dir).map_err(|error| error.to_string())?;
+    }
+
     fs::create_dir_all(default_workspace_dir()?).map_err(|error| error.to_string())?;
 
     if list_note_paths(None)?.is_empty() {
@@ -386,7 +438,7 @@ pub fn write_note(mut note: Note) -> Result<(), String> {
     }
 
     if note.title.trim().is_empty() {
-        note.title = "Untitled note".into();
+        note.title = "Untitled".into();
     }
 
     if note.language.trim().is_empty() {
@@ -406,6 +458,7 @@ pub fn write_note(mut note: Note) -> Result<(), String> {
 
     let target_path = note_path_for(&note.workspace, &note.id)?;
     write_note_to_path(&note, &target_path)?;
+    record_note_history(&note)?;
 
     if let Some(previous_path) = previous_path {
         if previous_path != target_path {
@@ -437,4 +490,53 @@ pub fn move_note_to_trash(id: &str) -> Result<(), String> {
     let timestamp = Utc::now().timestamp();
     let destination = trash_workspace_dir.join(format!("{}-{}.md", timestamp, note.id));
     fs::rename(path, destination).map_err(|error| error.to_string())
+}
+
+pub fn list_note_history(note_id: &str) -> Result<Vec<NoteHistoryEntry>, String> {
+    ensure_directories()?;
+    let history_dir = note_history_dir(note_id)?;
+
+    if !history_dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let mut entries = fs::read_dir(&history_dir)
+        .map_err(|error| error.to_string())?
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().is_file())
+        .filter_map(|entry| {
+            let path = entry.path();
+            let timestamp = path.file_stem()?.to_str()?.to_string();
+            let metadata = entry.metadata().ok()?;
+
+            Some(NoteHistoryEntry {
+                timestamp,
+                size_bytes: metadata.len(),
+            })
+        })
+        .collect::<Vec<_>>();
+
+    entries.sort_by(|left, right| right.timestamp.cmp(&left.timestamp));
+    Ok(entries)
+}
+
+pub fn read_note_version(note_id: &str, timestamp: &str) -> Result<String, String> {
+    ensure_directories()?;
+    let version_path = version_path_for(note_id, timestamp)?;
+    fs::read_to_string(version_path).map_err(|error| error.to_string())
+}
+
+pub fn restore_note_version(note_id: &str, timestamp: &str) -> Result<Note, String> {
+    ensure_directories()?;
+    let version_path = version_path_for(note_id, timestamp)?;
+    let content = fs::read_to_string(&version_path).map_err(|error| error.to_string())?;
+    let mut note = parse_note_from_file(&version_path, &content);
+
+    if note.id.trim().is_empty() {
+        note.id = note_id.to_string();
+    }
+
+    note.updated_at = now_iso();
+    write_note(note.clone())?;
+    Ok(note)
 }

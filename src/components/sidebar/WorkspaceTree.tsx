@@ -1,6 +1,8 @@
 import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
+import { DEFAULT_WORKSPACE_ID } from '@/lib/constants'
 import { getWorkspaceIcon } from '@/lib/icons'
 import type { Workspace } from '@/types'
 
@@ -31,6 +33,7 @@ export function WorkspaceTree({
   onCycleWorkspaceColor,
   onCycleWorkspaceIcon,
 }: WorkspaceTreeProps) {
+  const { t } = useTranslation()
   const [menu, setMenu] = useState<ContextMenuState | null>(null)
 
   useEffect(() => {
@@ -49,7 +52,7 @@ export function WorkspaceTree({
     <section className="relative border-b border-border/80 px-3 py-3">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
-          Workspaces
+          {t('sidebar.workspaces')}
         </h2>
         <button
           type="button"
@@ -70,7 +73,7 @@ export function WorkspaceTree({
         onClick={() => onSelectWorkspace(null)}
       >
         <span className="h-2 w-2 rounded-full bg-text-muted" />
-        <span>All notes</span>
+        <span>{t('common.allNotes')}</span>
       </button>
 
       <div className="grid gap-1">
@@ -118,29 +121,29 @@ export function WorkspaceTree({
             className="workspace-menu-item"
             onClick={() => void onRenameWorkspace(menu.workspaceId)}
           >
-            Rename
+            {t('common.rename')}
           </button>
           <button
             type="button"
             className="workspace-menu-item"
             onClick={() => void onCycleWorkspaceColor(menu.workspaceId)}
           >
-            Next color
+            {t('workspace.nextColor')}
           </button>
           <button
             type="button"
             className="workspace-menu-item"
             onClick={() => void onCycleWorkspaceIcon(menu.workspaceId)}
           >
-            Next icon
+            {t('workspace.nextIcon')}
           </button>
-          {menu.workspaceId !== 'geral' ? (
+          {menu.workspaceId !== DEFAULT_WORKSPACE_ID ? (
             <button
               type="button"
               className="workspace-menu-item text-red hover:bg-red/10"
               onClick={() => void onDeleteWorkspace(menu.workspaceId)}
             >
-              Delete
+              {t('common.delete')}
             </button>
           ) : null}
         </div>

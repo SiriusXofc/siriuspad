@@ -11,6 +11,7 @@ export function useRunner(
 ) {
   const [result, setResult] = useState<RunResult | null>(null)
   const [running, setRunning] = useState(false)
+  const [timeoutSeconds, setTimeoutSeconds] = useState(10)
 
   const canRun = Boolean(
     note && EXECUTABLE_LANGUAGES.has(note.language.toLowerCase()),
@@ -28,6 +29,7 @@ export function useRunner(
         code: replaceVariables(note.content, variables),
         language: note.language,
         envVars: variables,
+        timeoutSecs: timeoutSeconds,
       })
       setResult(output)
     } finally {
@@ -43,7 +45,9 @@ export function useRunner(
     canRun,
     result,
     running,
+    timeoutSeconds,
     run,
     clear,
+    setTimeoutSeconds,
   }
 }

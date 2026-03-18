@@ -1,7 +1,7 @@
-import type { Settings, Workspace } from '@/types'
+import type { AppLanguage, Settings, Workspace } from '@/types'
 
-export const APP_VERSION = '1.0.0'
-export const DEFAULT_WORKSPACE_ID = 'geral'
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? '0.0.0'
+export const DEFAULT_WORKSPACE_ID = 'general'
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'dark',
@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultWorkspace: DEFAULT_WORKSPACE_ID,
   githubToken: '',
   variables: {},
+  language: 'en',
 }
 
 export const DEFAULT_WORKSPACE: Workspace = {
@@ -56,14 +57,18 @@ export const NOTE_LANGUAGES = [
   'python3',
   'javascript',
   'node',
+  'typescript',
+  'ts',
   'bash',
   'sh',
   'ruby',
   'go',
   'rust',
+  'lua',
   'json',
   'html',
   'css',
+  'sql',
 ] as const
 
 export const EXECUTABLE_LANGUAGES = new Set([
@@ -71,10 +76,13 @@ export const EXECUTABLE_LANGUAGES = new Set([
   'python3',
   'javascript',
   'node',
+  'typescript',
+  'ts',
   'bash',
   'sh',
   'ruby',
   'go',
+  'lua',
 ])
 
 export const FONT_OPTIONS = [
@@ -83,23 +91,10 @@ export const FONT_OPTIONS = [
   'Cascadia Code',
 ] as const
 
+export const LANGUAGE_OPTIONS: Array<{ value: AppLanguage; label: string }> = [
+  { value: 'en', label: 'English' },
+  { value: 'pt-BR', label: 'Português (BR)' },
+  { value: 'es', label: 'Español' },
+]
+
 export const INITIAL_COMMAND_HISTORY_LIMIT = 5
-
-export const WELCOME_NOTE_CONTENT = `# Welcome to SiriusPad
-
-SiriusPad is your fast scratchpad for technical notes, commands, snippets, and architecture ideas.
-
-## Shortcuts
-
-- \`Ctrl+N\` new note
-- \`Ctrl+K\` command palette
-- \`Ctrl+F\` focus search
-- \`Ctrl+S\` save
-- \`Ctrl+Enter\` run snippet
-- \`Ctrl+Shift+C\` copy with variables
-- \`Ctrl+Shift+G\` export gist
-
-\`\`\`bash
-echo "SiriusPad is ready"
-\`\`\`
-`

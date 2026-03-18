@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
+import { getCurrentWindow } from '@tauri-apps/api/window'
 import {
   isRegistered as isShortcutRegistered,
   register as registerGlobalShortcut,
@@ -6,27 +7,40 @@ import {
 } from '@tauri-apps/plugin-global-shortcut'
 import { collectTags, replaceVariables } from '@/lib/parser'
 import { exportNoteToGist } from '@/lib/gist'
+import { exportAsJson, exportAsMarkdown, exportAsTxt } from '@/lib/export'
 import { useNotes } from '@/hooks/useNotes'
 import { useRunner } from '@/hooks/useRunner'
 import { useSearch } from '@/hooks/useSearch'
-import { APP_VERSION, DEFAULT_WORKSPACE_ID, WORKSPACE_COLORS, WORKSPACE_ICONS } from '@/lib/constants'
+import {
+  DEFAULT_WORKSPACE_ID,
+  WORKSPACE_COLORS,
+  WORKSPACE_ICONS,
+} from '@/lib/constants'
+import { ResizeBorders } from '@/components/layout/ResizeBorders'
+import { TabBar } from '@/components/layout/TabBar'
 import { TitleBar } from '@/components/layout/TitleBar'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { EditorPane } from '@/components/layout/EditorPane'
 import { StatusBar } from '@/components/layout/StatusBar'
+import { HistoryPanel } from '@/components/editor/HistoryPanel'
 import { CommandPalette } from '@/components/ui/CommandPalette'
+import { ConfirmModal } from '@/components/ui/ConfirmModal'
+import { PromptModal } from '@/components/ui/PromptModal'
 import { SettingsModal } from '@/components/ui/SettingsModal'
 import { ToastViewport } from '@/components/ui/Toast'
+import { useNotesStore } from '@/store/notes'
 import { useSettingsStore } from '@/store/settings'
 import { useUiStore } from '@/store/ui'
 import { useWorkspaceStore } from '@/store/workspace'
-import type { CommandItem } from '@/types'
-import { useEffect, useState } from 'react'
-
-function promptWorkspaceName(message: string, defaultValue = '') {
-  const result = window.prompt(message, defaultValue)
-  return result?.trim() ?? ''
-}
+import type {
+  AppPlatform,
+  CommandItem,
+  CursorInfo,
+  Note,
+  PreviewMode,
+} from '@/types'
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 function cycleValue(values: string[], current: string) {
   const index = values.indexOf(current)
@@ -49,8 +63,14 @@ function isEditableTarget(target: EventTarget | null) {
 }
 
 export default function App() {
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const [sidebarVisible, setSidebarVisible] = useState(true)
+  const [cursorInfo, setCursorInfo] = useState<CursorInfo | null>(null)
+  const [findReplaceNonce, setFindReplaceNonce] = useState(0)
+
+  const bootstrappedRef = useRef(false)
+  const allowWindowCloseRef = useRef(false)
 
   const notes = useNotes()
   const settingsState = useSettingsStore()
@@ -62,9 +82,6 @@ export default function App() {
     settingsState.settings.variables,
   )
 
-  const activeWorkspace = workspaceState.workspaces.find(
-    (workspace) => workspace.id === workspaceState.activeWorkspaceId,
-  )
   const visibleNotes = notes.notes.filter((note) => {
     const matchesWorkspace = workspaceState.activeWorkspaceId
       ? note.workspace === workspaceState.activeWorkspaceId
@@ -74,23 +91,544 @@ export default function App() {
   })
   const allTags = collectTags(notes.notes)
 
+  const showSidebar = sidebarVisible && !uiState.isZenMode && !uiState.isFocusMode
+  const showTitlebar = !uiState.isZenMode
+  const showStatusBar = !uiState.isZenMode
+  const showTabs = !uiState.isZenMode
+
+  const closeWindowAfterDecision = async (mode: 'save' | 'discard') => {
+    if (mode === 'save') {
+      await useNotesStore.getState().saveAllDirtyTabs()
+    }
+
+    useUiStore.getState().closeConfirm()
+    allowWindowCloseRef.current = true
+
+    try {
+      await getCurrentWindow().close()
+    } finally {
+      window.setTimeout(() => {
+        allowWindowCloseRef.current = false
+      }, 300)
+    }
+  }
+
+  const requestCloseTab = async (tabId: string) => {
+    const tab = useNotesStore.getState().openTabs.find((item) => item.id === tabId)
+    if (!tab) {
+      return
+    }
+
+    if (!tab.isDirty) {
+      await useNotesStore.getState().closeTab(tabId)
+      return
+    }
+
+    uiState.showConfirm({
+      title: t('note.closeDirtyTitle'),
+      description: t('note.closeDirtyDescription'),
+      confirmLabel: t('common.save'),
+      secondaryLabel: t('common.discard'),
+      cancelLabel: t('common.cancel'),
+      onConfirm: async () => {
+        await useNotesStore.getState().saveNote(tabId)
+        await useNotesStore.getState().closeTab(tabId)
+        useUiStore.getState().closeConfirm()
+      },
+      onSecondary: async () => {
+        await useNotesStore.getState().closeTab(tabId)
+        useUiStore.getState().closeConfirm()
+      },
+    })
+  }
+
+  const saveCurrentNote = async () => {
+    await notes.saveActiveNote()
+  }
+
+  const createNote = async (workspaceId?: string) => {
+    const workspace =
+      workspaceId ??
+      workspaceState.activeWorkspaceId ??
+      settingsState.settings.defaultWorkspace ??
+      DEFAULT_WORKSPACE_ID
+
+    await notes.createNote({
+      workspace,
+    })
+  }
+
+  const openNote = async (noteId: string) => {
+    await notes.openInTab(noteId)
+  }
+
+  const togglePin = async () => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    notes.updateActiveNote({ pinned: !notes.activeNote.pinned })
+    await notes.saveActiveNote()
+  }
+
+  const deleteActiveNote = async () => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    uiState.showConfirm({
+      title: t('note.deleteConfirm', { title: notes.activeNote.title }),
+      danger: true,
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      onConfirm: async () => {
+        await notes.trashActiveNote()
+        uiState.closeConfirm()
+        uiState.pushToast({
+          kind: 'info',
+          title: t('toasts.noteTrashed'),
+        })
+      },
+    })
+  }
+
+  const duplicateActiveNote = async () => {
+    await notes.duplicateActiveNote()
+  }
+
+  const copyCurrentNote = async () => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    await navigator.clipboard.writeText(
+      replaceVariables(notes.activeNote.content, settingsState.settings.variables),
+    )
+
+    uiState.pushToast({
+      kind: 'success',
+      title: t('toasts.copied'),
+    })
+  }
+
+  const copyCurrentNoteAsCode = async () => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    const content = replaceVariables(
+      notes.activeNote.content,
+      settingsState.settings.variables,
+    )
+    const fenced = `\`\`\`${notes.activeNote.language}\n${content}\n\`\`\``
+    await navigator.clipboard.writeText(fenced)
+    uiState.pushToast({
+      kind: 'success',
+      title: t('toasts.copiedAsCode'),
+    })
+  }
+
+  const exportCurrentNoteToGist = async () => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    uiState.showConfirm({
+      title: t('gist.publicConfirm'),
+      confirmLabel: t('common.public'),
+      secondaryLabel: t('common.private'),
+      cancelLabel: t('common.cancel'),
+      onConfirm: async () => {
+        try {
+          const url = await exportNoteToGist(
+            {
+              ...notes.activeNote!,
+              content: replaceVariables(
+                notes.activeNote!.content,
+                settingsState.settings.variables,
+              ),
+            },
+            settingsState.settings.githubToken,
+            true,
+          )
+          await navigator.clipboard.writeText(url)
+          uiState.pushToast({
+            kind: 'success',
+            title: t('gist.success'),
+            actionHref: url,
+            actionLabel: t('gist.openGist'),
+          })
+        } catch (error) {
+          uiState.pushToast({
+            kind: 'error',
+            title: t('gist.failed'),
+            description: error instanceof Error ? error.message : t('common.unknownError'),
+          })
+        } finally {
+          uiState.closeConfirm()
+        }
+      },
+      onSecondary: async () => {
+        try {
+          const url = await exportNoteToGist(
+            {
+              ...notes.activeNote!,
+              content: replaceVariables(
+                notes.activeNote!.content,
+                settingsState.settings.variables,
+              ),
+            },
+            settingsState.settings.githubToken,
+            false,
+          )
+          await navigator.clipboard.writeText(url)
+          uiState.pushToast({
+            kind: 'success',
+            title: t('gist.success'),
+            actionHref: url,
+            actionLabel: t('gist.openGist'),
+          })
+        } catch (error) {
+          uiState.pushToast({
+            kind: 'error',
+            title: t('gist.failed'),
+            description: error instanceof Error ? error.message : t('common.unknownError'),
+          })
+        } finally {
+          uiState.closeConfirm()
+        }
+      },
+    })
+  }
+
+  const exportCurrentNote = async (kind: 'md' | 'txt' | 'json') => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    const exported =
+      kind === 'md'
+        ? await exportAsMarkdown(notes.activeNote, settingsState.settings.variables)
+        : kind === 'txt'
+          ? await exportAsTxt(notes.activeNote, settingsState.settings.variables)
+          : await exportAsJson(notes.activeNote)
+
+    if (!exported) {
+      return
+    }
+
+    uiState.pushToast({
+      kind: 'success',
+      title:
+        kind === 'md'
+          ? t('toasts.exportedMarkdown')
+          : kind === 'txt'
+            ? t('toasts.exportedTxt')
+            : t('toasts.exportedJson'),
+    })
+  }
+
+  const createWorkspace = async () => {
+    uiState.showPrompt({
+      title: t('workspace.name'),
+      placeholder: t('workspace.name'),
+      confirmLabel: t('common.confirm'),
+      cancelLabel: t('common.cancel'),
+      onConfirm: async (value) => {
+        if (!value) {
+          uiState.closePrompt()
+          return
+        }
+
+        await workspaceState.createWorkspace(value)
+        await notes.loadNotes()
+        uiState.closePrompt()
+      },
+    })
+  }
+
+  const renameWorkspace = async (workspaceId: string) => {
+    uiState.showPrompt({
+      title: t('workspace.renamePrompt'),
+      placeholder: t('workspace.renamePrompt'),
+      defaultValue: workspaceId,
+      confirmLabel: t('common.rename'),
+      cancelLabel: t('common.cancel'),
+      onConfirm: async (value) => {
+        if (!value || value === workspaceId) {
+          uiState.closePrompt()
+          return
+        }
+
+        await workspaceState.renameWorkspace(workspaceId, value)
+        notes.replaceWorkspaceId(workspaceId, value)
+        await notes.loadNotes()
+        uiState.closePrompt()
+      },
+    })
+  }
+
+  const deleteWorkspace = async (workspaceId: string) => {
+    uiState.showConfirm({
+      title: t('workspace.deleteConfirm', {
+        name: workspaceId,
+        fallback: DEFAULT_WORKSPACE_ID,
+      }),
+      danger: true,
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      onConfirm: async () => {
+        await workspaceState.deleteWorkspace(workspaceId)
+        notes.replaceWorkspaceId(workspaceId, DEFAULT_WORKSPACE_ID)
+        await notes.loadNotes()
+        uiState.closeConfirm()
+      },
+    })
+  }
+
+  const cycleWorkspaceColor = async (workspaceId: string) => {
+    const workspace = workspaceState.workspaces.find(
+      (item) => item.id === workspaceId,
+    )
+    if (!workspace) {
+      return
+    }
+
+    await workspaceState.updateWorkspaceMeta(workspaceId, {
+      color: cycleValue(WORKSPACE_COLORS, workspace.color),
+    })
+  }
+
+  const cycleWorkspaceIcon = async (workspaceId: string) => {
+    const workspace = workspaceState.workspaces.find(
+      (item) => item.id === workspaceId,
+    )
+    if (!workspace) {
+      return
+    }
+
+    await workspaceState.updateWorkspaceMeta(workspaceId, {
+      icon: cycleValue(WORKSPACE_ICONS, workspace.icon),
+    })
+  }
+
+  const toggleFullscreen = async () => {
+    try {
+      const windowHandle = getCurrentWindow()
+      const next = !(await windowHandle.isFullscreen())
+      await windowHandle.setFullscreen(next)
+      uiState.setFullscreen(next)
+    } catch (error) {
+      console.warn('Fullscreen unavailable', error)
+    }
+  }
+
+  const restoreHistoryVersion = async (timestamp: string) => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    try {
+      const restoredNote = await invoke<Note>('restore_note_version', {
+        noteId: notes.activeNote.id,
+        timestamp,
+      })
+      notes.hydrateNote(restoredNote, 'saved')
+      await notes.loadNotes()
+      uiState.setHistoryPanelOpen(false)
+      uiState.pushToast({
+        kind: 'success',
+        title: t('history.restored'),
+      })
+    } catch (error) {
+      uiState.pushToast({
+        kind: 'error',
+        title: t('history.restoreFailed'),
+        description: error instanceof Error ? error.message : t('common.unknownError'),
+      })
+    }
+  }
+
+  const commands: CommandItem[] = [
+    {
+      id: 'note:new',
+      label: t('commands.newNote'),
+      group: t('commands.groups.notes'),
+      perform: () => createNote(),
+    },
+    {
+      id: 'note:duplicate',
+      label: t('commands.duplicateNote'),
+      group: t('commands.groups.notes'),
+      perform: () => duplicateActiveNote(),
+    },
+    {
+      id: 'note:delete',
+      label: t('commands.deleteNote'),
+      group: t('commands.groups.notes'),
+      perform: () => deleteActiveNote(),
+    },
+    {
+      id: 'note:pin',
+      label: notes.activeNote?.pinned
+        ? t('commands.unpinNote')
+        : t('commands.pinNote'),
+      group: t('commands.groups.notes'),
+      perform: () => togglePin(),
+    },
+    {
+      id: 'action:copy',
+      label: t('commands.copyNote'),
+      group: t('commands.groups.actions'),
+      perform: () => copyCurrentNote(),
+    },
+    {
+      id: 'action:copy-code',
+      label: t('commands.copyAsCode'),
+      group: t('commands.groups.actions'),
+      perform: () => copyCurrentNoteAsCode(),
+    },
+    {
+      id: 'action:gist',
+      label: t('commands.exportGist'),
+      group: t('commands.groups.actions'),
+      perform: () => exportCurrentNoteToGist(),
+    },
+    {
+      id: 'action:export-md',
+      label: t('commands.exportMarkdown'),
+      group: t('commands.groups.actions'),
+      perform: () => exportCurrentNote('md'),
+    },
+    {
+      id: 'action:export-txt',
+      label: t('commands.exportTxt'),
+      group: t('commands.groups.actions'),
+      perform: () => exportCurrentNote('txt'),
+    },
+    {
+      id: 'action:export-json',
+      label: t('commands.exportJson'),
+      group: t('commands.groups.actions'),
+      perform: () => exportCurrentNote('json'),
+    },
+    {
+      id: 'app:settings',
+      label: t('commands.openSettings'),
+      group: t('commands.groups.app'),
+      perform: async () => {
+        uiState.setSettingsOpen(true)
+      },
+    },
+    {
+      id: 'app:line-numbers',
+      label: t('commands.toggleLineNumbers'),
+      group: t('commands.groups.app'),
+      perform: () =>
+        settingsState.update({
+          showLineNumbers: !settingsState.settings.showLineNumbers,
+        }),
+    },
+    {
+      id: 'app:word-wrap',
+      label: t('commands.toggleWordWrap'),
+      group: t('commands.groups.app'),
+      perform: () =>
+        settingsState.update({
+          wordWrap: !settingsState.settings.wordWrap,
+        }),
+    },
+    {
+      id: 'app:fullscreen',
+      label: t('commands.toggleFullscreen'),
+      group: t('commands.groups.app'),
+      perform: () => toggleFullscreen(),
+    },
+    {
+      id: 'app:zen',
+      label: t('commands.zenMode'),
+      group: t('commands.groups.app'),
+      perform: async () => {
+        uiState.toggleZenMode()
+      },
+    },
+    {
+      id: 'app:focus',
+      label: t('commands.focusMode'),
+      group: t('commands.groups.app'),
+      perform: async () => {
+        uiState.toggleFocusMode()
+      },
+    },
+    {
+      id: 'app:preview',
+      label: t('commands.markdownPreview'),
+      group: t('commands.groups.app'),
+      perform: async () => {
+        uiState.cyclePreviewMode()
+      },
+    },
+    {
+      id: 'app:history',
+      label: t('history.title'),
+      group: t('commands.groups.app'),
+      perform: async () => {
+        uiState.setHistoryPanelOpen(true)
+      },
+    },
+    {
+      id: 'app:find-replace',
+      label: t('commands.findReplace'),
+      group: t('commands.groups.app'),
+      perform: async () => {
+        setFindReplaceNonce((current) => current + 1)
+      },
+    },
+    ...workspaceState.workspaces.map((workspace) => ({
+      id: `workspace:${workspace.id}`,
+      label: t('workspace.goTo', { name: workspace.name }),
+      group: t('commands.groups.navigation'),
+      keywords: [workspace.name],
+      perform: async () => {
+        workspaceState.setActiveWorkspace(workspace.id)
+      },
+    })),
+    ...notes.notes.map((note) => ({
+      id: `note:${note.id}`,
+      label: t('note.open', { title: note.title }),
+      group: t('commands.groups.navigation'),
+      keywords: [note.title, note.workspace, ...note.tags],
+      perform: () => openNote(note.id),
+    })),
+  ]
+
   useEffect(() => {
+    if (bootstrappedRef.current) {
+      return
+    }
+
+    bootstrappedRef.current = true
+
     const bootstrap = async () => {
       try {
         await invoke('ensure_dirs')
+        const platform = await invoke<AppPlatform>('get_platform')
+
         await Promise.all([
           settingsState.initialize(),
           workspaceState.initialize(),
           uiState.initialize(),
         ])
+
+        uiState.setPlatform(platform)
         await notes.loadNotes()
       } catch (error) {
         console.error(error)
         uiState.pushToast({
           kind: 'error',
-          title: 'Unable to initialize SiriusPad',
+          title: t('toasts.initError'),
           description:
-            error instanceof Error ? error.message : 'Unknown initialization error.',
+            error instanceof Error ? error.message : t('common.unknownError'),
         })
       }
     }
@@ -125,279 +663,90 @@ export default function App() {
     }
   }, [])
 
-  const saveCurrentNote = async () => {
-    await notes.saveActiveNote()
-  }
+  useEffect(() => {
+    let unlistenResize: (() => void) | undefined
+    let unlistenClose: (() => void) | undefined
 
-  const createNote = async (workspaceId?: string) => {
-    const workspace =
-      workspaceId ??
-      workspaceState.activeWorkspaceId ??
-      settingsState.settings.defaultWorkspace ??
-      DEFAULT_WORKSPACE_ID
+    const setupWindowListeners = async () => {
+      try {
+        const windowHandle = getCurrentWindow()
+        uiState.setFullscreen(await windowHandle.isFullscreen())
 
-    await notes.createNote({
-      workspace,
-    })
-  }
+        unlistenResize = await windowHandle.onResized(async () => {
+          uiState.setFullscreen(await windowHandle.isFullscreen())
+        })
 
-  const openNote = async (noteId: string) => {
-    await notes.openNote(noteId)
-  }
+        unlistenClose = await windowHandle.onCloseRequested(async (event) => {
+          if (allowWindowCloseRef.current) {
+            return
+          }
 
-  const togglePin = async () => {
-    if (!notes.activeNote) {
-      return
+          const dirtyTabs = useNotesStore
+            .getState()
+            .openTabs.filter((tab) => tab.isDirty)
+
+          if (!dirtyTabs.length) {
+            return
+          }
+
+          event.preventDefault()
+          useUiStore.getState().showConfirm({
+            title: t('note.closeWindowTitle'),
+            description: t('note.closeWindowDescription'),
+            confirmLabel: t('common.save'),
+            secondaryLabel: t('common.discard'),
+            cancelLabel: t('common.cancel'),
+            onConfirm: async () => closeWindowAfterDecision('save'),
+            onSecondary: async () => closeWindowAfterDecision('discard'),
+          })
+        })
+      } catch (error) {
+        console.warn('Window listeners unavailable', error)
+      }
     }
 
-    notes.updateActiveNote({ pinned: !notes.activeNote.pinned })
-    await notes.saveActiveNote()
-  }
+    void setupWindowListeners()
 
-  const deleteActiveNote = async () => {
-    if (!notes.activeNote) {
-      return
+    return () => {
+      unlistenResize?.()
+      unlistenClose?.()
     }
-
-    const confirmed = window.confirm(
-      `Move "${notes.activeNote.title}" to trash?`,
-    )
-    if (!confirmed) {
-      return
-    }
-
-    await notes.trashActiveNote()
-    uiState.pushToast({
-      kind: 'info',
-      title: 'Note moved to trash',
-    })
-  }
-
-  const duplicateActiveNote = async () => {
-    await notes.duplicateActiveNote()
-  }
-
-  const copyCurrentNote = async () => {
-    if (!notes.activeNote) {
-      return
-    }
-
-    await navigator.clipboard.writeText(
-      replaceVariables(notes.activeNote.content, settingsState.settings.variables),
-    )
-
-    uiState.pushToast({
-      kind: 'success',
-      title: 'Copied note content',
-    })
-  }
-
-  const copyCurrentNoteAsCode = async () => {
-    if (!notes.activeNote) {
-      return
-    }
-
-    const content = replaceVariables(
-      notes.activeNote.content,
-      settingsState.settings.variables,
-    )
-    const fenced = `\`\`\`${notes.activeNote.language}\n${content}\n\`\`\``
-    await navigator.clipboard.writeText(fenced)
-    uiState.pushToast({
-      kind: 'success',
-      title: 'Copied as code block',
-    })
-  }
-
-  const exportCurrentNoteToGist = async () => {
-    if (!notes.activeNote) {
-      return
-    }
-
-    try {
-      const isPublic = window.confirm(
-        'Create a public Gist? Choose Cancel for a private Gist.',
-      )
-      const url = await exportNoteToGist(
-        {
-          ...notes.activeNote,
-          content: replaceVariables(
-            notes.activeNote.content,
-            settingsState.settings.variables,
-          ),
-        },
-        settingsState.settings.githubToken,
-        isPublic,
-      )
-      await navigator.clipboard.writeText(url)
-      uiState.pushToast({
-        kind: 'success',
-        title: 'Gist created and URL copied',
-        actionHref: url,
-        actionLabel: 'Open Gist',
-      })
-    } catch (error) {
-      uiState.pushToast({
-        kind: 'error',
-        title: 'Gist export failed',
-        description: error instanceof Error ? error.message : 'Unknown error.',
-      })
-    }
-  }
-
-  const createWorkspace = async () => {
-    const name = promptWorkspaceName('Workspace name')
-    if (!name) {
-      return
-    }
-
-    await workspaceState.createWorkspace(name)
-    await notes.loadNotes()
-  }
-
-  const renameWorkspace = async (workspaceId: string) => {
-    const nextName = promptWorkspaceName('Rename workspace', workspaceId)
-    if (!nextName) {
-      return
-    }
-
-    await workspaceState.renameWorkspace(workspaceId, nextName)
-    await notes.loadNotes()
-  }
-
-  const deleteWorkspace = async (workspaceId: string) => {
-    const confirmed = window.confirm(
-      `Delete workspace "${workspaceId}" and move its notes to "${DEFAULT_WORKSPACE_ID}"?`,
-    )
-    if (!confirmed) {
-      return
-    }
-
-    await workspaceState.deleteWorkspace(workspaceId)
-    await notes.loadNotes()
-  }
-
-  const cycleWorkspaceColor = async (workspaceId: string) => {
-    const workspace = workspaceState.workspaces.find(
-      (item) => item.id === workspaceId,
-    )
-    if (!workspace) {
-      return
-    }
-
-    await workspaceState.updateWorkspaceMeta(workspaceId, {
-      color: cycleValue(WORKSPACE_COLORS, workspace.color),
-    })
-  }
-
-  const cycleWorkspaceIcon = async (workspaceId: string) => {
-    const workspace = workspaceState.workspaces.find(
-      (item) => item.id === workspaceId,
-    )
-    if (!workspace) {
-      return
-    }
-
-    await workspaceState.updateWorkspaceMeta(workspaceId, {
-      icon: cycleValue(WORKSPACE_ICONS, workspace.icon),
-    })
-  }
-
-  const commands: CommandItem[] = [
-    {
-      id: 'note:new',
-      label: 'New note',
-      group: 'Notas',
-      perform: () => createNote(),
-    },
-    {
-      id: 'note:duplicate',
-      label: 'Duplicate active note',
-      group: 'Notas',
-      perform: () => duplicateActiveNote(),
-    },
-    {
-      id: 'note:delete',
-      label: 'Move active note to trash',
-      group: 'Notas',
-      perform: () => deleteActiveNote(),
-    },
-    {
-      id: 'note:pin',
-      label: notes.activeNote?.pinned ? 'Unpin active note' : 'Pin active note',
-      group: 'Notas',
-      perform: () => togglePin(),
-    },
-    {
-      id: 'action:copy',
-      label: 'Copy note with variables',
-      group: 'Acoes',
-      perform: () => copyCurrentNote(),
-    },
-    {
-      id: 'action:copy-code',
-      label: 'Copy note as fenced code block',
-      group: 'Acoes',
-      perform: () => copyCurrentNoteAsCode(),
-    },
-    {
-      id: 'action:gist',
-      label: 'Export active note to Gist',
-      group: 'Acoes',
-      perform: () => exportCurrentNoteToGist(),
-    },
-    {
-      id: 'app:settings',
-      label: 'Open settings',
-      group: 'App',
-      perform: async () => {
-        uiState.setSettingsOpen(true)
-      },
-    },
-    {
-      id: 'app:line-numbers',
-      label: settingsState.settings.showLineNumbers
-        ? 'Hide line numbers'
-        : 'Show line numbers',
-      group: 'App',
-      perform: () =>
-        settingsState.update({
-          showLineNumbers: !settingsState.settings.showLineNumbers,
-        }),
-    },
-    {
-      id: 'app:word-wrap',
-      label: settingsState.settings.wordWrap
-        ? 'Disable word wrap'
-        : 'Enable word wrap',
-      group: 'App',
-      perform: () =>
-        settingsState.update({
-          wordWrap: !settingsState.settings.wordWrap,
-        }),
-    },
-    ...workspaceState.workspaces.map((workspace) => ({
-      id: `workspace:${workspace.id}`,
-      label: `Go to workspace: ${workspace.name}`,
-      group: 'Navegacao' as const,
-      keywords: [workspace.name],
-      perform: async () => {
-        workspaceState.setActiveWorkspace(workspace.id)
-      },
-    })),
-    ...notes.notes.map((note) => ({
-      id: `note:${note.id}`,
-      label: `Open note: ${note.title}`,
-      group: 'Navegacao' as const,
-      keywords: [note.title, note.workspace, ...note.tags],
-      perform: () => openNote(note.id),
-    })),
-  ]
+  }, [t])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const meta = event.ctrlKey || event.metaKey
       const editable = isEditableTarget(event.target)
+
+      if (event.key === 'F11') {
+        event.preventDefault()
+        void toggleFullscreen()
+        return
+      }
+
+      if (meta && event.shiftKey && event.key.toLowerCase() === 'z') {
+        event.preventDefault()
+        uiState.toggleZenMode()
+        return
+      }
+
+      if (meta && event.shiftKey && event.key.toLowerCase() === 'f') {
+        event.preventDefault()
+        uiState.toggleFocusMode()
+        return
+      }
+
+      if (meta && event.shiftKey && event.key.toLowerCase() === 'm') {
+        event.preventDefault()
+        uiState.cyclePreviewMode()
+        return
+      }
+
+      if (meta && event.key.toLowerCase() === 'h') {
+        event.preventDefault()
+        setFindReplaceNonce((current) => current + 1)
+        return
+      }
 
       if (meta && event.key.toLowerCase() === 'k') {
         event.preventDefault()
@@ -431,7 +780,9 @@ export default function App() {
 
       if (meta && event.key.toLowerCase() === 'w') {
         event.preventDefault()
-        void notes.closeActiveNote()
+        if (notes.activeNoteId) {
+          void requestCloseTab(notes.activeNoteId)
+        }
         return
       }
 
@@ -491,28 +842,68 @@ export default function App() {
       window.removeEventListener('keydown', onKeyDown)
     }
   }, [
-    notes.activeNote,
+    duplicateActiveNote,
+    exportCurrentNoteToGist,
+    notes.activeNoteId,
     runner,
-    settingsState.settings,
     workspaceState.workspaces,
-    visibleNotes,
   ])
 
-  const noteSubtitle = activeWorkspace?.name ?? 'all workspaces'
-  const sidebarWidth = sidebarVisible ? uiState.sidebarWidth : 0
+  useEffect(() => {
+    const onDragOver = (event: DragEvent) => {
+      event.preventDefault()
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'copy'
+      }
+    }
+
+    const onDrop = async (event: DragEvent) => {
+      event.preventDefault()
+      const files = Array.from(event.dataTransfer?.files ?? [])
+
+      for (const file of files) {
+        if (!file.name.endsWith('.md') && !file.name.endsWith('.txt')) {
+          continue
+        }
+
+        const content = await file.text()
+        const title = file.name.replace(/\.(md|txt)$/i, '')
+        await notes.createNote({
+          title,
+          content,
+          language: 'markdown',
+        })
+      }
+    }
+
+    window.addEventListener('dragover', onDragOver)
+    window.addEventListener('drop', onDrop)
+
+    return () => {
+      window.removeEventListener('dragover', onDragOver)
+      window.removeEventListener('drop', onDrop)
+    }
+  }, [notes.createNote])
 
   return (
     <div className="flex h-screen flex-col bg-base text-text-primary">
-      <TitleBar
-        onFocusSearch={() => uiState.focusSearch()}
-        onOpenSettings={() => uiState.setSettingsOpen(true)}
-        onToggleSidebar={() => setSidebarVisible((current) => !current)}
-      />
+      <ResizeBorders platform={uiState.platform} />
+
+      {showTitlebar ? (
+        <TitleBar
+          platform={uiState.platform}
+          isFullscreen={uiState.isFullscreen}
+          onFocusSearch={() => uiState.focusSearch()}
+          onOpenSettings={() => uiState.setSettingsOpen(true)}
+          onToggleSidebar={() => setSidebarVisible((current) => !current)}
+          onToggleFullscreen={() => void toggleFullscreen()}
+        />
+      ) : null}
 
       <div className="flex min-h-0 flex-1">
-        {sidebarVisible ? (
+        {showSidebar ? (
           <Sidebar
-            width={sidebarWidth}
+            width={uiState.sidebarWidth}
             searchQuery={searchQuery}
             focusSearchNonce={uiState.focusSearchNonce}
             workspaces={workspaceState.workspaces}
@@ -531,32 +922,63 @@ export default function App() {
             onCycleWorkspaceIcon={cycleWorkspaceIcon}
             onOpenNote={openNote}
             onCreateNote={() => createNote()}
-            onTagClick={notes.setActiveTag}
+            onTagClick={(tag) => {
+              notes.setActiveTag(tag)
+              if (tag) {
+                workspaceState.setActiveWorkspace(null)
+              }
+            }}
             onResize={uiState.setSidebarWidth}
           />
         ) : null}
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-border bg-base px-4 py-2 text-xs uppercase tracking-wide text-text-secondary">
-            <span>{noteSubtitle}</span>
-            <span>{APP_VERSION}</span>
-          </div>
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+          {showTabs ? (
+            <TabBar
+              tabs={notes.openTabs}
+              activeTabId={notes.activeNoteId}
+              onTabClick={notes.setActiveTab}
+              onTabClose={requestCloseTab}
+            />
+          ) : null}
+
           <EditorPane
             note={notes.activeNote}
             settings={settingsState.settings}
             workspaces={workspaceState.workspaces}
             allTags={allTags}
+            previewMode={uiState.previewMode}
+            previewSplitRatio={uiState.previewSplitRatio}
+            findReplaceNonce={findReplaceNonce}
             runner={runner}
             onNoteChange={(patch) => notes.updateActiveNote(patch)}
             onContentChange={notes.updateActiveContent}
             onSave={saveCurrentNote}
             onDelete={deleteActiveNote}
             onTogglePin={togglePin}
+            onCursorChange={setCursorInfo}
+            onPreviewModeChange={(mode: PreviewMode) => uiState.setPreviewMode(mode)}
+            onPreviewSplitRatioChange={uiState.setPreviewSplitRatio}
+            onOpenFindReplace={() => setFindReplaceNonce((current) => current + 1)}
+            onOpenHistory={() => uiState.setHistoryPanelOpen(true)}
+          />
+
+          <HistoryPanel
+            open={uiState.historyPanelOpen}
+            note={notes.activeNote}
+            onClose={() => uiState.setHistoryPanelOpen(false)}
+            onRestore={restoreHistoryVersion}
           />
         </div>
       </div>
 
-      <StatusBar note={notes.activeNote} saveStatus={notes.saveStatus} />
+      {showStatusBar ? (
+        <StatusBar
+          note={notes.activeNote}
+          saveStatus={notes.saveStatus}
+          cursorInfo={cursorInfo}
+        />
+      ) : null}
 
       <SettingsModal
         open={uiState.settingsOpen}
@@ -567,6 +989,34 @@ export default function App() {
         onSetVariable={settingsState.setVariable}
         onRemoveVariable={settingsState.removeVariable}
         onResetSection={settingsState.resetSection}
+      />
+
+      <ConfirmModal
+        open={Boolean(uiState.confirm?.open)}
+        title={uiState.confirm?.title ?? ''}
+        description={uiState.confirm?.description}
+        confirmLabel={uiState.confirm?.confirmLabel}
+        cancelLabel={uiState.confirm?.cancelLabel}
+        secondaryLabel={uiState.confirm?.secondaryLabel}
+        danger={uiState.confirm?.danger}
+        onConfirm={() => void uiState.confirm?.onConfirm()}
+        onSecondary={
+          uiState.confirm?.onSecondary
+            ? () => void uiState.confirm?.onSecondary?.()
+            : undefined
+        }
+        onCancel={uiState.closeConfirm}
+      />
+
+      <PromptModal
+        open={Boolean(uiState.prompt?.open)}
+        title={uiState.prompt?.title ?? ''}
+        placeholder={uiState.prompt?.placeholder}
+        defaultValue={uiState.prompt?.defaultValue}
+        confirmLabel={uiState.prompt?.confirmLabel}
+        cancelLabel={uiState.prompt?.cancelLabel}
+        onConfirm={(value) => void uiState.prompt?.onConfirm(value)}
+        onCancel={uiState.closePrompt}
       />
 
       <CommandPalette

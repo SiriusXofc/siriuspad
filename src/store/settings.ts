@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 
+import i18n from '@/i18n'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { getAppStore } from '@/lib/storage'
+import { applyTheme } from '@/lib/themes'
 import type { Settings } from '@/types'
 
 type SettingsSection =
@@ -10,6 +12,7 @@ type SettingsSection =
   | 'variables'
   | 'integrations'
   | 'shortcuts'
+  | 'language'
 
 interface SettingsState {
   settings: Settings
@@ -47,6 +50,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
 
     set({ settings, ready: true })
+    applyTheme(settings.theme)
+    await i18n.changeLanguage(settings.language)
     await persistSettings(settings)
   },
   async update(patch) {
@@ -59,6 +64,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
 
     set({ settings })
+    applyTheme(settings.theme)
+
+    if (patch.language) {
+      await i18n.changeLanguage(patch.language)
+    }
+
     await persistSettings(settings)
   },
   async setVariable(key, value) {
@@ -110,8 +121,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       case 'appearance':
         next = {
           ...current,
-          theme: 'dark',
+          theme: DEFAULT_SETTINGS.theme,
           fontFamily: DEFAULT_SETTINGS.fontFamily,
+        }
+        break
+      case 'language':
+        next = {
+          ...current,
+          language: DEFAULT_SETTINGS.language,
         }
         break
       case 'variables':
@@ -136,6 +153,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
 
     set({ settings: next })
+    applyTheme(next.theme)
+
+    if (section === 'language') {
+      await i18n.changeLanguage(next.language)
+    }
+
     await persistSettings(next)
   },
 }))
