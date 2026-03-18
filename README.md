@@ -19,15 +19,17 @@ SiriusPad is a dense, dark desktop scratchpad for developers. It is designed for
 
 ## Install
 
-- Linux `.deb`: [Latest release](https://github.com/siriusdev/siriuspad/releases/latest)
-- Linux `.AppImage`: [Latest release](https://github.com/siriusdev/siriuspad/releases/latest)
-- Windows `.msi`: [Latest release](https://github.com/siriusdev/siriuspad/releases/latest)
-- Windows `.exe`: [Latest release](https://github.com/siriusdev/siriuspad/releases/latest)
+- Linux `.deb`: [Latest release](https://github.com/Nic85796/siriuspad/releases/latest)
+- Linux `.AppImage`: [Latest release](https://github.com/Nic85796/siriuspad/releases/latest)
+- Windows `.msi`: [Latest release](https://github.com/Nic85796/siriuspad/releases/latest)
+- Windows `.exe`: [Latest release](https://github.com/Nic85796/siriuspad/releases/latest)
+- Linux installer script: `bash scripts/install-linux.sh --deb`
+- Windows installer script: `powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1 -Format msi`
 
 ## Build From Source
 
 ```bash
-git clone https://github.com/siriusdev/siriuspad
+git clone https://github.com/Nic85796/siriuspad
 cd siriuspad
 npm install
 npm run tauri:dev

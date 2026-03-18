@@ -3,6 +3,14 @@
   "private": true,
   "version": "1.0.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nic85796/siriuspad.git"
+  },
+  "homepage": "https://github.com/Nic85796/siriuspad",
+  "bugs": {
+    "url": "https://github.com/Nic85796/siriuspad/issues"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
