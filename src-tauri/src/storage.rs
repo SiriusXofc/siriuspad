@@ -162,6 +162,11 @@ fn serialize_note(note: &Note) -> Result<String, String> {
     Ok(format!("---\n{}---\n\n{}", frontmatter, body))
 }
 
+fn write_note_to_path(note: &Note, path: &Path) -> Result<(), String> {
+    let serialized = serialize_note(note)?;
+    fs::write(path, serialized).map_err(|error| error.to_string())
+}
+
 fn to_metadata(note: &Note) -> NoteMetadata {
     NoteMetadata {
         id: note.id.clone(),
@@ -242,17 +247,18 @@ pub fn ensure_directories() -> Result<(), String> {
     if list_note_paths(None)?.is_empty() {
         let now = now_iso();
         let note = Note {
-      id: Uuid::new_v4().to_string(),
-      title: "Welcome to SiriusPad".into(),
-      workspace: DEFAULT_WORKSPACE.into(),
-      language: "markdown".into(),
-      tags: vec!["welcome".into(), "shortcuts".into()],
-      created_at: now.clone(),
-      updated_at: now,
-      pinned: true,
-      content: "# Welcome to SiriusPad\n\nSiriusPad is your technical scratchpad for notes, snippets, bugs, and quick commands.\n\n## Shortcuts\n\n- `Ctrl+N` new note\n- `Ctrl+K` command palette\n- `Ctrl+F` focus search\n- `Ctrl+S` save\n- `Ctrl+Enter` run snippet\n- `Ctrl+Shift+C` copy with variables\n- `Ctrl+Shift+G` export Gist\n\n```bash\necho \"SiriusPad is ready\"\n```\n".into(),
-    };
-        write_note(note)?;
+            id: Uuid::new_v4().to_string(),
+            title: "Welcome to SiriusPad".into(),
+            workspace: DEFAULT_WORKSPACE.into(),
+            language: "markdown".into(),
+            tags: vec!["welcome".into(), "shortcuts".into()],
+            created_at: now.clone(),
+            updated_at: now,
+            pinned: true,
+            content: "# Welcome to SiriusPad\n\nSiriusPad is your technical scratchpad for notes, snippets, bugs, and quick commands.\n\n## Shortcuts\n\n- `Ctrl+N` new note\n- `Ctrl+K` command palette\n- `Ctrl+F` focus search\n- `Ctrl+S` save\n- `Ctrl+Enter` run snippet\n- `Ctrl+Shift+C` copy with variables\n- `Ctrl+Shift+G` export Gist\n\n```bash\necho \"SiriusPad is ready\"\n```\n".into(),
+        };
+        let welcome_note_path = note_path_for(DEFAULT_WORKSPACE, &note.id)?;
+        write_note_to_path(&note, &welcome_note_path)?;
     }
 
     Ok(())
@@ -399,8 +405,7 @@ pub fn write_note(mut note: Note) -> Result<(), String> {
     fs::create_dir_all(&target_workspace_dir).map_err(|error| error.to_string())?;
 
     let target_path = note_path_for(&note.workspace, &note.id)?;
-    let serialized = serialize_note(&note)?;
-    fs::write(&target_path, serialized).map_err(|error| error.to_string())?;
+    write_note_to_path(&note, &target_path)?;
 
     if let Some(previous_path) = previous_path {
         if previous_path != target_path {
