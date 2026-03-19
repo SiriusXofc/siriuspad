@@ -44,8 +44,8 @@ export function SearchResults({
 
   return (
     <section className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-muted">
           {t('sidebar.search')}
         </h2>
         {loading ? (
@@ -61,14 +61,14 @@ export function SearchResults({
             <button
               key={result.note_id}
               type="button"
-              className={`rounded-xl border px-3 py-3 text-left transition ${
+              className={`rounded-md border px-3 py-3 text-left transition ${
                 activeNoteId === result.note_id
-                  ? 'border-focus bg-active'
-                  : 'border-border bg-surface hover:border-focus hover:bg-hover'
+                  ? 'border-focus bg-[#161616]'
+                  : 'border-border bg-[#111111] hover:border-focus hover:bg-hover'
               }`}
               onClick={() => void onOpenNote(result.note_id)}
             >
-              <p className="text-sm font-medium text-text-primary">
+              <p className="text-[12px] font-medium text-text-primary">
                 {highlightText(result.title, query)}
               </p>
               <p className="mt-2 text-xs leading-5 text-text-secondary">
@@ -77,7 +77,7 @@ export function SearchResults({
             </button>
           ))
         ) : (
-          <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
+          <div className="rounded-md border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
             {t('sidebar.noResults', { query })}
           </div>
         )}

@@ -11,6 +11,7 @@ interface SettingsModalProps {
   settings: Settings
   workspaces: Workspace[]
   onClose: () => void
+  onReopenOnboarding: () => void
   onUpdate: (patch: Partial<Settings>) => Promise<void>
   onSetVariable: (key: string, value: string) => Promise<void>
   onRemoveVariable: (key: string) => Promise<void>
@@ -87,6 +88,7 @@ export function SettingsModal({
   settings,
   workspaces,
   onClose,
+  onReopenOnboarding,
   onUpdate,
   onSetVariable,
   onRemoveVariable,
@@ -102,6 +104,7 @@ export function SettingsModal({
     { key: 'Ctrl+F', action: t('titlebar.search') },
     { key: 'Ctrl+S', action: t('common.save') },
     { key: 'Ctrl+Enter', action: t('runner.run') },
+    { key: 'Ctrl+`', action: t('terminal.toggle') },
     { key: 'Ctrl+W', action: t('commands.closeNote') },
     { key: 'Ctrl+,', action: t('settings.title') },
     { key: 'Ctrl+Shift+C', action: t('commands.copyNote') },
@@ -299,6 +302,15 @@ export function SettingsModal({
             ))}
           </select>
         </Field>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+            onClick={onReopenOnboarding}
+          >
+            {t('onboarding.reopen')}
+          </button>
+        </div>
       </Section>
 
       <Section

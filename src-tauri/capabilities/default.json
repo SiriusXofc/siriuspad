@@ -16,6 +16,22 @@
     "fs:default",
     "shell:default",
     "shell:allow-open",
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        {
+          "name": "terminal-bash",
+          "cmd": "bash",
+          "args": true
+        },
+        {
+          "name": "terminal-cmd",
+          "cmd": "cmd.exe",
+          "args": true
+        }
+      ]
+    },
+    "shell:allow-kill",
     "updater:default",
     "log:default",
     "global-shortcut:allow-register",

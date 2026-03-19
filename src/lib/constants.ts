@@ -15,7 +15,7 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultWorkspace: DEFAULT_WORKSPACE_ID,
   githubToken: '',
   variables: {},
-  language: 'en',
+  language: 'pt-BR',
 }
 
 export const DEFAULT_WORKSPACE: Workspace = {
@@ -98,3 +98,12 @@ export const LANGUAGE_OPTIONS: Array<{ value: AppLanguage; label: string }> = [
 ]
 
 export const INITIAL_COMMAND_HISTORY_LIMIT = 5
+
+export const NOTE_COLOR_SWATCHES = [
+  '#ef4444',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#7c3aed',
+  '#374151',
+] as const

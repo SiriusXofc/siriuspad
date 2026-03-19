@@ -24,11 +24,8 @@ const config: Config = {
         info: 'var(--blue)',
       },
       fontFamily: {
-        ui: ['Inter', 'sans-serif'],
+        ui: ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'monospace'],
         mono: ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'monospace'],
-      },
-      boxShadow: {
-        accent: '0 0 0 1px var(--accent-glow), 0 10px 30px rgba(0, 0, 0, 0.28)',
       },
     },
   },

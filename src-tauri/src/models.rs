@@ -1,6 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChecklistItem {
+    pub id: String,
+    pub text: String,
+    pub done: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Note {
     pub id: String,
     pub title: String,
@@ -10,6 +17,10 @@ pub struct Note {
     pub created_at: String,
     pub updated_at: String,
     pub pinned: bool,
+    pub priority: Option<String>,
+    pub color: Option<String>,
+    #[serde(default)]
+    pub checklist: Vec<ChecklistItem>,
     pub content: String,
 }
 
@@ -23,6 +34,8 @@ pub struct NoteMetadata {
     pub created_at: String,
     pub updated_at: String,
     pub pinned: bool,
+    pub priority: Option<String>,
+    pub color: Option<String>,
     pub excerpt: String,
 }
 

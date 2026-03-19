@@ -3,6 +3,8 @@ import { Pin, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { getDateFnsLocale } from '@/lib/date'
+import { PriorityDot } from '@/components/ui/PriorityDot'
+import { TagPill } from '@/components/ui/TagPill'
 import type { NoteMetadata } from '@/types'
 
 interface NoteListProps {
@@ -26,13 +28,13 @@ export function NoteList({
 
   return (
     <section className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-muted">
           {t('sidebar.notes')}
         </h2>
         <button
           type="button"
-          className="rounded-md border border-border p-1 text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          className="rounded-md border border-border bg-[#161616] p-1.5 text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={() => void onCreateNote()}
           title={t('sidebar.newNote')}
           aria-label={t('sidebar.newNote')}
@@ -48,28 +50,22 @@ export function NoteList({
             <button
               key={note.id}
               type="button"
-              className={`rounded-xl border px-3 py-3 text-left transition ${
+              className={`relative overflow-hidden rounded-md border px-3 py-3 text-left transition ${
                 isActive
-                  ? 'border-focus bg-active'
-                  : 'border-border bg-surface hover:border-focus hover:bg-hover'
+                  ? 'border-focus bg-[#161616]'
+                  : 'border-border bg-[#111111] hover:border-focus hover:bg-hover'
               }`}
               onClick={() => void onOpenNote(note.id)}
             >
+              <span
+                className={`absolute inset-y-0 left-0 w-0.5 ${
+                  isActive ? 'bg-accent' : 'bg-transparent'
+                }`}
+              />
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-text-primary">
+                  <p className="truncate text-[12px] font-medium text-text-primary">
                     {note.title}
-                  </p>
-                  <p
-                    className="mt-1 text-xs text-text-secondary"
-                    title={format(new Date(note.updated_at), 'PPPpp', {
-                      locale: getDateFnsLocale(i18n.language),
-                    })}
-                  >
-                    {formatDistanceToNow(new Date(note.updated_at), {
-                      addSuffix: true,
-                      locale: getDateFnsLocale(i18n.language),
-                    })}
                   </p>
                 </div>
                 {note.pinned ? (
@@ -80,35 +76,37 @@ export function NoteList({
                 ) : null}
               </div>
 
-              {note.tags.length ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {note.tags.slice(0, 2).map((tag) => (
-                    <span
-                      key={tag}
-                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] transition ${
-                        activeTag === tag
-                          ? 'border-accent bg-accent/15 text-accent'
-                          : 'border-border text-text-secondary hover:border-focus hover:text-text-primary'
-                      }`}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        onTagClick(activeTag === tag ? null : tag)
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
+              <div
+                className="mt-2 flex items-center gap-2 text-[10px] text-text-secondary"
+                title={format(new Date(note.updated_at), 'PPPpp', {
+                  locale: getDateFnsLocale(i18n.language),
+                })}
+              >
+                <PriorityDot priority={note.priority} />
+                {note.tags[0] ? (
+                  <TagPill
+                    tag={note.tags[0]}
+                    compact
+                    active={activeTag === note.tags[0]}
+                    onClick={() => onTagClick(activeTag === note.tags[0] ? null : note.tags[0])}
+                  />
+                ) : null}
+                <span className="truncate">
+                  {formatDistanceToNow(new Date(note.updated_at), {
+                    addSuffix: true,
+                    locale: getDateFnsLocale(i18n.language),
+                  })}
+                </span>
+              </div>
             </button>
           )
         })}
         {!notes.length ? (
-          <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
+          <div className="rounded-md border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
             <p>{t('sidebar.noNotes')}</p>
             <button
               type="button"
-              className="mt-3 rounded-lg border border-accent/40 bg-accent/15 px-3 py-2 text-sm font-medium text-text-primary transition hover:bg-accent/20"
+              className="mt-3 rounded-md border border-border bg-[#161616] px-3 py-2 text-sm font-medium text-text-primary transition hover:border-focus hover:bg-hover"
               onClick={() => void onCreateNote()}
             >
               {t('sidebar.newNote')}

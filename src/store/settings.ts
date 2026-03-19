@@ -45,13 +45,7 @@ function normalizeLanguage(language: string | null | undefined): AppLanguage {
 }
 
 function detectSystemLanguage(): AppLanguage {
-  if (typeof navigator === 'undefined') {
-    return DEFAULT_SETTINGS.language
-  }
-
-  return normalizeLanguage(
-    navigator.language || navigator.languages?.[0] || DEFAULT_SETTINGS.language,
-  )
+  return DEFAULT_SETTINGS.language
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({

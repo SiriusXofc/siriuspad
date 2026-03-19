@@ -1,3 +1,11 @@
+export type NotePriority = 'urgente' | 'alta' | 'media' | 'baixa'
+
+export interface ChecklistItem {
+  id: string
+  text: string
+  done: boolean
+}
+
 export interface BaseNote {
   id: string
   title: string
@@ -7,6 +15,8 @@ export interface BaseNote {
   created_at: string
   updated_at: string
   pinned: boolean
+  priority?: NotePriority
+  color?: string
 }
 
 export interface NoteMetadata extends BaseNote {
@@ -15,6 +25,7 @@ export interface NoteMetadata extends BaseNote {
 
 export interface Note extends BaseNote {
   content: string
+  checklist?: ChecklistItem[]
 }
 
 export interface SearchResult {

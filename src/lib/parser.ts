@@ -3,7 +3,7 @@ import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 
 import { DEFAULT_WORKSPACE_ID } from '@/lib/constants'
 import i18n from '@/i18n/index'
-import type { Note, NoteMetadata } from '@/types'
+import type { ChecklistItem, Note, NoteMetadata, NotePriority } from '@/types'
 
 const FRONTMATTER_PATTERN = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
 const VARIABLE_PATTERN = /\{\{([A-Z0-9_]+)\}\}/g
@@ -17,6 +17,58 @@ function cleanTags(tags: unknown): string[] {
     .map((tag) => `${tag}`.trim())
     .filter(Boolean)
     .filter((tag, index, array) => array.indexOf(tag) === index)
+}
+
+function normalizePriority(priority: unknown): NotePriority | undefined {
+  if (
+    priority === 'urgente' ||
+    priority === 'alta' ||
+    priority === 'media' ||
+    priority === 'baixa'
+  ) {
+    return priority
+  }
+
+  return undefined
+}
+
+function normalizeColor(color: unknown): string | undefined {
+  if (typeof color !== 'string') {
+    return undefined
+  }
+
+  const normalized = color.trim()
+  return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(normalized)
+    ? normalized
+    : undefined
+}
+
+function cleanChecklist(checklist: unknown): ChecklistItem[] {
+  if (!Array.isArray(checklist)) {
+    return []
+  }
+
+  return checklist
+    .map((item) => {
+      if (!item || typeof item !== 'object') {
+        return null
+      }
+
+      const entry = item as Partial<ChecklistItem>
+      const id = typeof entry.id === 'string' ? entry.id.trim() : ''
+      const text = typeof entry.text === 'string' ? entry.text.trim() : ''
+
+      if (!id || !text) {
+        return null
+      }
+
+      return {
+        id,
+        text,
+        done: Boolean(entry.done),
+      }
+    })
+    .filter((item): item is ChecklistItem => item !== null)
 }
 
 export function buildExcerpt(content: string, maxLength = 140) {
@@ -44,7 +96,10 @@ export function createEmptyNote(
     created_at: overrides.created_at ?? now,
     updated_at: overrides.updated_at ?? now,
     pinned: overrides.pinned ?? false,
+    priority: normalizePriority(overrides.priority) ?? 'media',
+    color: normalizeColor(overrides.color),
     content: overrides.content ?? '',
+    checklist: cleanChecklist(overrides.checklist),
   }
 }
 
@@ -61,6 +116,9 @@ export function normalizeNote(input: Partial<Note>): Note {
     updated_at: input.updated_at ?? base.updated_at,
     content: input.content ?? base.content,
     pinned: input.pinned ?? base.pinned,
+    priority: normalizePriority(input.priority) ?? base.priority,
+    color: normalizeColor(input.color) ?? base.color,
+    checklist: cleanChecklist(input.checklist),
   }
 }
 
@@ -74,6 +132,8 @@ export function toMetadata(note: Note): NoteMetadata {
     created_at: note.created_at,
     updated_at: note.updated_at,
     pinned: note.pinned,
+    priority: note.priority,
+    color: note.color,
     excerpt: buildExcerpt(note.content),
   }
 }
@@ -116,6 +176,9 @@ export function stringifyNote(note: Note) {
     created_at: normalized.created_at,
     updated_at: normalized.updated_at,
     pinned: normalized.pinned,
+    priority: normalized.priority,
+    color: normalized.color,
+    checklist: normalized.checklist?.length ? normalized.checklist : undefined,
   }).trimEnd()
 
   const content = normalized.content.replace(/^\n+/, '')

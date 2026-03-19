@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { EXECUTABLE_LANGUAGES } from '@/lib/constants'
 import { MarkdownPreview } from '@/components/editor/MarkdownPreview'
-import { NoteEditor } from '@/components/editor/NoteEditor'
-import { FrontmatterBar } from '@/components/editor/FrontmatterBar'
-import { SnippetRunner } from '@/components/editor/SnippetRunner'
+import { NoteEditor, NoteEditorHeader } from '@/components/editor/NoteEditor'
+import { Terminal } from '@/components/editor/Terminal'
 import type {
+  AppPlatform,
   CursorInfo,
   Note,
   PreviewMode,
@@ -16,6 +16,7 @@ import type {
 } from '@/types'
 
 interface EditorPaneProps {
+  platform: AppPlatform
   note: Note | null
   settings: Settings
   workspaces: Workspace[]
@@ -23,6 +24,7 @@ interface EditorPaneProps {
   previewMode: PreviewMode
   previewSplitRatio: number
   findReplaceNonce: number
+  toggleTerminalNonce: number
   runner: {
     result: RunResult | null
     running: boolean
@@ -45,6 +47,7 @@ interface EditorPaneProps {
 }
 
 export function EditorPane({
+  platform,
   note,
   settings,
   workspaces,
@@ -52,6 +55,7 @@ export function EditorPane({
   previewMode,
   previewSplitRatio,
   findReplaceNonce,
+  toggleTerminalNonce,
   runner,
   onNoteChange,
   onContentChange,
@@ -70,6 +74,12 @@ export function EditorPane({
     width: number
     startX: number
     startRatio: number
+  } | null>(null)
+  const [terminalOpen, setTerminalOpen] = useState(false)
+  const [terminalHeight, setTerminalHeight] = useState(180)
+  const [terminalSeed, setTerminalSeed] = useState<{
+    id: number
+    value: string
   } | null>(null)
 
   useEffect(() => {
@@ -98,10 +108,24 @@ export function EditorPane({
     }
   }, [onPreviewSplitRatioChange])
 
+  useEffect(() => {
+    if (!toggleTerminalNonce) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setTerminalOpen((current) => !current)
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [toggleTerminalNonce])
+
   if (!note) {
     return (
       <main className="flex min-h-0 flex-1 items-center justify-center bg-base">
-        <div className="max-w-md rounded-2xl border border-dashed border-border bg-surface px-6 py-10 text-center">
+        <div className="max-w-md rounded-lg border border-dashed border-border bg-[#111111] px-6 py-10 text-center">
           <p className="text-sm font-semibold text-text-primary">
             {t('note.noActive')}
           </p>
@@ -110,7 +134,7 @@ export function EditorPane({
           </p>
           <button
             type="button"
-            className="mt-5 rounded-xl border border-accent/40 bg-accent/15 px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-accent/20"
+            className="mt-5 rounded-md border border-border bg-[#161616] px-4 py-2 text-sm font-medium text-text-primary transition hover:border-focus hover:bg-hover"
             onClick={() => void onCreateNote()}
           >
             {t('note.createFirstAction')}
@@ -120,11 +144,11 @@ export function EditorPane({
     )
   }
 
-  const showRunner = EXECUTABLE_LANGUAGES.has(note.language.toLowerCase())
+  const canRunSnippet = EXECUTABLE_LANGUAGES.has(note.language.toLowerCase())
 
   return (
     <main className="flex min-h-0 flex-1 flex-col bg-base">
-      <FrontmatterBar
+      <NoteEditorHeader
         note={note}
         workspaces={workspaces}
         allTags={allTags}
@@ -160,7 +184,7 @@ export function EditorPane({
 
         {previewMode === 'split' ? (
           <div
-            className="w-1 cursor-col-resize bg-border hover:bg-accent/40"
+            className="w-1 cursor-col-resize bg-border hover:bg-[var(--accent-subtle)]"
             onMouseDown={(event) => {
               const container = event.currentTarget.parentElement
               if (!container) {
@@ -183,22 +207,31 @@ export function EditorPane({
               width: previewMode === 'split' ? `${(1 - previewSplitRatio) * 100}%` : '100%',
             }}
           >
-            <MarkdownPreview content={note.content} />
+            <MarkdownPreview
+              content={note.content}
+              onRunCodeInTerminal={(code) => {
+                setTerminalOpen(true)
+                setTerminalSeed({
+                  id: Date.now(),
+                  value: code,
+                })
+              }}
+            />
           </div>
         ) : null}
       </div>
 
-      {showRunner ? (
-        <SnippetRunner
-          language={note.language}
-          result={runner.result}
-          running={runner.running}
-          timeoutSeconds={runner.timeoutSeconds}
-          onTimeoutChange={runner.setTimeoutSeconds}
-          onRun={runner.run}
-          onClear={runner.clear}
-        />
-      ) : null}
+      <Terminal
+        platform={platform}
+        language={note.language}
+        open={terminalOpen}
+        height={terminalHeight}
+        canRunSnippet={canRunSnippet}
+        seedCommand={terminalSeed}
+        runner={runner}
+        onOpenChange={setTerminalOpen}
+        onHeightChange={setTerminalHeight}
+      />
     </main>
   )
 }

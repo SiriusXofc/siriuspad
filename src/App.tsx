@@ -22,14 +22,21 @@ import { TabBar } from '@/components/layout/TabBar'
 import { TitleBar } from '@/components/layout/TitleBar'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { EditorPane } from '@/components/layout/EditorPane'
+import { RightPanel } from '@/components/layout/RightPanel'
 import { StatusBar } from '@/components/layout/StatusBar'
 import { HistoryPanel } from '@/components/editor/HistoryPanel'
 import { CommandPalette } from '@/components/ui/CommandPalette'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
+import { OnboardingModal } from '@/components/ui/OnboardingModal'
 import { PromptModal } from '@/components/ui/PromptModal'
 import { SettingsModal } from '@/components/ui/SettingsModal'
 import { ToastViewport } from '@/components/ui/Toast'
-import { UpdateToast } from '@/components/ui/UpdateToast'
+import { UpdateModal } from '@/components/ui/UpdateModal'
+import {
+  hasCompletedOnboarding,
+  markOnboardingComplete,
+  resetOnboarding,
+} from '@/lib/onboarding'
 import { useNotesStore } from '@/store/notes'
 import { useSettingsStore } from '@/store/settings'
 import { useUiStore } from '@/store/ui'
@@ -70,6 +77,8 @@ export default function App() {
   const [sidebarVisible, setSidebarVisible] = useState(true)
   const [cursorInfo, setCursorInfo] = useState<CursorInfo | null>(null)
   const [findReplaceNonce, setFindReplaceNonce] = useState(0)
+  const [toggleTerminalNonce, setToggleTerminalNonce] = useState(0)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   const bootstrappedRef = useRef(false)
   const allowWindowCloseRef = useRef(false)
@@ -84,6 +93,7 @@ export default function App() {
     focusSearch: () => void
     saveCurrentNote: () => Promise<void>
     runSnippet: () => Promise<void>
+    toggleTerminal: () => void
     activeNoteId: string | null
     requestCloseTab: (tabId: string) => Promise<void>
     openSettings: () => void
@@ -104,6 +114,7 @@ export default function App() {
     focusSearch: () => {},
     saveCurrentNote: async () => {},
     runSnippet: async () => {},
+    toggleTerminal: () => {},
     activeNoteId: null,
     requestCloseTab: async () => {},
     openSettings: () => {},
@@ -124,14 +135,18 @@ export default function App() {
     notes.activeNote,
     settingsState.settings.variables,
   )
-  useUpdater(settingsState.ready)
+  const updater = useUpdater(settingsState.ready)
 
-  const visibleNotes = notes.notes.filter((note) => {
+  const workspaceScopedNotes = notes.notes.filter((note) => {
     const matchesWorkspace = workspaceState.activeWorkspaceId
       ? note.workspace === workspaceState.activeWorkspaceId
       : true
+    return matchesWorkspace
+  })
+
+  const visibleNotes = workspaceScopedNotes.filter((note) => {
     const matchesTag = notes.activeTag ? note.tags.includes(notes.activeTag) : true
-    return matchesWorkspace && matchesTag
+    return matchesTag
   })
   const allTags = collectTags(notes.notes)
 
@@ -139,6 +154,7 @@ export default function App() {
   const showTitlebar = !uiState.isZenMode
   const showStatusBar = !uiState.isZenMode
   const showTabs = !uiState.isZenMode
+  const showRightPanel = !uiState.isZenMode && !uiState.isFocusMode
 
   const closeWindowAfterDecision = async (mode: 'save' | 'discard') => {
     if (mode === 'save') {
@@ -678,6 +694,12 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!hasCompletedOnboarding()) {
+      setShowOnboarding(true)
+    }
+  }, [])
+
+  useEffect(() => {
     const shortcut = 'CommandOrControl+Shift+K'
     let registered = false
 
@@ -765,6 +787,7 @@ export default function App() {
     focusSearch: () => useUiStore.getState().focusSearch(),
     saveCurrentNote,
     runSnippet: runner.run,
+    toggleTerminal: () => setToggleTerminalNonce((current) => current + 1),
     activeNoteId: notes.activeNoteId,
     requestCloseTab,
     openSettings: () => useUiStore.getState().setSettingsOpen(true),
@@ -839,6 +862,12 @@ export default function App() {
       if (event.ctrlKey && event.key === 'Enter') {
         event.preventDefault()
         void handlers.runSnippet()
+        return
+      }
+
+      if (meta && (event.key === '`' || event.code === 'Backquote')) {
+        event.preventDefault()
+        handlers.toggleTerminal()
         return
       }
 
@@ -944,7 +973,7 @@ export default function App() {
   }, [notes.createNote])
 
   return (
-    <div className="flex h-screen flex-col bg-base text-text-primary">
+    <div className="relative flex h-screen flex-col bg-base text-text-primary">
       <ResizeBorders
         platform={uiState.platform}
         enabled={!uiState.isFullscreen}
@@ -1004,6 +1033,7 @@ export default function App() {
           ) : null}
 
           <EditorPane
+            platform={uiState.platform}
             note={notes.activeNote}
             settings={settingsState.settings}
             workspaces={workspaceState.workspaces}
@@ -1011,6 +1041,7 @@ export default function App() {
             previewMode={uiState.previewMode}
             previewSplitRatio={uiState.previewSplitRatio}
             findReplaceNonce={findReplaceNonce}
+            toggleTerminalNonce={toggleTerminalNonce}
             runner={runner}
             onNoteChange={(patch) => notes.updateActiveNote(patch)}
             onContentChange={notes.updateActiveContent}
@@ -1032,6 +1063,22 @@ export default function App() {
             onRestore={restoreHistoryVersion}
           />
         </div>
+
+        {showRightPanel ? (
+          <RightPanel
+            note={notes.activeNote}
+            notes={workspaceScopedNotes}
+            activeTag={notes.activeTag}
+            onTagClick={(tag) => notes.setActiveTag(tag)}
+            onColorSelect={(color) => {
+              if (!notes.activeNote) {
+                return
+              }
+
+              notes.updateActiveNote({ color })
+            }}
+          />
+        ) : null}
       </div>
 
       {showStatusBar ? (
@@ -1047,6 +1094,10 @@ export default function App() {
         settings={settingsState.settings}
         workspaces={workspaceState.workspaces}
         onClose={() => uiState.setSettingsOpen(false)}
+        onReopenOnboarding={() => {
+          resetOnboarding()
+          window.location.reload()
+        }}
         onUpdate={settingsState.update}
         onSetVariable={settingsState.setVariable}
         onRemoveVariable={settingsState.removeVariable}
@@ -1081,7 +1132,13 @@ export default function App() {
         onCancel={uiState.closePrompt}
       />
 
-      <UpdateToast />
+      <UpdateModal
+        state={updater.state}
+        onDismiss={updater.dismiss}
+        onDownload={updater.startDownload}
+        onInstall={updater.installUpdate}
+        onRetry={updater.retry}
+      />
 
       <CommandPalette
         open={uiState.commandPaletteOpen}
@@ -1090,6 +1147,15 @@ export default function App() {
         onOpenChange={uiState.setCommandPaletteOpen}
         onCommandRun={uiState.rememberCommand}
       />
+
+      {showOnboarding ? (
+        <OnboardingModal
+          onComplete={() => {
+            markOnboardingComplete()
+            setShowOnboarding(false)
+          }}
+        />
+      ) : null}
 
       <ToastViewport />
     </div>

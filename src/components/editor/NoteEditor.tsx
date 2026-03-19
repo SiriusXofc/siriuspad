@@ -1,7 +1,19 @@
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
-import { useEffect, useRef, type CSSProperties } from 'react'
+import {
+  Clock3,
+  Pin,
+  PinOff,
+  Search,
+  Trash2,
+} from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 
+import {
+  NOTE_COLOR_SWATCHES,
+  NOTE_LANGUAGES,
+} from '@/lib/constants'
 import {
   createEditorCompartments,
   createEditorExtensions,
@@ -11,7 +23,27 @@ import {
   reconfigureTabSize,
   reconfigureWordWrap,
 } from '@/lib/codemirror'
-import type { CursorInfo, Settings } from '@/types'
+import { TagPill } from '@/components/ui/TagPill'
+import type {
+  CursorInfo,
+  Note,
+  PreviewMode,
+  Settings,
+  Workspace,
+} from '@/types'
+
+interface NoteEditorHeaderProps {
+  note: Note
+  workspaces: Workspace[]
+  allTags: string[]
+  previewMode: PreviewMode
+  onChange: (patch: Partial<Note>) => void
+  onDelete: () => Promise<void>
+  onTogglePin: () => Promise<void>
+  onPreviewModeChange: (mode: PreviewMode) => void
+  onOpenFindReplace: () => void
+  onOpenHistory: () => void
+}
 
 interface NoteEditorProps {
   noteId: string
@@ -22,6 +54,228 @@ interface NoteEditorProps {
   onSave: () => void | Promise<void>
   onRun: () => void | Promise<void>
   onCursorChange?: (cursorInfo: CursorInfo) => void
+}
+
+function controlClassName() {
+  return 'h-8 rounded-md border border-border bg-[#161616] px-2.5 text-[11px] text-text-secondary outline-none transition hover:border-focus hover:bg-hover hover:text-text-primary focus:border-focus'
+}
+
+export function NoteEditorHeader({
+  note,
+  workspaces,
+  allTags,
+  previewMode,
+  onChange,
+  onDelete,
+  onTogglePin,
+  onPreviewModeChange,
+  onOpenFindReplace,
+  onOpenHistory,
+}: NoteEditorHeaderProps) {
+  const { t } = useTranslation()
+  const [tagValue, setTagValue] = useState('')
+
+  return (
+    <div className="border-b border-border bg-[#111111] px-4 py-3">
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <input
+            className="w-full bg-transparent text-[20px] font-semibold tracking-tight text-text-primary outline-none placeholder:text-text-muted"
+            placeholder={t('note.titlePlaceholder')}
+            title={t('note.titlePlaceholder')}
+            value={note.title}
+            onChange={(event) => onChange({ title: event.target.value })}
+          />
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {note.tags.map((tag) => (
+              <TagPill
+                key={tag}
+                tag={tag}
+                onRemove={() =>
+                  onChange({
+                    tags: note.tags.filter((item) => item !== tag),
+                  })
+                }
+              />
+            ))}
+
+            <input
+              className="h-8 min-w-[96px] rounded-md border border-dashed border-border bg-transparent px-2 text-[11px] text-text-primary outline-none placeholder:text-text-muted focus:border-focus"
+              list="note-tag-suggestions"
+              placeholder={t('note.addTag')}
+              value={tagValue}
+              onChange={(event) => setTagValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter') {
+                  return
+                }
+
+                event.preventDefault()
+                const nextTag = tagValue.trim()
+
+                if (!nextTag || note.tags.includes(nextTag)) {
+                  setTagValue('')
+                  return
+                }
+
+                onChange({
+                  tags: [...note.tags, nextTag],
+                })
+                setTagValue('')
+              }}
+            />
+            <datalist id="note-tag-suggestions">
+              {allTags.map((tag) => (
+                <option key={tag} value={tag} />
+              ))}
+            </datalist>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex items-center rounded-md border border-border bg-[#161616] p-1">
+            {(['editor', 'split', 'preview'] as PreviewMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                className={`rounded-md px-2.5 py-1 text-[11px] transition ${
+                  previewMode === mode
+                    ? 'bg-[#222222] text-text-primary'
+                    : 'text-text-secondary hover:bg-hover hover:text-text-primary'
+                }`}
+                onClick={() => onPreviewModeChange(mode)}
+              >
+                {t(`preview.${mode}`)}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-[#161616] px-2.5 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+            onClick={onOpenFindReplace}
+            title={t('commands.findReplace')}
+          >
+            <Search className="h-3.5 w-3.5" />
+            {t('commands.findReplace')}
+          </button>
+
+          <button
+            type="button"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-[#161616] px-2.5 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+            onClick={onOpenHistory}
+            title={t('history.title')}
+          >
+            <Clock3 className="h-3.5 w-3.5" />
+            {t('history.title')}
+          </button>
+
+          <button
+            type="button"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#161616] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+            onClick={() => void onTogglePin()}
+            title={note.pinned ? t('commands.unpinNote') : t('commands.pinNote')}
+          >
+            {note.pinned ? (
+              <PinOff className="h-3.5 w-3.5" />
+            ) : (
+              <Pin className="h-3.5 w-3.5" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#161616] text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171]"
+            onClick={() => void onDelete()}
+            title={t('commands.deleteNote')}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-text-muted">
+            <span>{t('note.priorityLabel')}</span>
+            <select
+              className={controlClassName()}
+              value={note.priority ?? 'media'}
+              onChange={(event) =>
+                onChange({
+                  priority: event.target.value as Note['priority'],
+                })
+              }
+            >
+              <option value="urgente">{t('priority.urgente')}</option>
+              <option value="alta">{t('priority.alta')}</option>
+              <option value="media">{t('priority.media')}</option>
+              <option value="baixa">{t('priority.baixa')}</option>
+            </select>
+          </label>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-text-muted">
+              {t('note.colorLabel')}
+            </span>
+            <div className="flex items-center gap-1">
+              {NOTE_COLOR_SWATCHES.map((swatch) => {
+                const selected = note.color === swatch
+
+                return (
+                  <button
+                    key={swatch}
+                    type="button"
+                    className={`h-6 w-6 rounded-md border transition ${
+                      selected
+                        ? 'border-white/50 ring-1 ring-white/35'
+                        : 'border-border hover:border-focus'
+                    }`}
+                    style={{ backgroundColor: swatch }}
+                    onClick={() => onChange({ color: swatch })}
+                    aria-label={`${t('note.colorLabel')}: ${swatch}`}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-text-muted">
+            <span>{t('note.workspaceLabel')}</span>
+            <select
+              className={controlClassName()}
+              value={note.workspace}
+              onChange={(event) => onChange({ workspace: event.target.value })}
+            >
+              {workspaces.map((workspace) => (
+                <option key={workspace.id} value={workspace.id}>
+                  {workspace.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-text-muted">
+            <span>{t('note.languageLabel')}</span>
+            <select
+              className={controlClassName()}
+              value={note.language}
+              onChange={(event) => onChange({ language: event.target.value })}
+            >
+              {NOTE_LANGUAGES.map((language) => (
+                <option key={language} value={language}>
+                  {language}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function NoteEditor({
@@ -39,7 +293,9 @@ export function NoteEditor({
   const compartmentsRef = useRef(createEditorCompartments())
   const handlersRef = useRef({ onChange, onSave, onRun, onCursorChange })
 
-  handlersRef.current = { onChange, onSave, onRun, onCursorChange }
+  useEffect(() => {
+    handlersRef.current = { onChange, onSave, onRun, onCursorChange }
+  }, [onChange, onCursorChange, onRun, onSave])
 
   useEffect(() => {
     if (!hostRef.current) {
@@ -143,7 +399,7 @@ export function NoteEditor({
 
   return (
     <div
-      className="relative min-h-0 flex-1 overflow-hidden bg-base"
+      className="relative min-h-0 flex-1 overflow-hidden bg-[#111111]"
       style={
         {
           '--editor-font-family': `"${settings.fontFamily}", monospace`,

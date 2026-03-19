@@ -41,11 +41,13 @@
   "note": {
     "copySuffix": "cópia",
     "titlePlaceholder": "Título da nota",
-    "addTag": "Adicionar tag",
+    "addTag": "+ tag",
     "addTagHelp": "Adicione uma tag e pressione Enter para confirmar.",
     "workspaceLabel": "Espaço",
     "languageLabel": "Linguagem",
     "tagsLabel": "Tags",
+    "colorLabel": "Cor da nota",
+    "priorityLabel": "Prioridade",
     "deleteConfirm": "Mover \"{{title}}\" para a lixeira?",
     "closeDirtyTitle": "Esta nota tem alterações não salvas.",
     "closeDirtyDescription": "Você quer salvar antes de fechar?",
@@ -229,14 +231,46 @@
     }
   },
   "updater": {
-    "available": "SiriusPad {{version}} disponível",
-    "description": "Uma nova versão está pronta para instalar.",
+    "available": "Atualização v{{version}} disponível",
+    "description": "Uma nova versão do SiriusPad está disponível.",
+    "downloading": "Baixando... {{progress}}%",
+    "readyToInstall": "Pronto para instalar",
+    "installAndRestart": "Instalar e reiniciar",
     "updateNow": "Atualizar agora",
     "viewRelease": "Ver novidades",
-    "later": "Mais tarde",
+    "later": "Depois",
     "installing": "Instalando...",
-    "installedRestart": "Atualização instalada. Reinicie para aplicar.",
-    "installFailed": "Falha na atualização"
+    "installedRestart": "Atualização instalada. Reiniciando...",
+    "installFailed": "Erro ao instalar atualização"
+  },
+  "terminal": {
+    "title": "Terminal",
+    "terminal": "Terminal",
+    "output": "Output",
+    "clear": "Limpar",
+    "run": "Rodar",
+    "toggle": "Toggle terminal (Ctrl+`)"
+  },
+  "priority": {
+    "urgente": "Urgente",
+    "alta": "Alta",
+    "media": "Média",
+    "baixa": "Baixa"
+  },
+  "onboarding": {
+    "skip": "Pular tutorial",
+    "next": "Próximo",
+    "prev": "Anterior",
+    "start": "Começar a usar o SiriusPad",
+    "reopen": "Ver tutorial novamente"
+  },
+  "rightPanel": {
+    "filterTags": "Filtrar por tag",
+    "noTags": "Nenhuma tag ainda.",
+    "info": "Info",
+    "createdAt": "Criado em",
+    "words": "Palavras",
+    "shortcuts": "Atalhos"
   },
   "toasts": {
     "copied": "Conteúdo da nota copiado",

@@ -34,14 +34,14 @@ function controlButtonClassName(
           ? 'border-[#c79a1b] bg-[#ffbd2e]'
           : 'border-[#1e9e3f] bg-[#28c840]'
 
-    return `group relative flex h-3.5 w-3.5 items-center justify-center rounded-full border ${palette} text-[9px] text-black/65 transition hover:brightness-105`
+    return `group relative z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full border ${palette} text-[9px] text-black/65 transition hover:brightness-105`
   }
 
   if (tone === 'danger') {
-    return 'flex h-8 w-10 items-center justify-center text-text-secondary transition hover:bg-red/20 hover:text-red'
+    return 'relative z-10 flex h-8 w-8 items-center justify-center border-l border-border text-text-secondary transition hover:bg-red/20 hover:text-red'
   }
 
-  return 'flex h-8 w-10 items-center justify-center text-text-secondary transition hover:bg-hover hover:text-text-primary'
+  return 'relative z-10 flex h-8 w-8 items-center justify-center border-l border-border text-text-secondary transition hover:bg-hover hover:text-text-primary'
 }
 
 function controlOrder(platform: AppPlatform) {
@@ -87,7 +87,7 @@ function WindowControls({ platform }: { platform: AppPlatform }) {
   return (
     <div
       className={`relative z-10 flex items-center ${
-        platform === 'macos' ? 'gap-2 px-3' : 'border-l border-border'
+        platform === 'macos' ? 'gap-2 px-3' : ''
       }`}
     >
       {controls.map((control) => {
@@ -131,13 +131,13 @@ export function TitleBar({
   const { t } = useTranslation()
 
   return (
-    <header className="relative flex h-8 items-stretch border-b border-border bg-surface/95">
+    <header className="relative z-10 flex h-9 items-stretch border-b border-[#1e1e1e] bg-[#0f0f0f]">
       {platform === 'macos' ? <WindowControls platform={platform} /> : null}
 
       <div className="relative z-10 flex items-center pl-2">
         <button
           type="button"
-          className="flex h-6 w-6 items-center justify-center rounded-md text-text-secondary transition hover:bg-hover hover:text-text-primary"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent text-text-secondary transition hover:border-border hover:bg-hover hover:text-text-primary"
           onClick={onToggleSidebar}
           title={t('titlebar.toggleSidebar')}
           aria-label={t('titlebar.toggleSidebar')}
@@ -151,7 +151,7 @@ export function TitleBar({
         data-tauri-drag-region
       >
         <div className="flex min-w-0 items-center gap-2" data-tauri-drag-region>
-          <span className="h-2.5 w-2.5 rounded-full bg-blue shadow-[0_0_18px_rgba(96,165,250,0.45)]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-accent" />
           <span className="truncate text-sm font-semibold tracking-wide text-text-primary">
             {t('app.name')}
           </span>
@@ -162,7 +162,7 @@ export function TitleBar({
       <div className="relative z-10 flex items-center gap-2 px-2">
         <button
           type="button"
-          className="inline-flex h-6 items-center gap-2 rounded-md border border-border px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          className="inline-flex h-7 items-center gap-2 rounded-md border border-border bg-[#161616] px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={onFocusSearch}
           title={t('titlebar.search')}
         >
@@ -171,7 +171,7 @@ export function TitleBar({
         </button>
         <button
           type="button"
-          className="inline-flex h-6 items-center gap-2 rounded-md border border-border px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          className="inline-flex h-7 items-center gap-2 rounded-md border border-border bg-[#161616] px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={onToggleFullscreen}
           title={t('commands.toggleFullscreen')}
           aria-label={t('commands.toggleFullscreen')}
@@ -184,7 +184,7 @@ export function TitleBar({
         </button>
         <button
           type="button"
-          className="inline-flex h-6 items-center gap-2 rounded-md border border-border px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          className="inline-flex h-7 items-center gap-2 rounded-md border border-border bg-[#161616] px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={onOpenSettings}
           title={t('titlebar.settings')}
         >

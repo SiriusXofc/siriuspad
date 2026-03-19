@@ -49,14 +49,14 @@ export function WorkspaceTree({
   }, [menu])
 
   return (
-    <section className="relative border-b border-border/80 px-3 py-3">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
+    <section className="relative border-b border-border px-3 py-3">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-muted">
           {t('sidebar.workspaces')}
         </h2>
         <button
           type="button"
-          className="rounded-md border border-border p-1 text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          className="rounded-md border border-border bg-[#161616] p-1.5 text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={() => void onCreateWorkspace()}
           title={t('sidebar.newWorkspace')}
           aria-label={t('sidebar.newWorkspace')}
@@ -73,9 +73,9 @@ export function WorkspaceTree({
 
       <button
         type="button"
-        className={`mb-1 flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition ${
+        className={`mb-1 flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-[12px] transition ${
           activeWorkspaceId === null
-            ? 'bg-active text-text-primary'
+            ? 'bg-[#161616] text-text-primary'
             : 'text-text-secondary hover:bg-hover hover:text-text-primary'
         }`}
         onClick={() => onSelectWorkspace(null)}
@@ -94,9 +94,9 @@ export function WorkspaceTree({
             <button
               key={workspace.id}
               type="button"
-              className={`flex items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition ${
+              className={`flex items-center gap-2 rounded-md px-2 py-2 text-left text-[12px] transition ${
                 isActive
-                  ? 'bg-active text-text-primary'
+                  ? 'bg-[#161616] text-text-primary'
                   : 'text-text-secondary hover:bg-hover hover:text-text-primary'
               }`}
               onClick={() => onSelectWorkspace(workspace.id)}
@@ -123,7 +123,7 @@ export function WorkspaceTree({
 
       {menu ? (
         <div
-          className="fixed z-[65] w-44 rounded-xl border border-border bg-elevated p-1 shadow-2xl"
+          className="fixed z-[65] w-44 rounded-lg border border-border bg-[#161616] p-1"
           style={{ left: menu.x, top: menu.y }}
         >
           <button

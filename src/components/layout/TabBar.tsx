@@ -23,7 +23,7 @@ export function TabBar({
   }
 
   return (
-    <div className="border-b border-border bg-surface">
+    <div className="border-b border-border bg-[#0f0f0f]">
       <div className="flex h-8 overflow-x-auto px-2">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId
@@ -31,10 +31,10 @@ export function TabBar({
           return (
             <div
               key={tab.id}
-              className={`group inline-flex h-full min-w-0 shrink-0 cursor-pointer items-center gap-2 rounded-t-lg border border-b-0 px-3 text-sm transition ${
+              className={`group inline-flex h-full min-w-0 shrink-0 cursor-pointer items-center gap-2 border-r border-border px-3 text-[12px] transition ${
                 isActive
-                  ? 'border-focus bg-active text-text-primary'
-                  : 'border-transparent bg-transparent text-text-secondary hover:bg-hover hover:text-text-primary'
+                  ? 'bg-[#161616] text-text-primary'
+                  : 'bg-transparent text-text-secondary hover:bg-hover hover:text-text-primary'
               }`}
               title={t('note.open', { title: tab.title })}
               onClick={() => void onTabClick(tab.id)}

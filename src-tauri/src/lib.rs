@@ -12,6 +12,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updater::UpdateCache::default())
         .plugin(
             tauri_plugin_log::Builder::default()
                 .level(log::LevelFilter::Info)
@@ -45,6 +46,7 @@ pub fn run() {
             runner::run_snippet,
             search::search_notes,
             updater::check_for_update,
+            updater::download_update,
             updater::install_update,
         ])
         .run(tauri::generate_context!())

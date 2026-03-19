@@ -1,15 +1,39 @@
+import { Play } from 'lucide-react'
+import { isValidElement } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
+import { useTranslation } from 'react-i18next'
 
 interface MarkdownPreviewProps {
   content: string
+  onRunCodeInTerminal?: (code: string) => void
 }
 
-export function MarkdownPreview({ content }: MarkdownPreviewProps) {
+function extractCodeText(children: React.ReactNode): string {
+  if (
+    isValidElement<{ children?: React.ReactNode }>(children)
+  ) {
+    const content = children.props.children
+    return Array.isArray(content) ? content.join('') : `${content ?? ''}`
+  }
+
+  if (Array.isArray(children)) {
+    return children.map((child) => `${child ?? ''}`).join('')
+  }
+
+  return `${children ?? ''}`
+}
+
+export function MarkdownPreview({
+  content,
+  onRunCodeInTerminal,
+}: MarkdownPreviewProps) {
+  const { t } = useTranslation()
+
   return (
-    <div className="h-full overflow-y-auto bg-base px-8 py-6">
-      <div className="max-w-none text-sm leading-7 text-text-primary">
+    <div className="h-full overflow-y-auto bg-[#111111] px-6 py-5">
+      <div className="max-w-none text-[13px] leading-7 text-text-primary">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeHighlight]}
@@ -39,16 +63,30 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
               return (
                 <code
                   {...props}
-                  className={`${props.className ?? ''} rounded bg-surface px-1.5 py-0.5 text-[0.9em]`}
+                  className={`${props.className ?? ''} rounded-md bg-[#161616] px-1.5 py-0.5 text-[0.9em]`}
                 />
               )
             },
             pre(props) {
+              const code = extractCodeText(props.children).trimEnd()
+
               return (
-                <pre
-                  {...props}
-                  className="overflow-x-auto rounded-2xl border border-border bg-surface p-4 text-xs"
-                />
+                <div className="relative mb-4 overflow-hidden rounded-lg border border-border bg-[#0f0f0f]">
+                  {onRunCodeInTerminal && code ? (
+                    <button
+                      type="button"
+                      className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-[#161616] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+                      onClick={() => onRunCodeInTerminal(code)}
+                    >
+                      <Play className="h-3 w-3" />
+                      {t('terminal.run')}
+                    </button>
+                  ) : null}
+                  <pre
+                    {...props}
+                    className="overflow-x-auto p-4 pr-24 text-xs"
+                  />
+                </div>
               )
             },
             blockquote(props) {
@@ -64,7 +102,7 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
                 <div className="overflow-x-auto">
                   <table
                     {...props}
-                    className="min-w-full border-collapse rounded-xl border border-border"
+                    className="min-w-full border-collapse rounded-lg border border-border"
                   />
                 </div>
               )
@@ -73,7 +111,7 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
               return (
                 <th
                   {...props}
-                  className="border-b border-border bg-surface px-3 py-2 text-left font-medium"
+                  className="border-b border-border bg-[#161616] px-3 py-2 text-left font-medium"
                 />
               )
             },

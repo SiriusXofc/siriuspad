@@ -9,7 +9,7 @@ use regex::Regex;
 use uuid::Uuid;
 use walkdir::WalkDir;
 
-use crate::models::{Note, NoteHistoryEntry, NoteMetadata};
+use crate::models::{ChecklistItem, Note, NoteHistoryEntry, NoteMetadata};
 
 const APP_DIR_NAME: &str = "siriuspad";
 const DEFAULT_WORKSPACE: &str = "general";
@@ -136,6 +136,9 @@ fn parse_note_from_file(path: &Path, content: &str) -> Note {
         created_at: now_iso(),
         updated_at: now_iso(),
         pinned: false,
+        priority: Some("media".into()),
+        color: None,
+        checklist: vec![],
         content: content.to_string(),
     };
 
@@ -164,6 +167,9 @@ fn parse_note_from_file(path: &Path, content: &str) -> Note {
         created_at: Option<String>,
         updated_at: Option<String>,
         pinned: Option<bool>,
+        priority: Option<String>,
+        color: Option<String>,
+        checklist: Option<Vec<ChecklistItem>>,
     }
 
     match serde_yaml::from_str::<Frontmatter>(frontmatter_match.as_str()) {
@@ -176,6 +182,9 @@ fn parse_note_from_file(path: &Path, content: &str) -> Note {
             created_at: frontmatter.created_at.unwrap_or(base.created_at),
             updated_at: frontmatter.updated_at.unwrap_or(base.updated_at),
             pinned: frontmatter.pinned.unwrap_or(false),
+            priority: frontmatter.priority.or(base.priority),
+            color: frontmatter.color.or(base.color),
+            checklist: frontmatter.checklist.unwrap_or_default(),
             content: body,
         },
         Err(_) => base,
@@ -193,6 +202,9 @@ fn serialize_note(note: &Note) -> Result<String, String> {
         created_at: &'a str,
         updated_at: &'a str,
         pinned: bool,
+        priority: Option<&'a str>,
+        color: Option<&'a str>,
+        checklist: Option<&'a [ChecklistItem]>,
     }
 
     let frontmatter = serde_yaml::to_string(&Frontmatter {
@@ -204,6 +216,9 @@ fn serialize_note(note: &Note) -> Result<String, String> {
         created_at: &note.created_at,
         updated_at: &note.updated_at,
         pinned: note.pinned,
+        priority: note.priority.as_deref(),
+        color: note.color.as_deref(),
+        checklist: (!note.checklist.is_empty()).then_some(note.checklist.as_slice()),
     })
     .map_err(|error| error.to_string())?;
 
@@ -252,6 +267,8 @@ fn to_metadata(note: &Note) -> NoteMetadata {
         created_at: note.created_at.clone(),
         updated_at: note.updated_at.clone(),
         pinned: note.pinned,
+        priority: note.priority.clone(),
+        color: note.color.clone(),
         excerpt: build_excerpt(&note.content),
     }
 }
@@ -340,6 +357,9 @@ pub fn ensure_directories() -> Result<(), String> {
             created_at: now.clone(),
             updated_at: now,
             pinned: true,
+            priority: Some("media".into()),
+            color: None,
+            checklist: vec![],
             content: content.into(),
         };
         let welcome_note_path = note_path_for(DEFAULT_WORKSPACE, &note.id)?;
@@ -485,6 +505,19 @@ pub fn write_note(mut note: Note) -> Result<(), String> {
     if note.updated_at.trim().is_empty() {
         note.updated_at = now_iso();
     }
+
+    note.priority = note
+        .priority
+        .map(|value| value.trim().to_lowercase())
+        .filter(|value| matches!(value.as_str(), "urgente" | "alta" | "media" | "baixa"))
+        .or_else(|| Some("media".into()));
+
+    note.color = note.color.and_then(|value| {
+        let normalized = value.trim().to_string();
+        Regex::new(r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
+            .ok()
+            .and_then(|expression| expression.is_match(&normalized).then_some(normalized))
+    });
 
     let target_workspace_dir = notes_dir()?.join(&note.workspace);
     fs::create_dir_all(&target_workspace_dir).map_err(|error| error.to_string())?;

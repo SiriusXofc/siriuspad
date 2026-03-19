@@ -26,18 +26,14 @@ export function PromptModal({
   const { t } = useTranslation()
   const [value, setValue] = useState(defaultValue ?? '')
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const valueRef = useRef(value)
-
-  valueRef.current = value
 
   useEffect(() => {
     if (!open) {
       return
     }
 
-    setValue(defaultValue ?? '')
-
     const timeoutId = window.setTimeout(() => {
+      setValue(defaultValue ?? '')
       inputRef.current?.focus()
       inputRef.current?.select()
     }, 0)
@@ -51,7 +47,7 @@ export function PromptModal({
 
       if (event.key === 'Enter') {
         event.preventDefault()
-        void onConfirm(valueRef.current.trim())
+        void onConfirm(value.trim())
       }
     }
 
@@ -61,7 +57,7 @@ export function PromptModal({
       window.clearTimeout(timeoutId)
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [defaultValue, onCancel, onConfirm, open])
+  }, [defaultValue, onCancel, onConfirm, open, value])
 
   if (!open || typeof document === 'undefined') {
     return null

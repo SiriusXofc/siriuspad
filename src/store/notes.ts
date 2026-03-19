@@ -383,6 +383,9 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       language: current.language,
       tags: current.tags,
       pinned: false,
+      priority: current.priority,
+      color: current.color,
+      checklist: current.checklist,
       content: current.content,
     })
   },

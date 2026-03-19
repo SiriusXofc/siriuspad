@@ -22,6 +22,9 @@ export function useNotes() {
       language: note.language,
       tags: note.tags,
       pinned: note.pinned,
+      priority: note.priority,
+      color: note.color,
+      checklist: note.checklist,
       content: note.content,
       updated_at: note.updated_at,
     })
