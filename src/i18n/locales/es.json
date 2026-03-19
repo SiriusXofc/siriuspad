@@ -8,19 +8,23 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "discard": "Descartar",
+    "escape": "Esc",
     "private": "Privado",
     "public": "Público",
     "close": "Cerrar",
     "rename": "Renombrar",
     "delete": "Eliminar",
+    "create": "Crear",
     "allNotes": "Todas las notas",
     "untitled": "Sin título",
     "none": "—",
+    "open": "Abrir",
     "unknownError": "Error desconocido."
   },
   "titlebar": {
     "search": "Buscar",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "toggleSidebar": "Alternar barra lateral"
   },
   "sidebar": {
     "searchPlaceholder": "Buscar título o contenido",
@@ -29,6 +33,7 @@
     "search": "Búsqueda",
     "newNote": "Nueva nota",
     "newWorkspace": "Nuevo espacio",
+    "workspaceHint": "Crea más espacios con el botón +.",
     "noNotes": "No hay notas en este espacio.",
     "noResults": "No hay resultados para \"{{query}}\".",
     "loading": "Buscando..."
@@ -37,6 +42,10 @@
     "copySuffix": "copia",
     "titlePlaceholder": "Título de la nota",
     "addTag": "Agregar etiqueta",
+    "addTagHelp": "Agrega una etiqueta y presiona Enter para confirmar.",
+    "workspaceLabel": "Espacio",
+    "languageLabel": "Lenguaje",
+    "tagsLabel": "Etiquetas",
     "deleteConfirm": "¿Mover \"{{title}}\" a la papelera?",
     "closeDirtyTitle": "Esta nota tiene cambios sin guardar.",
     "closeDirtyDescription": "¿Quieres guardar antes de cerrarla?",
@@ -45,6 +54,7 @@
     "pinned": "Fijada",
     "noActive": "No hay nota activa",
     "noActiveDescription": "Crea una nota desde la barra lateral o usa Ctrl+N para empezar.",
+    "createFirstAction": "Crear tu primera nota",
     "open": "Abrir nota: {{title}}"
   },
   "workspace": {
@@ -52,6 +62,7 @@
     "renamePrompt": "Renombrar espacio",
     "deleteConfirm": "¿Eliminar el espacio \"{{name}}\" y mover sus notas a \"{{fallback}}\"?",
     "goTo": "Ir al espacio: {{name}}",
+    "select": "Espacio: {{name}}",
     "nextColor": "Siguiente color",
     "nextIcon": "Siguiente icono"
   },
@@ -77,7 +88,9 @@
     "noInterpreter": "No se encontró intérprete para {{language}}.",
     "exitCode": "Código de salida: {{code}}",
     "duration": "Duración: {{ms}}ms",
-    "timeout": "Timeout"
+    "timeout": "Timeout",
+    "readyDescription": "Snippet de {{language}} listo para ejecutarse.",
+    "runShortcut": "Ejecutar (Ctrl+Enter)"
   },
   "commands": {
     "groups": {
@@ -191,10 +204,29 @@
   "history": {
     "title": "Historial",
     "empty": "Todavía no hay versiones guardadas.",
+    "loading": "Cargando historial...",
+    "loadingVersion": "Cargando versión seleccionada...",
     "restore": "Restaurar esta versión",
     "bytes": "{{count}} bytes",
     "restored": "Versión restaurada",
     "restoreFailed": "No se pudo restaurar la versión"
+  },
+  "window": {
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "close": "Cerrar"
+  },
+  "themes": {
+    "dark": "Oscuro",
+    "dark-dimmed": "Oscuro Atenuado",
+    "midnight": "Medianoche"
+  },
+  "export": {
+    "filters": {
+      "markdown": "Markdown",
+      "text": "Texto",
+      "json": "JSON"
+    }
   },
   "updater": {
     "available": "SiriusPad {{version}} disponible",

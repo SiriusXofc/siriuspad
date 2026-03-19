@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 import { useUiStore } from '@/store/ui'
 
@@ -10,6 +11,7 @@ const toastStyles = {
 } as const
 
 export function ToastViewport() {
+  const { t } = useTranslation()
   const toasts = useUiStore((state) => state.toasts)
   const dismissToast = useUiStore((state) => state.dismissToast)
 
@@ -39,7 +41,7 @@ export function ToastViewport() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {toast.actionLabel ?? 'Open'}
+                  {toast.actionLabel ?? t('common.open')}
                 </a>
               ) : null}
             </div>
@@ -48,7 +50,7 @@ export function ToastViewport() {
               className="rounded-md border border-border px-2 py-1 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
               onClick={() => dismissToast(toast.id)}
             >
-              close
+              {t('common.close')}
             </button>
           </div>
         </div>

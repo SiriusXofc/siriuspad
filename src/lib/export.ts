@@ -1,6 +1,7 @@
 import { save } from '@tauri-apps/plugin-dialog'
 import { writeTextFile } from '@tauri-apps/plugin-fs'
 
+import i18n from '@/i18n'
 import { replaceVariables, stringifyNote } from '@/lib/parser'
 import type { Note } from '@/types'
 
@@ -23,7 +24,7 @@ export async function exportAsMarkdown(
 ) {
   const path = await save({
     defaultPath: `${baseName(note)}.md`,
-    filters: [{ name: 'Markdown', extensions: ['md'] }],
+    filters: [{ name: i18n.t('export.filters.markdown'), extensions: ['md'] }],
   })
 
   if (!path) {
@@ -44,7 +45,7 @@ export async function exportAsTxt(
 ) {
   const path = await save({
     defaultPath: `${baseName(note)}.txt`,
-    filters: [{ name: 'Text', extensions: ['txt'] }],
+    filters: [{ name: i18n.t('export.filters.text'), extensions: ['txt'] }],
   })
 
   if (!path) {
@@ -58,7 +59,7 @@ export async function exportAsTxt(
 export async function exportAsJson(note: Note) {
   const path = await save({
     defaultPath: `${baseName(note)}.json`,
-    filters: [{ name: 'JSON', extensions: ['json'] }],
+    filters: [{ name: i18n.t('export.filters.json'), extensions: ['json'] }],
   })
 
   if (!path) {

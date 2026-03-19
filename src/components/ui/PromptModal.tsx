@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 interface PromptModalProps {
   open: boolean
@@ -17,11 +18,12 @@ export function PromptModal({
   title,
   placeholder,
   defaultValue,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: PromptModalProps) {
+  const { t } = useTranslation()
   const [value, setValue] = useState(defaultValue ?? '')
   const inputRef = useRef<HTMLInputElement | null>(null)
   const valueRef = useRef(value)
@@ -88,17 +90,17 @@ export function PromptModal({
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
-              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
-              onClick={onCancel}
-            >
-              {cancelLabel}
+            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+            onClick={onCancel}
+          >
+              {cancelLabel ?? t('common.cancel')}
             </button>
             <button
               type="button"
               className="rounded-lg border border-accent/40 bg-accent/15 px-3 py-2 text-sm font-medium text-text-primary transition hover:bg-accent/20"
               onClick={() => void onConfirm(value.trim())}
             >
-              {confirmLabel}
+              {confirmLabel ?? t('common.confirm')}
             </button>
           </div>
         </div>

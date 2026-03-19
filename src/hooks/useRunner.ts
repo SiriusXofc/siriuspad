@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { useState } from 'react'
 
+import i18n from '@/i18n'
 import { EXECUTABLE_LANGUAGES } from '@/lib/constants'
 import { replaceVariables } from '@/lib/parser'
 import type { Note, RunResult } from '@/types'
@@ -32,6 +33,20 @@ export function useRunner(
         timeoutSecs: timeoutSeconds,
       })
       setResult(output)
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : `${error ?? ''}`.trim()
+      const stderr = message.toLowerCase().includes('no interpreter found')
+        ? i18n.t('runner.noInterpreter', { language: note.language })
+        : message || i18n.t('common.unknownError')
+
+      setResult({
+        stdout: '',
+        stderr,
+        exit_code: -1,
+        duration_ms: 0,
+        timed_out: false,
+      })
     } finally {
       setRunning(false)
     }

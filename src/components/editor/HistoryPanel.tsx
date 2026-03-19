@@ -77,16 +77,21 @@ export function HistoryPanel({
   const [entries, setEntries] = useState<NoteHistoryEntry[]>([])
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | null>(null)
   const [selectedContent, setSelectedContent] = useState('')
+  const [loadingEntries, setLoadingEntries] = useState(false)
+  const [loadingVersion, setLoadingVersion] = useState(false)
 
   useEffect(() => {
     if (!open || !note) {
       setEntries([])
       setSelectedTimestamp(null)
       setSelectedContent('')
+      setLoadingEntries(false)
+      setLoadingVersion(false)
       return
     }
 
     const loadHistory = async () => {
+      setLoadingEntries(true)
       try {
         const nextEntries = await invoke<NoteHistoryEntry[]>('list_note_history', {
           noteId: note.id,
@@ -96,6 +101,8 @@ export function HistoryPanel({
       } catch (error) {
         console.error(error)
         setEntries([])
+      } finally {
+        setLoadingEntries(false)
       }
     }
 
@@ -105,10 +112,12 @@ export function HistoryPanel({
   useEffect(() => {
     if (!open || !note || !selectedTimestamp) {
       setSelectedContent('')
+      setLoadingVersion(false)
       return
     }
 
     const loadVersion = async () => {
+      setLoadingVersion(true)
       try {
         const content = await invoke<string>('read_note_version', {
           noteId: note.id,
@@ -118,6 +127,8 @@ export function HistoryPanel({
       } catch (error) {
         console.error(error)
         setSelectedContent('')
+      } finally {
+        setLoadingVersion(false)
       }
     }
 
@@ -151,7 +162,11 @@ export function HistoryPanel({
 
       <div className="grid min-h-0 flex-1 grid-rows-[auto_1fr_auto]">
         <div className="max-h-52 overflow-y-auto border-b border-border px-2 py-2">
-          {entries.length ? (
+          {loadingEntries ? (
+            <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
+              {t('history.loading')}
+            </div>
+          ) : entries.length ? (
             <div className="grid gap-1">
               {entries.map((entry) => (
                 <button
@@ -184,23 +199,29 @@ export function HistoryPanel({
         </div>
 
         <div className="overflow-y-auto px-4 py-3">
-          <pre className="grid gap-1 whitespace-pre-wrap font-mono text-xs leading-5">
-            {diffLines.map((line, index) => (
-              <span
-                key={index}
-                className={
-                  line.kind === 'added'
-                    ? 'rounded bg-green/10 px-2 py-1 text-green'
-                    : line.kind === 'removed'
-                      ? 'rounded bg-red/10 px-2 py-1 text-red'
-                      : 'px-2 py-1 text-text-secondary'
-                }
-              >
-                {line.kind === 'added' ? '+' : line.kind === 'removed' ? '-' : ' '}
-                {line.text}
-              </span>
-            ))}
-          </pre>
+          {loadingVersion ? (
+            <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
+              {t('history.loadingVersion')}
+            </div>
+          ) : (
+            <pre className="grid gap-1 whitespace-pre-wrap font-mono text-xs leading-5">
+              {diffLines.map((line, index) => (
+                <span
+                  key={index}
+                  className={
+                    line.kind === 'added'
+                      ? 'rounded bg-green/10 px-2 py-1 text-green'
+                      : line.kind === 'removed'
+                        ? 'rounded bg-red/10 px-2 py-1 text-red'
+                        : 'px-2 py-1 text-text-secondary'
+                  }
+                >
+                  {line.kind === 'added' ? '+' : line.kind === 'removed' ? '-' : ' '}
+                  {line.text}
+                </span>
+              ))}
+            </pre>
+          )}
         </div>
 
         <div className="border-t border-border px-4 py-3">

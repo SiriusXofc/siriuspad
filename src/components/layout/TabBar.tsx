@@ -46,6 +46,7 @@ export function TabBar({
               <button
                 type="button"
                 className="rounded p-0.5 text-text-muted transition hover:bg-hover hover:text-text-primary"
+                title={t('commands.closeNote')}
                 onClick={(event) => {
                   event.stopPropagation()
                   void onTabClose(tab.id)

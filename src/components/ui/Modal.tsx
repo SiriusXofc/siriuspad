@@ -1,5 +1,6 @@
 import { useEffect, type PropsWithChildren } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 interface ModalProps extends PropsWithChildren {
   open: boolean
@@ -15,6 +16,8 @@ export function Modal({
   onClose,
   widthClassName = 'max-w-4xl',
 }: ModalProps) {
+  const { t } = useTranslation()
+
   useEffect(() => {
     if (!open) {
       return
@@ -53,8 +56,9 @@ export function Modal({
             type="button"
             className="rounded-md border border-border px-2 py-1 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
             onClick={onClose}
+            title={t('common.close')}
           >
-            Esc
+            {t('common.escape')}
           </button>
         </div>
         <div className="max-h-[80vh] overflow-y-auto">{children}</div>

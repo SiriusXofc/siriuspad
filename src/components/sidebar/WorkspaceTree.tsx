@@ -58,10 +58,18 @@ export function WorkspaceTree({
           type="button"
           className="rounded-md border border-border p-1 text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={() => void onCreateWorkspace()}
+          title={t('sidebar.newWorkspace')}
+          aria-label={t('sidebar.newWorkspace')}
         >
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      {workspaces.length <= 1 ? (
+        <p className="mb-2 text-xs leading-5 text-text-secondary">
+          {t('sidebar.workspaceHint')}
+        </p>
+      ) : null}
 
       <button
         type="button"
@@ -71,6 +79,7 @@ export function WorkspaceTree({
             : 'text-text-secondary hover:bg-hover hover:text-text-primary'
         }`}
         onClick={() => onSelectWorkspace(null)}
+        title={t('common.allNotes')}
       >
         <span className="h-2 w-2 rounded-full bg-text-muted" />
         <span>{t('common.allNotes')}</span>
@@ -99,6 +108,7 @@ export function WorkspaceTree({
                   y: event.clientY,
                 })
               }}
+              title={t('workspace.select', { name: workspace.name })}
             >
               <span
                 className="h-2.5 w-2.5 rounded-full"

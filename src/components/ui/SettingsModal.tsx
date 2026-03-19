@@ -220,7 +220,7 @@ export function SettingsModal({
                   }`}
                   onClick={() => void onUpdate({ theme: theme.id })}
                 >
-                  {theme.name}
+                  {t(`themes.${theme.id}`)}
                 </button>
               ))}
             </div>

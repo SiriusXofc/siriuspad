@@ -32,7 +32,7 @@ export function SnippetRunner({
             {t('runner.title')}
           </p>
           <p className="mt-1 text-xs text-text-secondary">
-            {language} • Ctrl+Enter
+            {t('runner.readyDescription', { language })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -55,18 +55,20 @@ export function SnippetRunner({
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-base px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
             onClick={() => void onRun()}
             disabled={running}
+            title={t('runner.runShortcut')}
           >
             {running ? (
               <LoaderCircle className="h-4 w-4 animate-spin" />
             ) : (
               <Play className="h-4 w-4" />
             )}
-            {running ? t('runner.running') : t('runner.run')}
+            {running ? t('runner.running') : t('runner.runShortcut')}
           </button>
           <button
             type="button"
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-base px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
             onClick={onClear}
+            title={t('runner.clearOutput')}
           >
             <RotateCcw className="h-4 w-4" />
             {t('runner.clearOutput')}
@@ -80,6 +82,7 @@ export function SnippetRunner({
               )
             }
             disabled={!result}
+            title={t('runner.copyOutput')}
           >
             <Copy className="h-4 w-4" />
             {t('runner.copyOutput')}

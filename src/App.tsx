@@ -124,7 +124,7 @@ export default function App() {
     notes.activeNote,
     settingsState.settings.variables,
   )
-  useUpdater()
+  useUpdater(settingsState.ready)
 
   const visibleNotes = notes.notes.filter((note) => {
     const matchesWorkspace = workspaceState.activeWorkspaceId
@@ -657,14 +657,11 @@ export default function App() {
       try {
         await invoke('ensure_dirs')
         const platform = await invoke<AppPlatform>('get_platform')
-
-        await Promise.all([
-          settingsState.initialize(),
-          workspaceState.initialize(),
-          uiState.initialize(),
-        ])
-
         uiState.setPlatform(platform)
+
+        await settingsState.initialize()
+        await workspaceState.initialize()
+        await uiState.initialize()
         await notes.loadNotes()
       } catch (error) {
         console.error(error)
@@ -948,7 +945,10 @@ export default function App() {
 
   return (
     <div className="flex h-screen flex-col bg-base text-text-primary">
-      <ResizeBorders platform={uiState.platform} />
+      <ResizeBorders
+        platform={uiState.platform}
+        enabled={!uiState.isFullscreen}
+      />
 
       {showTitlebar ? (
         <TitleBar
@@ -1017,6 +1017,7 @@ export default function App() {
             onSave={saveCurrentNote}
             onDelete={deleteActiveNote}
             onTogglePin={togglePin}
+            onCreateNote={() => createNote()}
             onCursorChange={setCursorInfo}
             onPreviewModeChange={(mode: PreviewMode) => uiState.setPreviewMode(mode)}
             onPreviewSplitRatioChange={uiState.setPreviewSplitRatio}

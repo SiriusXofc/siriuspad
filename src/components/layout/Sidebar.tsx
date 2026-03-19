@@ -101,6 +101,7 @@ export function Sidebar({
             ref={searchInputRef}
             className="w-full bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
             placeholder={t('sidebar.searchPlaceholder')}
+            title={t('sidebar.searchPlaceholder')}
             value={searchQuery}
             onChange={(event) => onSearchQueryChange(event.target.value)}
           />

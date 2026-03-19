@@ -4,7 +4,7 @@ import i18n from '@/i18n'
 import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { getAppStore } from '@/lib/storage'
 import { applyTheme } from '@/lib/themes'
-import type { Settings } from '@/types'
+import type { AppLanguage, Settings } from '@/types'
 
 type SettingsSection =
   | 'editor'
@@ -30,6 +30,30 @@ async function persistSettings(settings: Settings) {
   await store.save()
 }
 
+function normalizeLanguage(language: string | null | undefined): AppLanguage {
+  const normalized = (language ?? '').trim().toLowerCase()
+
+  if (normalized.startsWith('pt')) {
+    return 'pt-BR'
+  }
+
+  if (normalized.startsWith('es')) {
+    return 'es'
+  }
+
+  return 'en'
+}
+
+function detectSystemLanguage(): AppLanguage {
+  if (typeof navigator === 'undefined') {
+    return DEFAULT_SETTINGS.language
+  }
+
+  return normalizeLanguage(
+    navigator.language || navigator.languages?.[0] || DEFAULT_SETTINGS.language,
+  )
+}
+
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: DEFAULT_SETTINGS,
   ready: false,
@@ -40,9 +64,13 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
     const store = await getAppStore()
     const persisted = await store.get<Settings>('settings')
+    const language = persisted?.language
+      ? normalizeLanguage(persisted.language)
+      : detectSystemLanguage()
     const settings = {
       ...DEFAULT_SETTINGS,
       ...persisted,
+      language,
       variables: {
         ...DEFAULT_SETTINGS.variables,
         ...(persisted?.variables ?? {}),
@@ -55,9 +83,13 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await persistSettings(settings)
   },
   async update(patch) {
+    const nextLanguage = patch.language
+      ? normalizeLanguage(patch.language)
+      : get().settings.language
     const settings = {
       ...get().settings,
       ...patch,
+      language: nextLanguage,
       variables: patch.variables
         ? { ...patch.variables }
         : { ...get().settings.variables },
@@ -67,7 +99,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     applyTheme(settings.theme)
 
     if (patch.language) {
-      await i18n.changeLanguage(patch.language)
+      await i18n.changeLanguage(nextLanguage)
     }
 
     await persistSettings(settings)
@@ -128,7 +160,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       case 'language':
         next = {
           ...current,
-          language: DEFAULT_SETTINGS.language,
+          language: detectSystemLanguage(),
         }
         break
       case 'variables':

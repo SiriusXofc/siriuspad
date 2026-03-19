@@ -22,6 +22,10 @@ function controlClassName() {
   return 'rounded-lg border border-border bg-base px-2.5 py-1.5 text-xs text-text-primary outline-none transition focus:border-focus'
 }
 
+function inlineFieldClassName() {
+  return 'inline-flex items-center gap-2 rounded-lg border border-border bg-base px-2.5 py-1.5'
+}
+
 export function FrontmatterBar({
   note,
   workspaces,
@@ -42,33 +46,46 @@ export function FrontmatterBar({
       <input
         className="min-w-[220px] flex-1 rounded-lg border border-border bg-base px-3 py-2 text-sm font-medium text-text-primary outline-none transition placeholder:text-text-muted focus:border-focus"
         placeholder={t('note.titlePlaceholder')}
+        title={t('note.titlePlaceholder')}
         value={note.title}
         onChange={(event) => onChange({ title: event.target.value })}
       />
 
-      <select
-        className={controlClassName()}
-        value={note.workspace}
-        onChange={(event) => onChange({ workspace: event.target.value })}
-      >
-        {workspaces.map((workspace) => (
-          <option key={workspace.id} value={workspace.id}>
-            {workspace.name}
-          </option>
-        ))}
-      </select>
+      <label className={inlineFieldClassName()}>
+        <span className="text-[10px] uppercase tracking-[0.24em] text-text-muted">
+          {t('note.workspaceLabel')}
+        </span>
+        <select
+          className={controlClassName()}
+          value={note.workspace}
+          onChange={(event) => onChange({ workspace: event.target.value })}
+          title={t('note.workspaceLabel')}
+        >
+          {workspaces.map((workspace) => (
+            <option key={workspace.id} value={workspace.id}>
+              {workspace.name}
+            </option>
+          ))}
+        </select>
+      </label>
 
-      <select
-        className={controlClassName()}
-        value={note.language}
-        onChange={(event) => onChange({ language: event.target.value })}
-      >
-        {NOTE_LANGUAGES.map((language) => (
-          <option key={language} value={language}>
-            {language}
-          </option>
-        ))}
-      </select>
+      <label className={inlineFieldClassName()}>
+        <span className="text-[10px] uppercase tracking-[0.24em] text-text-muted">
+          {t('note.languageLabel')}
+        </span>
+        <select
+          className={controlClassName()}
+          value={note.language}
+          onChange={(event) => onChange({ language: event.target.value })}
+          title={t('note.languageLabel')}
+        >
+          {NOTE_LANGUAGES.map((language) => (
+            <option key={language} value={language}>
+              {language}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="flex flex-wrap items-center gap-2">
         {note.tags.map((tag) => (
@@ -88,11 +105,15 @@ export function FrontmatterBar({
         ))}
       </div>
 
-      <div className="flex items-center gap-2">
+      <label className={inlineFieldClassName()}>
+        <span className="text-[10px] uppercase tracking-[0.24em] text-text-muted">
+          {t('note.tagsLabel')}
+        </span>
         <input
           className={`${controlClassName()} w-32`}
           list="note-tag-suggestions"
           placeholder={t('note.addTag')}
+          title={t('note.addTagHelp')}
           value={tagValue}
           onChange={(event) => setTagValue(event.target.value)}
           onKeyDown={(event) => {
@@ -118,7 +139,7 @@ export function FrontmatterBar({
             <option key={tag} value={tag} />
           ))}
         </datalist>
-      </div>
+      </label>
 
       <button
         type="button"
@@ -153,6 +174,7 @@ export function FrontmatterBar({
                 : 'text-text-secondary hover:bg-hover hover:text-text-primary'
             }`}
             onClick={() => onPreviewModeChange(mode)}
+            title={t(`preview.${mode}`)}
           >
             {t(`preview.${mode}`)}
           </button>

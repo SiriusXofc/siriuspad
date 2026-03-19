@@ -1,4 +1,4 @@
-import { formatDistanceToNow } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { Pin, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -34,6 +34,8 @@ export function NoteList({
           type="button"
           className="rounded-md border border-border p-1 text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
           onClick={() => void onCreateNote()}
+          title={t('sidebar.newNote')}
+          aria-label={t('sidebar.newNote')}
         >
           <Plus className="h-3.5 w-3.5" />
         </button>
@@ -58,7 +60,12 @@ export function NoteList({
                   <p className="truncate text-sm font-medium text-text-primary">
                     {note.title}
                   </p>
-                  <p className="mt-1 text-xs text-text-secondary">
+                  <p
+                    className="mt-1 text-xs text-text-secondary"
+                    title={format(new Date(note.updated_at), 'PPPpp', {
+                      locale: getDateFnsLocale(i18n.language),
+                    })}
+                  >
                     {formatDistanceToNow(new Date(note.updated_at), {
                       addSuffix: true,
                       locale: getDateFnsLocale(i18n.language),
@@ -98,7 +105,14 @@ export function NoteList({
         })}
         {!notes.length ? (
           <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
-            {t('sidebar.noNotes')}
+            <p>{t('sidebar.noNotes')}</p>
+            <button
+              type="button"
+              className="mt-3 rounded-lg border border-accent/40 bg-accent/15 px-3 py-2 text-sm font-medium text-text-primary transition hover:bg-accent/20"
+              onClick={() => void onCreateNote()}
+            >
+              {t('sidebar.newNote')}
+            </button>
           </div>
         ) : null}
       </div>

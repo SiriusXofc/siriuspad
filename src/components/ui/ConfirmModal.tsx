@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 interface ConfirmModalProps {
   open: boolean
@@ -18,14 +19,15 @@ export function ConfirmModal({
   open,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   secondaryLabel,
   danger = false,
   onConfirm,
   onCancel,
   onSecondary,
 }: ConfirmModalProps) {
+  const { t } = useTranslation()
   const cancelButtonRef = useRef<HTMLButtonElement | null>(null)
   const secondaryButtonRef = useRef<HTMLButtonElement | null>(null)
   const confirmButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -101,7 +103,7 @@ export function ConfirmModal({
             className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
             onClick={onCancel}
           >
-            {cancelLabel}
+            {cancelLabel ?? t('common.cancel')}
           </button>
           {secondaryLabel && onSecondary ? (
             <button
@@ -124,7 +126,7 @@ export function ConfirmModal({
             }`}
             onClick={() => void onConfirm()}
           >
-            {confirmLabel}
+            {confirmLabel ?? t('common.confirm')}
           </button>
         </div>
       </div>

@@ -25,6 +25,7 @@ fn now_iso() -> String {
 
 fn system_language() -> String {
     std::env::var("LC_ALL")
+        .or_else(|_| std::env::var("LANGUAGE"))
         .or_else(|_| std::env::var("LANG"))
         .unwrap_or_default()
         .to_lowercase()

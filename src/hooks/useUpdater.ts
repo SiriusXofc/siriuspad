@@ -1,16 +1,14 @@
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import { useUiStore } from '@/store/ui'
 import type { UpdateInfo } from '@/types'
 
-export function useUpdater() {
-  const { t } = useTranslation()
+export function useUpdater(enabled = true) {
   const checkedRef = useRef(false)
 
   useEffect(() => {
-    if (checkedRef.current) {
+    if (!enabled || checkedRef.current) {
       return
     }
 
@@ -25,11 +23,6 @@ export function useUpdater() {
 
         const uiStore = useUiStore.getState()
         uiStore.setUpdateAvailable(update)
-        uiStore.pushToast({
-          kind: 'info',
-          title: t('updater.available', { version: update.version }),
-          description: t('updater.description'),
-        })
       } catch {
         // Fail silently when offline or when the updater endpoint is unavailable.
       }
@@ -38,5 +31,5 @@ export function useUpdater() {
     return () => {
       window.clearTimeout(timeoutId)
     }
-  }, [t])
+  }, [enabled])
 }

@@ -16,30 +16,40 @@ const statusColor: Record<SaveStatus, string> = {
   error: 'bg-red',
 }
 
+function Separator() {
+  return <span className="text-text-muted/60">|</span>
+}
+
 export function StatusBar({ note, saveStatus, cursorInfo }: StatusBarProps) {
   const { t } = useTranslation()
 
   return (
-    <footer className="flex h-6 items-center justify-between border-t border-border bg-surface px-3 text-[11px] uppercase tracking-wide text-text-secondary">
-      <div className="flex min-w-0 items-center gap-3">
+    <footer className="flex min-h-6 flex-wrap items-center gap-x-2 gap-y-1 border-t border-border bg-surface px-3 py-1 text-[10px] uppercase tracking-wide text-text-secondary sm:text-[11px]">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 overflow-hidden">
         <span className="truncate">
           {t('statusBar.workspace')}: {note?.workspace ?? t('common.none')}
         </span>
-        <span>{note?.language ?? 'markdown'}</span>
+        <Separator />
+        <span>{note?.language ?? t('common.none')}</span>
+        <Separator />
         <span className="inline-flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${statusColor[saveStatus]}`} />
           {t(`statusBar.${saveStatus === 'dirty' ? 'unsaved' : saveStatus}`)}
         </span>
         {cursorInfo ? (
           <>
+            <Separator />
             <span>{t('statusBar.line', { line: cursorInfo.line })}</span>
+            <Separator />
             <span>{t('statusBar.column', { col: cursorInfo.col })}</span>
+            <Separator />
             <span>{t('statusBar.words', { count: cursorInfo.wordCount })}</span>
+            <Separator />
             <span>{t('statusBar.chars', { count: cursorInfo.charCount })}</span>
           </>
         ) : null}
       </div>
-      <span>{APP_VERSION}</span>
+      <span className="ml-auto shrink-0">{APP_VERSION}</span>
     </footer>
   )
 }

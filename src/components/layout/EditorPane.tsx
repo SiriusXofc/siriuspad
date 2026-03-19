@@ -36,6 +36,7 @@ interface EditorPaneProps {
   onSave: () => Promise<void>
   onDelete: () => Promise<void>
   onTogglePin: () => Promise<void>
+  onCreateNote: () => Promise<void>
   onCursorChange: (cursorInfo: CursorInfo) => void
   onPreviewModeChange: (mode: PreviewMode) => void
   onPreviewSplitRatioChange: (ratio: number) => void
@@ -57,6 +58,7 @@ export function EditorPane({
   onSave,
   onDelete,
   onTogglePin,
+  onCreateNote,
   onCursorChange,
   onPreviewModeChange,
   onPreviewSplitRatioChange,
@@ -106,6 +108,13 @@ export function EditorPane({
           <p className="mt-2 text-sm leading-6 text-text-secondary">
             {t('note.noActiveDescription')}
           </p>
+          <button
+            type="button"
+            className="mt-5 rounded-xl border border-accent/40 bg-accent/15 px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-accent/20"
+            onClick={() => void onCreateNote()}
+          >
+            {t('note.createFirstAction')}
+          </button>
         </div>
       </main>
     )
