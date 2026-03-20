@@ -78,7 +78,11 @@ fn prepare_script(language: &str, code: &str) -> String {
 }
 
 fn build_script_path(base_dir: &Path, extension: &str) -> PathBuf {
-    base_dir.join(format!(".siriuspad-snippet-{}.{}", Uuid::new_v4(), extension))
+    base_dir.join(format!(
+        ".siriuspad-snippet-{}.{}",
+        Uuid::new_v4(),
+        extension
+    ))
 }
 
 #[tauri::command]
@@ -98,7 +102,8 @@ pub async fn run_snippet(
         .map(str::trim)
         .filter(|value| !value.is_empty())
         .map(PathBuf::from);
-    let temp_dir = cwd_path.is_none()
+    let temp_dir = cwd_path
+        .is_none()
         .then(|| tempdir().map_err(|error| error.to_string()))
         .transpose()?;
     let script_path = if let Some(dir) = cwd_path.as_deref() {

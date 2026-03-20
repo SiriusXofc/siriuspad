@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "SiriusPad",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "identifier": "dev.siriusdev.siriuspad",
   "build": {
     "frontendDist": "../dist",
@@ -30,16 +30,9 @@
   },
   "bundle": {
     "active": true,
-    "targets": [
-      "deb",
-      "nsis"
-    ],
+    "targets": ["deb", "nsis"],
     "createUpdaterArtifacts": true,
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/icon.ico"
-    ],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/icon.ico"],
     "linux": {
       "deb": {
         "depends": []
@@ -58,7 +51,7 @@
     },
     "updater": {
       "endpoints": [
-        "https://github.com/Nic85796/siriuspad/releases/latest/download/latest.json"
+        "https://github.com/SiriusXofc/siriuspad/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFGRkNEQjhBNENERjMwMjIKUldRaU1OOU1pdHY4cjlpTDJETWt6NUtQbDJuM2d0a1pEL2ViK2ttZHhVWWVrcmxvcUh2QlAxRHgK"
     }

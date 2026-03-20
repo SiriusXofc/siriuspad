@@ -35,7 +35,7 @@ export function ResizeBorders({
   platform,
   enabled = true,
 }: ResizeBordersProps) {
-  if (!enabled || platform === 'macos') {
+  if (!enabled || platform === 'macos' || platform === 'android' || platform === 'ios') {
     return null
   }
 

@@ -112,10 +112,7 @@ pub async fn download_update(
 }
 
 #[tauri::command]
-pub async fn install_update(
-    app: AppHandle,
-    cache: State<'_, UpdateCache>,
-) -> Result<(), String> {
+pub async fn install_update(app: AppHandle, cache: State<'_, UpdateCache>) -> Result<(), String> {
     let cached = {
         let mut guard = cache.0.lock().map_err(|error| error.to_string())?;
         guard.take()

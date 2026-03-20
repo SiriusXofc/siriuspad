@@ -71,7 +71,7 @@ export interface Workspace {
 
 export type AppLanguage = 'en' | 'pt-BR' | 'es'
 export type AppTheme = 'dark' | 'dark-dimmed' | 'midnight'
-export type AppPlatform = 'linux' | 'windows' | 'macos'
+export type AppPlatform = 'linux' | 'windows' | 'macos' | 'android' | 'ios'
 export type PreviewMode = 'editor' | 'split' | 'preview'
 
 export interface ThemeDefinition {

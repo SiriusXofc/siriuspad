@@ -1,70 +1,75 @@
-import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { PriorityDot } from '@/components/ui/PriorityDot'
-import { TagPill } from '@/components/ui/TagPill'
+import { PriorityDot } from "@/components/ui/PriorityDot";
+import { TagPill } from "@/components/ui/TagPill";
+import type { AppPlatform } from "@/types";
 
 interface OnboardingModalProps {
-  onComplete: () => void
+  platform: AppPlatform;
+  onComplete: () => void;
 }
 
 const STEPS = [
-  { id: 'welcome', icon: '◆', visual: 'welcome' },
-  { id: 'notes', icon: '≡', visual: 'notes' },
-  { id: 'tags', icon: '#', visual: 'tags' },
-  { id: 'terminal', icon: '>_', visual: 'terminal' },
-  { id: 'command', icon: '⌘', visual: 'command' },
-  { id: 'project', icon: '▣', visual: 'project' },
-  { id: 'shortcuts', icon: '⌨', visual: 'shortcuts' },
-  { id: 'practice', icon: '▤', visual: 'practice' },
-  { id: 'ready', icon: '✓', visual: 'ready' },
-] as const
+  { id: "welcome", icon: "◆", visual: "welcome" },
+  { id: "notes", icon: "≡", visual: "notes" },
+  { id: "tags", icon: "#", visual: "tags" },
+  { id: "terminal", icon: ">_", visual: "terminal" },
+  { id: "command", icon: "⌘", visual: "command" },
+  { id: "project", icon: "▣", visual: "project" },
+  { id: "shortcuts", icon: "⌨", visual: "shortcuts" },
+  { id: "practice", icon: "▤", visual: "practice" },
+  { id: "ready", icon: "✓", visual: "ready" },
+] as const;
 
 function StepVisual({
   step,
   shortcuts,
+  isMobile,
 }: {
-  step: (typeof STEPS)[number]
-  shortcuts: Array<{ key: string; label: string }>
+  step: (typeof STEPS)[number];
+  shortcuts: Array<{ key: string; label: string }>;
+  isMobile: boolean;
 }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   switch (step.visual) {
-    case 'notes':
+    case "notes":
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4">
           <div className="rounded-md border border-border bg-[#111111] p-3">
             <div className="mb-1 text-xs text-text-secondary">
-              {t('onboarding.visuals.notesTitle')}
+              {t("onboarding.visuals.notesTitle")}
             </div>
             <div className="text-sm text-text-primary">
-              {t('onboarding.visuals.notesBody')}
+              {t("onboarding.visuals.notesBody")}
             </div>
           </div>
           <div className="rounded-md border border-border bg-[#111111] p-3">
             <div className="mb-2 text-[11px] uppercase tracking-[0.16em] text-text-muted">
-              {t('note.checklistTitle')}
+              {t("note.checklistTitle")}
             </div>
             <div className="grid gap-2 text-xs">
-              {[t('onboarding.visuals.notesChecklist1'), t('onboarding.visuals.notesChecklist2')].map(
-                (item, index) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-2 rounded-md border border-border bg-[#0f0f0f] px-3 py-2 text-text-primary"
+              {[
+                t("onboarding.visuals.notesChecklist1"),
+                t("onboarding.visuals.notesChecklist2"),
+              ].map((item, index) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-2 rounded-md border border-border bg-[#0f0f0f] px-3 py-2 text-text-primary"
+                >
+                  <span
+                    className={`inline-flex h-4 w-4 items-center justify-center rounded border ${
+                      index === 0
+                        ? "border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-[#c4b5fd]"
+                        : "border-border bg-[#111111] text-transparent"
+                    }`}
                   >
-                    <span
-                      className={`inline-flex h-4 w-4 items-center justify-center rounded border ${
-                        index === 0
-                          ? 'border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-[#c4b5fd]'
-                          : 'border-border bg-[#111111] text-transparent'
-                      }`}
-                    >
-                      ✓
-                    </span>
-                    <span>{item}</span>
-                  </div>
-                ),
-              )}
+                    ✓
+                  </span>
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
           </div>
           <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.08)] p-3">
@@ -72,10 +77,10 @@ function StepVisual({
               &gt; [!TIP]
             </div>
             <div className="text-sm text-text-primary">
-              {t('onboarding.visuals.notesCalloutTitle')}
+              {t("onboarding.visuals.notesCalloutTitle")}
             </div>
             <div className="mt-1 text-xs leading-6 text-text-secondary">
-              {t('onboarding.visuals.notesCalloutBody')}
+              {t("onboarding.visuals.notesCalloutBody")}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -84,8 +89,8 @@ function StepVisual({
             <TagPill tag="api" compact />
           </div>
         </div>
-      )
-    case 'tags':
+      );
+    case "tags":
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4">
           <div className="flex flex-wrap gap-2">
@@ -95,43 +100,47 @@ function StepVisual({
             <TagPill tag="idea" />
           </div>
           <div className="flex flex-wrap gap-2">
-            <PriorityDot priority="urgente" label={t('priority.urgente')} />
-            <PriorityDot priority="alta" label={t('priority.alta')} />
-            <PriorityDot priority="media" label={t('priority.media')} />
+            <PriorityDot priority="urgente" label={t("priority.urgente")} />
+            <PriorityDot priority="alta" label={t("priority.alta")} />
+            <PriorityDot priority="media" label={t("priority.media")} />
           </div>
         </div>
-      )
-    case 'terminal':
+      );
+    case "terminal":
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 font-mono text-xs">
           <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] p-3">
             <div className="text-[11px] uppercase tracking-[0.16em] text-[#c4b5fd]">
-              {t('terminal.terminal')}
+              {t("terminal.terminal")}
             </div>
             <div className="mt-2 text-text-primary">cmd.exe / bash</div>
             <div className="mt-1 text-text-secondary">
-              {t('terminal.noteFolder')} ~/siriuspad/notes/fix-janela
+              {t("terminal.noteFolder")} ~/siriuspad/notes/fix-janela
             </div>
           </div>
           <div className="rounded-md border border-border bg-[#111111] p-3">
-            <div className="text-text-secondary">~/siriuspad/notes/fix-janela $ npm run dev</div>
+            <div className="text-text-secondary">
+              ~/siriuspad/notes/fix-janela $ npm run dev
+            </div>
             <div className="mt-2 text-[#34d399]">VITE ready in 412ms</div>
           </div>
           <div className="rounded-md border border-border bg-[#111111] p-3">
             <div className="mb-1 text-text-secondary">
-              {t('onboarding.visuals.terminalSnippetLabel')}
+              {t("onboarding.visuals.terminalSnippetLabel")}
             </div>
-            <div className="text-[#34d399]">console.log('teste') -&gt; teste</div>
+            <div className="text-[#34d399]">
+              console.log('teste') -&gt; teste
+            </div>
           </div>
           <div className="rounded-md border border-border bg-[#111111] p-3">
             <div className="mb-1 text-text-secondary">
-              {t('onboarding.visuals.terminalCommandLabel')}
+              {t("onboarding.visuals.terminalCommandLabel")}
             </div>
             <div className="text-text-primary">ls</div>
             <div className="mt-2 text-[#34d399]">fix-janela.md</div>
           </div>
           <div className="flex flex-wrap gap-2 text-[11px]">
-            {['Ctrl+`', 'Enter', 'Ctrl+C', 'Ctrl+Enter'].map((shortcut) => (
+            {["Ctrl+`", "Enter", "Ctrl+C", "Ctrl+Enter"].map((shortcut) => (
               <span
                 key={shortcut}
                 className="rounded-md border border-border bg-[#111111] px-2 py-1 text-text-secondary"
@@ -141,15 +150,15 @@ function StepVisual({
             ))}
           </div>
         </div>
-      )
-    case 'project':
+      );
+    case "project":
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
           {[
-            t('onboarding.visuals.projectPoint1'),
-            t('onboarding.visuals.projectPoint2'),
-            t('onboarding.visuals.projectPoint3'),
-            t('onboarding.visuals.projectPoint4'),
+            t("onboarding.visuals.projectPoint1"),
+            t("onboarding.visuals.projectPoint2"),
+            t("onboarding.visuals.projectPoint3"),
+            t("onboarding.visuals.projectPoint4"),
           ].map((text) => (
             <div
               key={text}
@@ -159,22 +168,22 @@ function StepVisual({
             </div>
           ))}
         </div>
-      )
-    case 'command':
+      );
+    case "command":
       return (
         <div className="grid gap-2 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs">
           {[
             {
-              label: t('commands.newNote'),
-              shortcut: 'Ctrl+N',
+              label: t("commands.newNote"),
+              shortcut: "Ctrl+N",
             },
             {
-              label: t('commands.findReplace'),
-              shortcut: 'Ctrl+H',
+              label: t("commands.findReplace"),
+              shortcut: "Ctrl+H",
             },
             {
-              label: t('commands.zoomIn'),
-              shortcut: 'Ctrl++',
+              label: t("commands.zoomIn"),
+              shortcut: "Ctrl++",
             },
           ].map((item) => (
             <div
@@ -188,8 +197,8 @@ function StepVisual({
             </div>
           ))}
         </div>
-      )
-    case 'shortcuts':
+      );
+    case "shortcuts":
       return (
         <div className="grid gap-2 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
           {shortcuts.map((shortcut) => (
@@ -202,97 +211,127 @@ function StepVisual({
             </div>
           ))}
         </div>
-      )
-    case 'practice':
+      );
+    case "practice":
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
           {[
             {
-              step: '01',
-              title: t('onboarding.visuals.practiceStep1Title'),
-              body: t('onboarding.visuals.practiceStep1Body'),
+              step: "01",
+              title: t("onboarding.visuals.practiceStep1Title"),
+              body: t("onboarding.visuals.practiceStep1Body"),
             },
             {
-              step: '02',
-              title: t('onboarding.visuals.practiceStep2Title'),
-              body: t('onboarding.visuals.practiceStep2Body'),
+              step: "02",
+              title: t("onboarding.visuals.practiceStep2Title"),
+              body: t("onboarding.visuals.practiceStep2Body"),
             },
             {
-              step: '03',
-              title: t('onboarding.visuals.practiceStep3Title'),
-              body: t('onboarding.visuals.practiceStep3Body'),
+              step: "03",
+              title: t("onboarding.visuals.practiceStep3Title"),
+              body: t("onboarding.visuals.practiceStep3Body"),
             },
             {
-              step: '04',
-              title: t('onboarding.visuals.practiceStep4Title'),
-              body: t('onboarding.visuals.practiceStep4Body'),
+              step: "04",
+              title: t("onboarding.visuals.practiceStep4Title"),
+              body: t("onboarding.visuals.practiceStep4Body"),
             },
-          ].map((item) => (
-            <div
-              key={item.step}
-              className="flex items-start gap-3 rounded-md border border-border bg-[#111111] px-3 py-3"
-            >
-              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-[11px] font-semibold text-[#c4b5fd]">
-                {item.step}
-              </span>
-              <div className="min-w-0">
-                <div className="text-sm text-text-primary">{item.title}</div>
-                <div className="mt-1 leading-6 text-text-secondary">{item.body}</div>
+          ]
+            .filter((item) => !isMobile || item.step !== "04")
+            .map((item) => (
+              <div
+                key={item.step}
+                className="flex items-start gap-3 rounded-md border border-border bg-[#111111] px-3 py-3"
+              >
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-[11px] font-semibold text-[#c4b5fd]">
+                  {item.step}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-sm text-text-primary">{item.title}</div>
+                  <div className="mt-1 leading-6 text-text-secondary">
+                    {item.body}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.08)] px-3 py-3 text-xs leading-6 text-text-secondary sm:col-span-2">
-            {t('onboarding.visuals.practiceFooter')}
+            {t("onboarding.visuals.practiceFooter")}
           </div>
         </div>
-      )
-    case 'welcome':
+      );
+    case "welcome":
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-sm text-text-secondary">
           <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] px-3 py-3 text-text-primary">
-            {t('onboarding.visuals.welcomeBadge')}
+            {t("onboarding.visuals.welcomeBadge")}
           </div>
           <div className="grid gap-2 text-xs">
-            <div>{t('onboarding.visuals.welcomePoint1')}</div>
-            <div>{t('onboarding.visuals.welcomePoint2')}</div>
-            <div>{t('onboarding.visuals.welcomePoint3')}</div>
-            <div>{t('onboarding.visuals.welcomePoint4')}</div>
+            <div>{t("onboarding.visuals.welcomePoint1")}</div>
+            <div>{t("onboarding.visuals.welcomePoint2")}</div>
+            <div>{t("onboarding.visuals.welcomePoint3")}</div>
+            <div>{t("onboarding.visuals.welcomePoint4")}</div>
           </div>
         </div>
-      )
+      );
     default:
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-sm text-text-secondary">
           <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] px-3 py-3 text-text-primary">
-            {t('onboarding.visuals.readyBadge')}
+            {t("onboarding.visuals.readyBadge")}
           </div>
-          <div className="text-xs leading-6">{t('onboarding.visuals.readyHint')}</div>
+          <div className="text-xs leading-6">
+            {t("onboarding.visuals.readyHint")}
+          </div>
           <div className="grid gap-2 text-xs">
-            <div>{t('onboarding.visuals.readyPoint1')}</div>
-            <div>{t('onboarding.visuals.readyPoint2')}</div>
-            <div>{t('onboarding.visuals.readyPoint3')}</div>
+            <div>{t("onboarding.visuals.readyPoint1")}</div>
+            <div>{t("onboarding.visuals.readyPoint2")}</div>
+            <div>{t("onboarding.visuals.readyPoint3")}</div>
           </div>
         </div>
-      )
+      );
   }
 }
 
-export function OnboardingModal({ onComplete }: OnboardingModalProps) {
-  const { t } = useTranslation()
-  const [index, setIndex] = useState(0)
-  const step = useMemo(() => STEPS[index], [index])
-  const isLast = index === STEPS.length - 1
+export function OnboardingModal({
+  platform,
+  onComplete,
+}: OnboardingModalProps) {
+  const { t } = useTranslation();
+  const [index, setIndex] = useState(0);
+  const isMobile = platform === "android" || platform === "ios";
+  const steps = useMemo(
+    () =>
+      isMobile
+        ? STEPS.filter(
+            (step) => step.id !== "terminal" && step.id !== "command",
+          )
+        : STEPS,
+    [isMobile],
+  );
+  const step = useMemo(() => steps[index], [index, steps]);
+  const isLast = index === steps.length - 1;
   const shortcuts = useMemo(
-    () => [
-      { key: 'Ctrl+N', label: t('commands.newNote') },
-      { key: 'Ctrl+S', label: t('common.save') },
-      { key: 'Ctrl+K', label: t('commands.commandPalette') },
-      { key: 'Ctrl+F', label: t('titlebar.search') },
-      { key: 'Ctrl+`', label: t('terminal.toggleTitle') },
-      { key: 'Ctrl+Enter', label: t('terminal.run') },
-    ],
-    [t],
-  )
+    () =>
+      isMobile
+        ? [
+            { key: t("sidebar.newNote"), label: t("commands.newNote") },
+            { key: t("titlebar.search"), label: t("titlebar.search") },
+            {
+              key: t("rightPanel.noteTools"),
+              label: t("rightPanel.noteTools"),
+            },
+            { key: t("titlebar.settings"), label: t("titlebar.settings") },
+          ]
+        : [
+            { key: "Ctrl+N", label: t("commands.newNote") },
+            { key: "Ctrl+S", label: t("common.save") },
+            { key: "Ctrl+K", label: t("commands.commandPalette") },
+            { key: "Ctrl+F", label: t("titlebar.search") },
+            { key: "Ctrl+`", label: t("terminal.toggleTitle") },
+            { key: "Ctrl+Enter", label: t("terminal.run") },
+          ],
+    [isMobile, t],
+  );
 
   return (
     <div className="modal-backdrop absolute inset-0 z-[90] overflow-y-auto bg-black/85 px-4 py-4 sm:py-8">
@@ -308,7 +347,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
                   {t(`onboarding.steps.${step.id}.title`)}
                 </p>
                 <p className="text-xs text-text-secondary">
-                  {index + 1} / {STEPS.length}
+                  {index + 1} / {steps.length}
                 </p>
               </div>
             </div>
@@ -317,7 +356,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
               className="text-xs text-text-secondary transition hover:text-text-primary"
               onClick={onComplete}
             >
-              {t('onboarding.skip')}
+              {t("onboarding.skip")}
             </button>
           </div>
 
@@ -327,15 +366,19 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
             </p>
 
             <div className="motion-fade-up">
-              <StepVisual step={step} shortcuts={shortcuts} />
+              <StepVisual
+                step={step}
+                shortcuts={shortcuts}
+                isMobile={isMobile}
+              />
             </div>
 
             <div className="mt-5 flex items-center justify-center gap-2">
-              {STEPS.map((item, dotIndex) => (
+              {steps.map((item, dotIndex) => (
                 <span
                   key={item.id}
                   className={`h-2 w-2 rounded-full ${
-                    dotIndex === index ? 'bg-accent' : 'bg-[#2a2a2a]'
+                    dotIndex === index ? "bg-accent" : "bg-[#2a2a2a]"
                   }`}
                 />
               ))}
@@ -349,7 +392,7 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
               onClick={() => setIndex((current) => Math.max(0, current - 1))}
               disabled={index === 0}
             >
-              {t('onboarding.prev')}
+              {t("onboarding.prev")}
             </button>
 
             {isLast ? (
@@ -358,22 +401,22 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
                 onClick={onComplete}
               >
-                {t('onboarding.start')}
+                {t("onboarding.start")}
               </button>
             ) : (
               <button
                 type="button"
                 className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
                 onClick={() =>
-                  setIndex((current) => Math.min(STEPS.length - 1, current + 1))
+                  setIndex((current) => Math.min(steps.length - 1, current + 1))
                 }
               >
-                {t('onboarding.next')}
+                {t("onboarding.next")}
               </button>
             )}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

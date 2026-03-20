@@ -1,3 +1,6 @@
+use tauri::{AppHandle, State};
+
+#[cfg(desktop)]
 use std::{
     collections::HashMap,
     io::{Read, Write},
@@ -5,15 +8,32 @@ use std::{
     thread,
 };
 
+#[cfg(desktop)]
 use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize};
-use tauri::{AppHandle, Emitter, Manager, State};
+#[cfg(desktop)]
+use tauri::{Emitter, Manager};
+#[cfg(desktop)]
 use uuid::Uuid;
 
-#[derive(Default)]
+#[cfg(desktop)]
 pub struct TerminalState {
     sessions: Mutex<HashMap<String, Arc<TerminalSession>>>,
 }
 
+#[cfg(desktop)]
+impl Default for TerminalState {
+    fn default() -> Self {
+        Self {
+            sessions: Mutex::new(HashMap::new()),
+        }
+    }
+}
+
+#[cfg(mobile)]
+#[derive(Default)]
+pub struct TerminalState;
+
+#[cfg(desktop)]
 struct TerminalSession {
     writer: Mutex<Box<dyn Write + Send>>,
     master: Mutex<Box<dyn MasterPty + Send>>,
@@ -27,6 +47,7 @@ pub struct TerminalSessionInfo {
     pub shell: String,
 }
 
+#[cfg(desktop)]
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 struct TerminalDataPayload {
@@ -34,12 +55,14 @@ struct TerminalDataPayload {
     data: String,
 }
 
+#[cfg(desktop)]
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 struct TerminalExitPayload {
     session_id: String,
 }
 
+#[cfg(desktop)]
 fn shell_program() -> (&'static str, Vec<&'static str>) {
     if cfg!(target_os = "windows") {
         ("cmd.exe", Vec::new())
@@ -48,6 +71,7 @@ fn shell_program() -> (&'static str, Vec<&'static str>) {
     }
 }
 
+#[cfg(desktop)]
 fn normalize_terminal_size(cols: u16, rows: u16) -> PtySize {
     PtySize {
         rows: rows.max(18),
@@ -57,6 +81,7 @@ fn normalize_terminal_size(cols: u16, rows: u16) -> PtySize {
     }
 }
 
+#[cfg(desktop)]
 fn remove_session(app: &AppHandle, session_id: &str) {
     let state = app.state::<TerminalState>();
     let Ok(mut sessions) = state.sessions.lock() else {
@@ -65,6 +90,7 @@ fn remove_session(app: &AppHandle, session_id: &str) {
     sessions.remove(session_id);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 pub fn terminal_create_session(
     app: AppHandle,
@@ -155,6 +181,19 @@ pub fn terminal_create_session(
     })
 }
 
+#[cfg(mobile)]
+#[tauri::command]
+pub fn terminal_create_session(
+    _app: AppHandle,
+    _state: State<'_, TerminalState>,
+    _cwd: Option<String>,
+    _cols: u16,
+    _rows: u16,
+) -> Result<TerminalSessionInfo, String> {
+    Err("O terminal embutido está disponível apenas no desktop.".to_string())
+}
+
+#[cfg(desktop)]
 #[tauri::command]
 pub fn terminal_write(
     state: State<'_, TerminalState>,
@@ -176,6 +215,17 @@ pub fn terminal_write(
     Ok(())
 }
 
+#[cfg(mobile)]
+#[tauri::command]
+pub fn terminal_write(
+    _state: State<'_, TerminalState>,
+    _session_id: String,
+    _data: String,
+) -> Result<(), String> {
+    Err("O terminal embutido está disponível apenas no desktop.".to_string())
+}
+
+#[cfg(desktop)]
 #[tauri::command]
 pub fn terminal_interrupt(
     state: State<'_, TerminalState>,
@@ -194,6 +244,16 @@ pub fn terminal_interrupt(
     Ok(())
 }
 
+#[cfg(mobile)]
+#[tauri::command]
+pub fn terminal_interrupt(
+    _state: State<'_, TerminalState>,
+    _session_id: String,
+) -> Result<(), String> {
+    Err("O terminal embutido está disponível apenas no desktop.".to_string())
+}
+
+#[cfg(desktop)]
 #[tauri::command]
 pub fn terminal_resize(
     state: State<'_, TerminalState>,
@@ -215,6 +275,18 @@ pub fn terminal_resize(
     Ok(())
 }
 
+#[cfg(mobile)]
+#[tauri::command]
+pub fn terminal_resize(
+    _state: State<'_, TerminalState>,
+    _session_id: String,
+    _cols: u16,
+    _rows: u16,
+) -> Result<(), String> {
+    Err("O terminal embutido está disponível apenas no desktop.".to_string())
+}
+
+#[cfg(desktop)]
 #[tauri::command]
 pub fn terminal_close_session(
     app: AppHandle,
@@ -231,12 +303,17 @@ pub fn terminal_close_session(
         let _ = child.kill();
     }
 
-    let _ = app.emit(
-        "terminal://exit",
-        TerminalExitPayload {
-            session_id,
-        },
-    );
+    let _ = app.emit("terminal://exit", TerminalExitPayload { session_id });
 
     Ok(())
+}
+
+#[cfg(mobile)]
+#[tauri::command]
+pub fn terminal_close_session(
+    _app: AppHandle,
+    _state: State<'_, TerminalState>,
+    _session_id: String,
+) -> Result<(), String> {
+    Err("O terminal embutido está disponível apenas no desktop.".to_string())
 }

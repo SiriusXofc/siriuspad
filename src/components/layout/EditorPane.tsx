@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { EXECUTABLE_LANGUAGES } from '@/lib/constants'
-import { NoteBlocks } from '@/components/editor/NoteBlocks'
-import { MarkdownPreview } from '@/components/editor/MarkdownPreview'
-import { NoteEditor, NoteEditorHeader } from '@/components/editor/NoteEditor'
-import { Terminal } from '@/components/editor/Terminal'
+import { EXECUTABLE_LANGUAGES } from "@/lib/constants";
+import { NoteBlocks } from "@/components/editor/NoteBlocks";
+import { MarkdownPreview } from "@/components/editor/MarkdownPreview";
+import { NoteEditor, NoteEditorHeader } from "@/components/editor/NoteEditor";
+import { Terminal } from "@/components/editor/Terminal";
 import type {
   AppPlatform,
   CursorInfo,
@@ -14,55 +14,55 @@ import type {
   RunResult,
   Settings,
   Workspace,
-} from '@/types'
+} from "@/types";
 
 interface EditorPaneProps {
-  platform: AppPlatform
-  note: Note | null
-  noteDirectory: string | null
-  settings: Settings
-  workspaces: Workspace[]
-  allTags: string[]
-  previewMode: PreviewMode
-  previewSplitRatio: number
-  findReplaceNonce: number
-  toggleTerminalNonce: number
+  platform: AppPlatform;
+  note: Note | null;
+  noteDirectory: string | null;
+  settings: Settings;
+  workspaces: Workspace[];
+  allTags: string[];
+  previewMode: PreviewMode;
+  previewSplitRatio: number;
+  findReplaceNonce: number;
+  toggleTerminalNonce: number;
   runner: {
-    result: RunResult | null
-    running: boolean
-    timeoutSeconds: number
+    result: RunResult | null;
+    running: boolean;
+    timeoutSeconds: number;
     lastRun: {
-      id: string
-      label: string
-      language: string
-      source: 'note' | 'block'
-    } | null
-    run: () => Promise<void>
+      id: string;
+      label: string;
+      language: string;
+      source: "note" | "block";
+    } | null;
+    run: () => Promise<void>;
     runSnippet: (input: {
-      code: string
-      language: string
-      label?: string
-      source?: 'note' | 'block'
-      cwd?: string | null
-    }) => Promise<void>
-    clear: () => void
-    setTimeoutSeconds: (value: number) => void
-  }
-  onNoteChange: (patch: Partial<Note>) => void
+      code: string;
+      language: string;
+      label?: string;
+      source?: "note" | "block";
+      cwd?: string | null;
+    }) => Promise<void>;
+    clear: () => void;
+    setTimeoutSeconds: (value: number) => void;
+  };
+  onNoteChange: (patch: Partial<Note>) => void;
   onInsertCallout: (input: {
-    tone: 'note' | 'tip' | 'warning'
-    title?: string
-  }) => void
-  onContentChange: (value: string) => void
-  onSave: () => Promise<void>
-  onDelete: () => Promise<void>
-  onTogglePin: () => Promise<void>
-  onCreateNote: () => Promise<void>
-  onCursorChange: (cursorInfo: CursorInfo) => void
-  onPreviewModeChange: (mode: PreviewMode) => void
-  onPreviewSplitRatioChange: (ratio: number) => void
-  onOpenFindReplace: () => void
-  onOpenHistory: () => void
+    tone: "note" | "tip" | "warning";
+    title?: string;
+  }) => void;
+  onContentChange: (value: string) => void;
+  onSave: () => Promise<void>;
+  onDelete: () => Promise<void>;
+  onTogglePin: () => Promise<void>;
+  onCreateNote: () => Promise<void>;
+  onCursorChange: (cursorInfo: CursorInfo) => void;
+  onPreviewModeChange: (mode: PreviewMode) => void;
+  onPreviewSplitRatioChange: (ratio: number) => void;
+  onOpenFindReplace: () => void;
+  onOpenHistory: () => void;
 }
 
 export function EditorPane({
@@ -90,106 +90,109 @@ export function EditorPane({
   onOpenFindReplace,
   onOpenHistory,
 }: EditorPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
+  const isMobile = platform === "android" || platform === "ios";
   const resizeStateRef = useRef<{
-    width: number
-    startX: number
-    startRatio: number
-  } | null>(null)
-  const [terminalOpen, setTerminalOpen] = useState(false)
-  const [terminalHeight, setTerminalHeight] = useState(280)
+    width: number;
+    startX: number;
+    startRatio: number;
+  } | null>(null);
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const [terminalHeight, setTerminalHeight] = useState(280);
   const [terminalSeed, setTerminalSeed] = useState<
     | {
-        id: number
-        kind: 'command'
-        value: string
+        id: number;
+        kind: "command";
+        value: string;
       }
     | {
-        id: number
-        kind: 'snippet'
-        code: string
-        language: string | null
+        id: number;
+        kind: "snippet";
+        code: string;
+        language: string | null;
       }
     | null
-  >(null)
+  >(null);
 
   useEffect(() => {
     const onMouseMove = (event: MouseEvent) => {
       if (!resizeStateRef.current) {
-        return
+        return;
       }
 
-      const delta = event.clientX - resizeStateRef.current.startX
+      const delta = event.clientX - resizeStateRef.current.startX;
       const ratio =
-        (resizeStateRef.current.width * resizeStateRef.current.startRatio + delta) /
-        resizeStateRef.current.width
-      onPreviewSplitRatioChange(ratio)
-    }
+        (resizeStateRef.current.width * resizeStateRef.current.startRatio +
+          delta) /
+        resizeStateRef.current.width;
+      onPreviewSplitRatioChange(ratio);
+    };
 
     const onMouseUp = () => {
-      resizeStateRef.current = null
-    }
+      resizeStateRef.current = null;
+    };
 
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', onMouseUp)
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
 
     return () => {
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', onMouseUp)
-    }
-  }, [onPreviewSplitRatioChange])
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [onPreviewSplitRatioChange]);
 
   useEffect(() => {
     if (!toggleTerminalNonce) {
-      return
+      return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      setTerminalOpen((current) => !current)
-    }, 0)
+      setTerminalOpen((current) => !current);
+    }, 0);
 
     return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [toggleTerminalNonce])
+      window.clearTimeout(timeoutId);
+    };
+  }, [toggleTerminalNonce]);
 
   useEffect(() => {
     if (!runner.running && !runner.result) {
-      return
+      return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      setTerminalOpen(true)
-    }, 0)
+      setTerminalOpen(true);
+    }, 0);
 
     return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [runner.result, runner.running])
+      window.clearTimeout(timeoutId);
+    };
+  }, [runner.result, runner.running]);
 
   if (!note) {
     return (
       <main className="motion-fade-in flex min-h-0 flex-1 items-center justify-center bg-base">
         <div className="motion-pop max-w-md rounded-lg border border-dashed border-border bg-[#111111] px-6 py-10 text-center">
           <p className="text-sm font-semibold text-text-primary">
-            {t('note.noActive')}
+            {t("note.noActive")}
           </p>
           <p className="mt-2 text-sm leading-6 text-text-secondary">
-            {t('note.noActiveDescription')}
+            {t("note.noActiveDescription")}
           </p>
           <button
             type="button"
             className="mt-5 rounded-md border border-border bg-[#161616] px-4 py-2 text-sm font-medium text-text-primary transition hover:border-focus hover:bg-hover"
             onClick={() => void onCreateNote()}
           >
-            {t('note.createFirstAction')}
+            {t("note.createFirstAction")}
           </button>
         </div>
       </main>
-    )
+    );
   }
 
-  const canRunSnippet = EXECUTABLE_LANGUAGES.has(note.language.toLowerCase())
+  const canRunSnippet =
+    !isMobile && EXECUTABLE_LANGUAGES.has(note.language.toLowerCase());
 
   return (
     <main className="motion-fade-in flex min-h-0 flex-1 flex-col bg-base">
@@ -207,11 +210,14 @@ export function EditorPane({
       />
 
       <div className="relative flex min-h-0 flex-1">
-        {previewMode !== 'preview' ? (
+        {previewMode !== "preview" ? (
           <div
             className="min-w-0"
             style={{
-              width: previewMode === 'split' ? `${previewSplitRatio * 100}%` : '100%',
+              width:
+                previewMode === "split"
+                  ? `${previewSplitRatio * 100}%`
+                  : "100%",
             }}
           >
             <NoteEditor
@@ -223,51 +229,61 @@ export function EditorPane({
               onChange={onContentChange}
               onSave={onSave}
               onRun={async () => {
-                setTerminalOpen(true)
-                await runner.run()
+                if (isMobile) {
+                  return;
+                }
+                setTerminalOpen(true);
+                await runner.run();
               }}
               onCursorChange={onCursorChange}
             />
           </div>
         ) : null}
 
-        {previewMode === 'split' ? (
+        {previewMode === "split" ? (
           <div
             className="w-1 cursor-col-resize bg-border hover:bg-[var(--accent-subtle)]"
             onMouseDown={(event) => {
-              const container = event.currentTarget.parentElement
+              const container = event.currentTarget.parentElement;
               if (!container) {
-                return
+                return;
               }
 
               resizeStateRef.current = {
                 width: container.getBoundingClientRect().width,
                 startX: event.clientX,
                 startRatio: previewSplitRatio,
-              }
+              };
             }}
           />
         ) : null}
 
-        {previewMode !== 'editor' ? (
+        {previewMode !== "editor" ? (
           <div
             className="min-w-0 border-l border-border"
             style={{
-              width: previewMode === 'split' ? `${(1 - previewSplitRatio) * 100}%` : '100%',
+              width:
+                previewMode === "split"
+                  ? `${(1 - previewSplitRatio) * 100}%`
+                  : "100%",
             }}
           >
             <MarkdownPreview
               content={note.content}
               accentColor={note.color}
-              onRunCodeInTerminal={({ code, language }) => {
-                setTerminalOpen(true)
-                setTerminalSeed({
-                  id: Date.now(),
-                  kind: 'snippet',
-                  code,
-                  language,
-                })
-              }}
+              onRunCodeInTerminal={
+                isMobile
+                  ? undefined
+                  : ({ code, language }) => {
+                      setTerminalOpen(true);
+                      setTerminalSeed({
+                        id: Date.now(),
+                        kind: "snippet",
+                        code,
+                        language,
+                      });
+                    }
+              }
             />
           </div>
         ) : null}
@@ -279,17 +295,19 @@ export function EditorPane({
         onInsertCallout={onInsertCallout}
       />
 
-      <Terminal
-        platform={platform}
-        noteDirectory={noteDirectory}
-        open={terminalOpen}
-        height={terminalHeight}
-        canRunSnippet={canRunSnippet}
-        seedCommand={terminalSeed}
-        runner={runner}
-        onOpenChange={setTerminalOpen}
-        onHeightChange={setTerminalHeight}
-      />
+      {!isMobile ? (
+        <Terminal
+          platform={platform}
+          noteDirectory={noteDirectory}
+          open={terminalOpen}
+          height={terminalHeight}
+          canRunSnippet={canRunSnippet}
+          seedCommand={terminalSeed}
+          runner={runner}
+          onOpenChange={setTerminalOpen}
+          onHeightChange={setTerminalHeight}
+        />
+      ) : null}
     </main>
-  )
+  );
 }

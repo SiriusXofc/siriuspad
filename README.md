@@ -5,7 +5,7 @@
 
 # SiriusPad
 
-Bloco de notas desktop para desenvolvedores. Local, rápido, escuro e feito para anotações técnicas do dia a dia.
+Bloco de notas local para desenvolvedores. Rápido, escuro e feito para anotações técnicas do dia a dia, agora com beta inicial para Android.
 
 Projeto público mantido por **SiriusX**.
 
@@ -13,7 +13,7 @@ Projeto público mantido por **SiriusX**.
 
 ## Visão geral
 
-O **SiriusPad** é um app desktop open source que nasceu mais por diversão, curiosidade e vontade de construir algo útil, mesmo sendo algo simples.
+O **SiriusPad** é um app open source que nasceu mais por diversão, curiosidade e vontade de construir algo útil, mesmo sendo algo simples.
 
 Ele não tenta substituir tudo, não quer reinventar a forma de fazer anotações e nem competir com editores grandes, Notion ou coisas do tipo. A proposta é bem mais humilde: ser um cantinho prático para guardar comandos, snippets, bugs, ideias, checklists e qualquer anotação técnica que aparece no meio do uso.
 
@@ -51,6 +51,7 @@ Formatos suportados atualmente:
 
 - Linux: `.deb`
 - Windows: `.exe`
+- Android beta: `.apk`
 
 Os assets técnicos de updater, como `latest.json`, continuam existindo apenas para o fluxo de atualização automática.
 
@@ -82,18 +83,18 @@ Referências oficiais do Tauri:
 
 ## Atalhos principais
 
-| Atalho | Ação |
-|--------|------|
-| `Ctrl+N` | Nova nota |
-| `Ctrl+K` | Paleta de comandos |
-| `Ctrl+F` | Focar busca |
-| `Ctrl+S` | Salvar |
-| `Ctrl+Enter` | Executar snippet |
-| `Ctrl+\`` | Alternar terminal |
-| `Ctrl++` | Aumentar zoom da interface |
-| `Ctrl+-` | Diminuir zoom da interface |
-| `Ctrl+0` | Restaurar zoom da interface |
-| `Ctrl+,` | Abrir configurações |
+| Atalho       | Ação                        |
+| ------------ | --------------------------- |
+| `Ctrl+N`     | Nova nota                   |
+| `Ctrl+K`     | Paleta de comandos          |
+| `Ctrl+F`     | Focar busca                 |
+| `Ctrl+S`     | Salvar                      |
+| `Ctrl+Enter` | Executar snippet            |
+| `Ctrl+\``    | Alternar terminal           |
+| `Ctrl++`     | Aumentar zoom da interface  |
+| `Ctrl+-`     | Diminuir zoom da interface  |
+| `Ctrl+0`     | Restaurar zoom da interface |
+| `Ctrl+,`     | Abrir configurações         |
 
 ## Projeto público
 

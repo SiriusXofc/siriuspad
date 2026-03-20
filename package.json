@@ -1,8 +1,8 @@
 {
   "name": "siriuspad",
   "private": true,
-  "version": "1.0.14",
-  "description": "Bloco de notas desktop local para desenvolvedores, com Markdown, terminal embutido e organização por workspaces.",
+  "version": "1.0.15",
+  "description": "Bloco de notas local para desenvolvedores, com Markdown, workspaces e beta mobile para Android.",
   "author": "SiriusX",
   "license": "MIT",
   "repository": {
@@ -20,7 +20,9 @@
     "markdown",
     "notes",
     "developer",
-    "desktop"
+    "desktop",
+    "android",
+    "mobile"
   ],
   "type": "module",
   "scripts": {
@@ -30,7 +32,10 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "tauri:android:init": "tauri android init",
+    "tauri:android:dev": "tauri android dev",
+    "tauri:android:build": "tauri android build --debug --apk -t aarch64"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.1",

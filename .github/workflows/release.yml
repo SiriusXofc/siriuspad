@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
 permissions:
@@ -18,9 +18,9 @@ jobs:
       matrix:
         include:
           - platform: ubuntu-22.04
-            args: '--bundles deb'
+            args: "--bundles deb"
           - platform: windows-latest
-            args: '--bundles nsis'
+            args: "--bundles nsis"
 
     runs-on: ${{ matrix.platform }}
 
@@ -93,19 +93,20 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'SiriusPad ${{ github.ref_name }}'
+          releaseName: "SiriusPad ${{ github.ref_name }}"
           releaseBody: |
             Nova versão pública do SiriusPad.
 
             Destaques desta versão:
-            - animações sutis em painéis, abas, cards, botões e modais
-            - transições mais fluidas no layout sem perder o visual minimalista
-            - modal de atualização reorganizado e mais legível
-            - link do updater corrigido para o repositório público atual
+            - beta inicial para Android com layout adaptado ao toque
+            - header mobile próprio para busca, notas, ajustes e configurações
+            - sidebar e painel de ajustes funcionam como overlays no mobile
+            - terminal continua desktop-only para não quebrar a experiência Android
 
             Distribuição oficial:
             - `.deb` para Linux
             - `.exe` para Windows
+            - `.apk` beta para Android
             - `latest.json` para o fluxo de auto-update
 
             Consulte o `CHANGELOG.md` para os detalhes completos da versão.
@@ -122,7 +123,99 @@ jobs:
         run: |
           gh release view "${{ github.ref_name }}" --json assets --jq '.assets[].name' | while IFS= read -r asset; do
             case "$asset" in
-              *.deb|*.exe|latest.json) ;;
+              *.deb|*.exe|*.apk|latest.json) ;;
               *) gh release delete-asset "${{ github.ref_name }}" "$asset" --yes || true ;;
             esac
           done
+
+  android:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install Rust with Android target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;27.2.12479018"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
+
+      - name: Install npm deps
+        run: npm ci
+
+      - name: Verify version sync
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs')
+          const packageVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version
+          const tauriVersion = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8')).version
+          const cargoToml = fs.readFileSync('src-tauri/Cargo.toml', 'utf8')
+          const cargoVersion = cargoToml.match(/^version = "(.+)"$/m)?.[1]
+
+          if (!cargoVersion) {
+            throw new Error('Unable to read Cargo.toml version')
+          }
+
+          const versions = [packageVersion, tauriVersion, cargoVersion]
+          if (new Set(versions).size !== 1) {
+            throw new Error(`Version mismatch: package=${packageVersion}, tauri=${tauriVersion}, cargo=${cargoVersion}`)
+          }
+
+          console.log(`Version sync OK: ${packageVersion}`)
+          NODE
+
+      - name: Initialize Android target
+        shell: bash
+        run: npx tauri android init --ci --skip-targets-install
+
+      - name: Build Android beta APK
+        shell: bash
+        run: npx tauri android build --debug --apk -t aarch64
+
+      - name: Upload Android build artifact
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/v'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: SiriusPad-android
+          path: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+
+      - name: Ensure GitHub release exists
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release view "${{ github.ref_name }}" >/dev/null 2>&1 || \
+          gh release create "${{ github.ref_name }}" \
+            --title "SiriusPad ${{ github.ref_name }}" \
+            --notes "APK beta do SiriusPad para Android."
+
+      - name: Upload Android APK to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: gh release upload "${{ github.ref_name }}" src-tauri/gen/android/app/build/outputs/apk/**/*.apk --clobber
