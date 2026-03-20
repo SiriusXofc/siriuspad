@@ -3,4 +3,5 @@ pub mod history;
 pub mod platform;
 pub mod runner;
 pub mod search;
+pub mod terminal;
 pub mod updater;

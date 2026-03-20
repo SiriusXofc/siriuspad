@@ -137,7 +137,5 @@ pub async fn install_update(
         .install(cached.bytes)
         .map_err(|error| error.to_string())?;
 
-    app.request_restart();
-
-    Ok(())
+    app.restart();
 }

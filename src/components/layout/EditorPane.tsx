@@ -91,7 +91,7 @@ export function EditorPane({
     startRatio: number
   } | null>(null)
   const [terminalOpen, setTerminalOpen] = useState(false)
-  const [terminalHeight, setTerminalHeight] = useState(180)
+  const [terminalHeight, setTerminalHeight] = useState(280)
   const [terminalSeed, setTerminalSeed] = useState<
     | {
         id: number
