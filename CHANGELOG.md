@@ -7,6 +7,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.18] - 2026-03-20
+
+### Fixed
+
+- workflow Android agora localiza o `.apk` com `find` antes de publicar a release
+- upload do APK deixou de depender de `**/*.apk` sem `globstar`
+- build Android foi validado localmente até gerar `app-universal-debug.apk`
+
 ## [1.0.17] - 2026-03-20
 
 ### Fixed

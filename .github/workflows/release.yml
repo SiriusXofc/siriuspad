@@ -194,12 +194,24 @@ jobs:
         shell: bash
         run: npx tauri android build --debug --apk -t aarch64
 
+      - name: Locate Android APK
+        id: android_apk
+        shell: bash
+        run: |
+          apk_path="$(find src-tauri/gen/android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
+          if [ -z "$apk_path" ]; then
+            echo "Nenhum APK foi encontrado em src-tauri/gen/android/app/build/outputs/apk" >&2
+            exit 1
+          fi
+          echo "apk_path=$apk_path" >> "$GITHUB_OUTPUT"
+          echo "APK localizado em: $apk_path"
+
       - name: Upload Android build artifact
         if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/v'))
         uses: actions/upload-artifact@v4
         with:
           name: SiriusPad-android
-          path: src-tauri/gen/android/app/build/outputs/apk/**/*.apk
+          path: ${{ steps.android_apk.outputs.apk_path }}
           if-no-files-found: error
 
       - name: Ensure GitHub release exists
@@ -218,4 +230,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
-        run: gh release upload "${{ github.ref_name }}" src-tauri/gen/android/app/build/outputs/apk/**/*.apk --clobber
+        run: gh release upload "${{ github.ref_name }}" "${{ steps.android_apk.outputs.apk_path }}" --clobber
