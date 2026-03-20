@@ -1,52 +1,78 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "default",
-  "description": "Main window capability for SiriusPad",
-  "windows": [
-    "main"
-  ],
-  "permissions": [
-    "core:default",
-    "core:app:default",
-    "core:event:default",
-    "core:window:default",
-    "core:window:allow-close",
-    "core:window:allow-destroy",
-    "core:window:allow-minimize",
-    "core:window:allow-maximize",
-    "core:window:allow-unmaximize",
-    "core:window:allow-toggle-maximize",
-    "core:window:allow-set-fullscreen",
-    "core:window:allow-start-dragging",
-    "core:window:allow-start-resize-dragging",
-    "core:webview:allow-set-webview-zoom",
-    "core:path:default",
-    "dialog:default",
-    "store:default",
-    "fs:default",
-    "shell:default",
-    "shell:allow-open",
+  "capabilities": [
     {
-      "identifier": "shell:allow-spawn",
-      "allow": [
+      "identifier": "desktop-default",
+      "description": "Desktop capability for the SiriusPad main window",
+      "local": true,
+      "windows": ["main"],
+      "platforms": ["linux", "windows", "macOS"],
+      "permissions": [
+        "core:default",
+        "core:app:default",
+        "core:event:default",
+        "core:window:default",
+        "core:window:allow-close",
+        "core:window:allow-destroy",
+        "core:window:allow-minimize",
+        "core:window:allow-maximize",
+        "core:window:allow-unmaximize",
+        "core:window:allow-toggle-maximize",
+        "core:window:allow-set-fullscreen",
+        "core:window:allow-start-dragging",
+        "core:window:allow-start-resize-dragging",
+        "core:webview:allow-set-webview-zoom",
+        "core:path:default",
+        "dialog:default",
+        "store:default",
+        "fs:default",
+        "shell:default",
+        "shell:allow-open",
         {
-          "name": "terminal-bash",
-          "cmd": "bash",
-          "args": true
+          "identifier": "shell:allow-spawn",
+          "allow": [
+            {
+              "name": "terminal-bash",
+              "cmd": "bash",
+              "args": true
+            },
+            {
+              "name": "terminal-cmd",
+              "cmd": "cmd.exe",
+              "args": true
+            }
+          ]
         },
-        {
-          "name": "terminal-cmd",
-          "cmd": "cmd.exe",
-          "args": true
-        }
+        "shell:allow-kill",
+        "updater:default",
+        "log:default",
+        "global-shortcut:allow-register",
+        "global-shortcut:allow-unregister",
+        "global-shortcut:allow-unregister-all",
+        "global-shortcut:allow-is-registered"
       ]
     },
-    "shell:allow-kill",
-    "updater:default",
-    "log:default",
-    "global-shortcut:allow-register",
-    "global-shortcut:allow-unregister",
-    "global-shortcut:allow-unregister-all",
-    "global-shortcut:allow-is-registered"
+    {
+      "identifier": "mobile-default",
+      "description": "Mobile capability for the SiriusPad main window",
+      "local": true,
+      "windows": ["main"],
+      "platforms": ["android", "iOS"],
+      "permissions": [
+        "core:default",
+        "core:app:default",
+        "core:event:default",
+        "core:window:default",
+        "core:webview:allow-set-webview-zoom",
+        "core:path:default",
+        "dialog:default",
+        "store:default",
+        "fs:default",
+        "shell:default",
+        "shell:allow-open",
+        "updater:default",
+        "log:default"
+      ]
+    }
   ]
 }

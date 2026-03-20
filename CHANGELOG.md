@@ -7,6 +7,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.17] - 2026-03-20
+
+### Fixed
+
+- Android deixou de herdar permissões `global-shortcut` do desktop durante o build
+- capabilities do Tauri agora são separadas por plataforma, com mobile mais enxuto e compatível
+- pipeline Android pode seguir da fase de permissões para a compilação real do APK
+
 ## [1.0.16] - 2026-03-20
 
 ### Fixed
