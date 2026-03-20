@@ -1,3 +1,5 @@
+#[cfg(mobile)]
+use std::sync::OnceLock;
 use std::{
     ffi::OsStr,
     fs,
@@ -14,6 +16,15 @@ use crate::models::{ChecklistItem, Note, NoteHistoryEntry, NoteMetadata};
 const APP_DIR_NAME: &str = "siriuspad";
 const DEFAULT_WORKSPACE: &str = "general";
 const LEGACY_DEFAULT_WORKSPACE: &str = "geral";
+#[cfg(mobile)]
+static APP_DATA_DIR_OVERRIDE: OnceLock<PathBuf> = OnceLock::new();
+
+#[cfg(mobile)]
+pub fn set_app_data_dir(path: PathBuf) -> Result<(), String> {
+    APP_DATA_DIR_OVERRIDE
+        .set(path)
+        .map_err(|_| "App data directory already initialized.".to_string())
+}
 
 fn is_default_workspace_alias(name: &str) -> bool {
     matches!(name, DEFAULT_WORKSPACE | LEGACY_DEFAULT_WORKSPACE)
@@ -95,6 +106,11 @@ fn sanitize_workspace_name(name: &str) -> Result<String, String> {
 }
 
 fn app_data_dir() -> Result<PathBuf, String> {
+    #[cfg(mobile)]
+    if let Some(path) = APP_DATA_DIR_OVERRIDE.get() {
+        return Ok(path.clone());
+    }
+
     let base = dirs::data_dir().ok_or_else(|| "Unable to resolve data directory.".to_string())?;
     Ok(base.join(APP_DIR_NAME))
 }

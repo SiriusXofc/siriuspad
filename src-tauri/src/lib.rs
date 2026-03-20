@@ -3,6 +3,8 @@ mod models;
 mod storage;
 
 use commands::{fs, history, platform, runner, search, terminal, updater};
+#[cfg(mobile)]
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,7 +13,6 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(updater::UpdateCache::default())
         .manage(terminal::TerminalState::default())
         .plugin(
@@ -21,10 +22,25 @@ pub fn run() {
         );
 
     #[cfg(desktop)]
-    let builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
+    let builder = builder
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build());
 
     builder
-        .setup(|_| {
+        .setup(|app| {
+            #[cfg(not(mobile))]
+            let _ = app;
+
+            #[cfg(mobile)]
+            storage::set_app_data_dir({
+                let path_api = app.path();
+                path_api
+                    .app_data_dir()
+                    .or_else(|_| path_api.app_local_data_dir())
+                    .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?
+            })
+            .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?;
+
             storage::ensure_directories()
                 .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?;
             Ok(())

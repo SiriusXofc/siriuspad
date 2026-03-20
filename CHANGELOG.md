@@ -7,6 +7,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.20] - 2026-03-20
+
+### Fixed
+
+- Android agora inicia usando diretório de dados próprio do app, evitando o fechamento imediato em dispositivos onde `dirs::data_dir()` não resolvia corretamente
+- updater passou a ficar realmente desktop-only no backend mobile, sem depender do plugin de atualização no Android
+- interface mobile nasce já no layout correto do Android/iOS, sem renderização desktop transitória logo na abertura
+- workflow Android volta a publicar o asset com nome limpo: `SiriusPad_<versão>_android.apk`
+
+### Changed
+
+- branding do Android ganhou ícones dedicados do SiriusPad gerados no pipeline antes do build do APK
+
 ## [1.0.19] - 2026-03-20
 
 ### Fixed

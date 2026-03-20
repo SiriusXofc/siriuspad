@@ -11,6 +11,32 @@ import type {
   UpdateInfo,
 } from '@/types'
 
+function detectInitialPlatform(): AppPlatform {
+  if (typeof navigator === 'undefined') {
+    return 'linux'
+  }
+
+  const agent = navigator.userAgent.toLowerCase()
+
+  if (agent.includes('android')) {
+    return 'android'
+  }
+
+  if (agent.includes('iphone') || agent.includes('ipad') || agent.includes('ipod')) {
+    return 'ios'
+  }
+
+  if (agent.includes('windows')) {
+    return 'windows'
+  }
+
+  if (agent.includes('mac os') || agent.includes('macintosh')) {
+    return 'macos'
+  }
+
+  return 'linux'
+}
+
 interface UiState {
   commandPaletteOpen: boolean
   settingsOpen: boolean
@@ -65,7 +91,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   focusSearchNonce: 0,
   toasts: [],
   commandHistory: [],
-  platform: 'linux',
+  platform: detectInitialPlatform(),
   isFullscreen: false,
   isZenMode: false,
   isFocusMode: false,

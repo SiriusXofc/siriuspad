@@ -1,14 +1,22 @@
+use std::sync::Mutex;
+
+#[cfg(desktop)]
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
-    Arc, Mutex,
+    Arc,
 };
 
-use tauri::{AppHandle, Emitter, State};
+#[cfg(desktop)]
+use tauri::Emitter;
+use tauri::{AppHandle, State};
+#[cfg(desktop)]
 use tauri_plugin_updater::UpdaterExt;
 
+#[cfg_attr(mobile, allow(dead_code))]
 #[derive(Default)]
 pub struct UpdateCache(pub Mutex<Option<CachedUpdate>>);
 
+#[cfg_attr(mobile, allow(dead_code))]
 pub struct CachedUpdate {
     pub version: String,
     pub bytes: Vec<u8>,
@@ -21,6 +29,7 @@ pub struct UpdateInfo {
     pub date: Option<String>,
 }
 
+#[cfg_attr(mobile, allow(dead_code))]
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct UpdateDownloadProgress {
     pub downloaded: usize,
@@ -29,6 +38,7 @@ pub struct UpdateDownloadProgress {
 }
 
 #[tauri::command]
+#[cfg(desktop)]
 pub async fn check_for_update(app: AppHandle) -> Result<Option<UpdateInfo>, String> {
     let updater = app.updater().map_err(|error| error.to_string())?;
 
@@ -47,6 +57,13 @@ pub async fn check_for_update(app: AppHandle) -> Result<Option<UpdateInfo>, Stri
 }
 
 #[tauri::command]
+#[cfg(mobile)]
+pub async fn check_for_update(_app: AppHandle) -> Result<Option<UpdateInfo>, String> {
+    Ok(None)
+}
+
+#[tauri::command]
+#[cfg(desktop)]
 pub async fn download_update(
     app: AppHandle,
     cache: State<'_, UpdateCache>,
@@ -112,6 +129,16 @@ pub async fn download_update(
 }
 
 #[tauri::command]
+#[cfg(mobile)]
+pub async fn download_update(
+    _app: AppHandle,
+    _cache: State<'_, UpdateCache>,
+) -> Result<UpdateInfo, String> {
+    Err("O auto-update está disponível apenas no desktop.".to_string())
+}
+
+#[tauri::command]
+#[cfg(desktop)]
 pub async fn install_update(app: AppHandle, cache: State<'_, UpdateCache>) -> Result<(), String> {
     let cached = {
         let mut guard = cache.0.lock().map_err(|error| error.to_string())?;
@@ -135,4 +162,10 @@ pub async fn install_update(app: AppHandle, cache: State<'_, UpdateCache>) -> Re
         .map_err(|error| error.to_string())?;
 
     app.restart();
+}
+
+#[tauri::command]
+#[cfg(mobile)]
+pub async fn install_update(_app: AppHandle, _cache: State<'_, UpdateCache>) -> Result<(), String> {
+    Err("O auto-update está disponível apenas no desktop.".to_string())
 }
