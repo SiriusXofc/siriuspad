@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { NOTE_LANGUAGES } from '@/lib/constants'
+import { getWorkspaceDisplayName } from '@/lib/workspaceLabel'
 import type { Note, PreviewMode, Workspace } from '@/types'
 
 interface FrontmatterBarProps {
@@ -63,7 +64,7 @@ export function FrontmatterBar({
         >
           {workspaces.map((workspace) => (
             <option key={workspace.id} value={workspace.id}>
-              {workspace.name}
+              {getWorkspaceDisplayName(workspace, t)}
             </option>
           ))}
         </select>

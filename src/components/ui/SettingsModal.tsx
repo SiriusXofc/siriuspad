@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { FONT_OPTIONS, LANGUAGE_OPTIONS } from '@/lib/constants'
 import { THEMES } from '@/lib/themes'
+import { getWorkspaceDisplayName } from '@/lib/workspaceLabel'
 import { Modal } from '@/components/ui/Modal'
 import type { AppLanguage, Settings, Workspace } from '@/types'
 
@@ -295,12 +296,12 @@ export function SettingsModal({
               void onUpdate({ defaultWorkspace: event.target.value })
             }
           >
-            {workspaces.map((workspace) => (
-              <option key={workspace.id} value={workspace.id}>
-                {workspace.name}
-              </option>
-            ))}
-          </select>
+              {workspaces.map((workspace) => (
+                <option key={workspace.id} value={workspace.id}>
+                  {getWorkspaceDisplayName(workspace, t)}
+                </option>
+              ))}
+            </select>
         </Field>
         <div className="flex justify-end">
           <button

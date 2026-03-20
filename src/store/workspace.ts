@@ -8,6 +8,10 @@ import {
   WORKSPACE_ICONS,
 } from '@/lib/constants'
 import { getAppStore } from '@/lib/storage'
+import {
+  LEGACY_DEFAULT_WORKSPACE_ID,
+  normalizeWorkspaceId,
+} from '@/lib/workspaceLabel'
 import { useSettingsStore } from '@/store/settings'
 import type { Workspace } from '@/types'
 
@@ -34,9 +38,11 @@ function createWorkspaceFromName(
   index: number,
   persisted?: Workspace,
 ): Workspace {
+  const normalizedId = normalizeWorkspaceId(name)
+
   return {
-    id: name,
-    name,
+    id: normalizedId,
+    name: normalizedId,
     color: persisted?.color ?? WORKSPACE_COLORS[index % WORKSPACE_COLORS.length],
     icon: persisted?.icon ?? WORKSPACE_ICONS[index % WORKSPACE_ICONS.length],
     createdAt: persisted?.createdAt ?? new Date().toISOString(),
@@ -45,9 +51,23 @@ function createWorkspaceFromName(
 
 async function loadWorkspaceMeta() {
   const store = await getAppStore()
-  return (await store.get<WorkspaceMetaMap>('workspaceMeta')) ?? {
+  const workspaceMeta = (await store.get<WorkspaceMetaMap>('workspaceMeta')) ?? {
     [DEFAULT_WORKSPACE.id]: DEFAULT_WORKSPACE,
   }
+
+  if (
+    workspaceMeta[LEGACY_DEFAULT_WORKSPACE_ID] &&
+    !workspaceMeta[DEFAULT_WORKSPACE_ID]
+  ) {
+    workspaceMeta[DEFAULT_WORKSPACE_ID] = {
+      ...workspaceMeta[LEGACY_DEFAULT_WORKSPACE_ID],
+      id: DEFAULT_WORKSPACE_ID,
+      name: DEFAULT_WORKSPACE_ID,
+    }
+    delete workspaceMeta[LEGACY_DEFAULT_WORKSPACE_ID]
+  }
+
+  return workspaceMeta
 }
 
 async function persistWorkspaceMeta(workspaces: Workspace[]) {
@@ -76,9 +96,15 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   async refresh() {
     const names = await invoke<string[]>('list_workspaces')
     const workspaceMeta = await loadWorkspaceMeta()
-    const uniqueNames = Array.from(new Set([DEFAULT_WORKSPACE_ID, ...names]))
+    const uniqueNames = Array.from(
+      new Set([DEFAULT_WORKSPACE_ID, ...names.map(normalizeWorkspaceId)]),
+    )
     const workspaces = uniqueNames.map((name, index) =>
-      createWorkspaceFromName(name, index, workspaceMeta[name]),
+      createWorkspaceFromName(
+        name,
+        index,
+        workspaceMeta[name] ?? workspaceMeta[normalizeWorkspaceId(name)],
+      ),
     )
 
     set((state) => {

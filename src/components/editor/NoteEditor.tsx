@@ -14,6 +14,7 @@ import {
   NOTE_COLOR_SWATCHES,
   NOTE_LANGUAGES,
 } from '@/lib/constants'
+import { getWorkspaceDisplayName } from '@/lib/workspaceLabel'
 import {
   createEditorCompartments,
   createEditorExtensions,
@@ -252,7 +253,7 @@ export function NoteEditorHeader({
             >
               {workspaces.map((workspace) => (
                 <option key={workspace.id} value={workspace.id}>
-                  {workspace.name}
+                  {getWorkspaceDisplayName(workspace, t)}
                 </option>
               ))}
             </select>

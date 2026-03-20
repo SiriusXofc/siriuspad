@@ -37,6 +37,10 @@ import {
   markOnboardingComplete,
   resetOnboarding,
 } from '@/lib/onboarding'
+import {
+  getWorkspaceDisplayName,
+  getWorkspaceNameFromId,
+} from '@/lib/workspaceLabel'
 import { useNotesStore } from '@/store/notes'
 import { useSettingsStore } from '@/store/settings'
 import { useUiStore } from '@/store/ui'
@@ -220,6 +224,79 @@ export default function App() {
 
   const openNote = async (noteId: string) => {
     await notes.openInTab(noteId)
+  }
+
+  const readNoteForAction = async (noteId: string) => {
+    const draft = useNotesStore.getState().noteDrafts[noteId]
+    if (draft) {
+      return draft
+    }
+
+    return invoke<Note>('read_note', { id: noteId })
+  }
+
+  const duplicateNoteById = async (noteId: string) => {
+    const source = await readNoteForAction(noteId)
+    await notes.createNote({
+      title: `${source.title} ${t('note.copySuffix')}`,
+      workspace: source.workspace,
+      language: source.language,
+      tags: source.tags,
+      pinned: false,
+      priority: source.priority,
+      color: source.color,
+      checklist: source.checklist,
+      content: source.content,
+    })
+  }
+
+  const toggleNotePinById = async (noteId: string) => {
+    const source = await readNoteForAction(noteId)
+    const nextNote = {
+      ...source,
+      pinned: !source.pinned,
+      updated_at: new Date().toISOString(),
+    }
+
+    await invoke('write_note', {
+      note: nextNote,
+    })
+
+    if (useNotesStore.getState().noteDrafts[noteId]) {
+      useNotesStore.getState().hydrateNote(nextNote, 'saved')
+      return
+    }
+
+    await notes.loadNotes()
+  }
+
+  const deleteNoteById = async (noteId: string) => {
+    const state = useNotesStore.getState()
+    const draft = state.noteDrafts[noteId]
+    const metadata = state.notes.find((item) => item.id === noteId)
+    const title = draft?.title ?? metadata?.title ?? t('common.untitled')
+    const isDirty = state.openTabs.find((tab) => tab.id === noteId)?.isDirty ?? false
+
+    uiState.showConfirm({
+      title: t('note.deleteConfirm', { title }),
+      description: isDirty ? t('note.deleteDirtyDescription') : undefined,
+      danger: true,
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      onConfirm: async () => {
+        if (isDirty) {
+          await useNotesStore.getState().saveNote(noteId)
+        }
+
+        await invoke('trash_note', { id: noteId })
+        await notes.loadNotes()
+        useUiStore.getState().closeConfirm()
+        useUiStore.getState().pushToast({
+          kind: 'info',
+          title: t('toasts.noteTrashed'),
+        })
+      },
+    })
   }
 
   const togglePin = async () => {
@@ -429,10 +506,12 @@ export default function App() {
   }
 
   const deleteWorkspace = async (workspaceId: string) => {
+    const workspace = workspaceState.workspaces.find((item) => item.id === workspaceId)
+
     uiState.showConfirm({
       title: t('workspace.deleteConfirm', {
-        name: workspaceId,
-        fallback: DEFAULT_WORKSPACE_ID,
+        name: workspace ? getWorkspaceDisplayName(workspace, t) : workspaceId,
+        fallback: getWorkspaceNameFromId(DEFAULT_WORKSPACE_ID, t),
       }),
       danger: true,
       confirmLabel: t('common.delete'),
@@ -646,9 +725,9 @@ export default function App() {
     },
     ...workspaceState.workspaces.map((workspace) => ({
       id: `workspace:${workspace.id}`,
-      label: t('workspace.goTo', { name: workspace.name }),
+      label: t('workspace.goTo', { name: getWorkspaceDisplayName(workspace, t) }),
       group: t('commands.groups.navigation'),
-      keywords: [workspace.name],
+      keywords: [workspace.name, getWorkspaceDisplayName(workspace, t)],
       perform: async () => {
         workspaceState.setActiveWorkspace(workspace.id)
       },
@@ -1011,6 +1090,9 @@ export default function App() {
             onCycleWorkspaceColor={cycleWorkspaceColor}
             onCycleWorkspaceIcon={cycleWorkspaceIcon}
             onOpenNote={openNote}
+            onDuplicateNote={duplicateNoteById}
+            onTogglePinNote={toggleNotePinById}
+            onDeleteNote={deleteNoteById}
             onCreateNote={() => createNote()}
             onTagClick={(tag) => {
               notes.setActiveTag(tag)

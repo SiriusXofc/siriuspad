@@ -18,11 +18,9 @@ jobs:
       matrix:
         include:
           - platform: ubuntu-22.04
-            args: ''
+            args: '--bundles deb'
           - platform: windows-latest
-            args: ''
-          - platform: macos-latest
-            args: '--target universal-apple-darwin'
+            args: '--bundles nsis'
 
     runs-on: ${{ matrix.platform }}
 
@@ -43,12 +41,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: Install macOS Rust targets
-        if: matrix.platform == 'macos-latest'
-        run: |
-          rustup target add aarch64-apple-darwin
-          rustup target add x86_64-apple-darwin
 
       - name: Install npm deps
         run: npm ci
@@ -89,12 +81,7 @@ jobs:
           name: SiriusPad-${{ matrix.platform }}
           path: |
             src-tauri/target/release/bundle/**/*.deb
-            src-tauri/target/release/bundle/**/*.AppImage
-            src-tauri/target/release/bundle/**/*.rpm
-            src-tauri/target/release/bundle/**/*.msi
             src-tauri/target/release/bundle/**/*setup.exe
-            src-tauri/target/release/bundle/**/*.dmg
-            src-tauri/target/release/bundle/**/*.sig
           if-no-files-found: ignore
 
       - name: Build and publish Tauri release
@@ -110,6 +97,17 @@ jobs:
           releaseBody: 'Automated SiriusPad release. See CHANGELOG.md for release notes.'
           releaseDraft: false
           prerelease: false
-          uploadUpdaterJson: true
-          uploadUpdaterSignatures: true
+          includeUpdaterJson: true
           args: ${{ matrix.args }}
+
+      - name: Prune auxiliary release assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "${{ github.ref_name }}" --json assets --jq '.assets[].name' | while IFS= read -r asset; do
+            case "$asset" in
+              *.deb|*.exe|latest.json) ;;
+              *) gh release delete-asset "${{ github.ref_name }}" "$asset" --yes || true ;;
+            esac
+          done

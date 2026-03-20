@@ -15,6 +15,7 @@
     "rename": "Renomear",
     "delete": "Excluir",
     "create": "Criar",
+    "copy": "Copiar",
     "allNotes": "Todas as notas",
     "untitled": "Sem título",
     "none": "—",
@@ -49,6 +50,7 @@
     "colorLabel": "Cor da nota",
     "priorityLabel": "Prioridade",
     "deleteConfirm": "Mover \"{{title}}\" para a lixeira?",
+    "deleteDirtyDescription": "Essa nota tem alterações não salvas. Elas serão salvas antes de mover para a lixeira.",
     "closeDirtyTitle": "Esta nota tem alterações não salvas.",
     "closeDirtyDescription": "Você quer salvar antes de fechar?",
     "closeWindowTitle": "Fechar o SiriusPad com alterações não salvas?",
@@ -60,6 +62,7 @@
     "open": "Abrir nota: {{title}}"
   },
   "workspace": {
+    "default": "Geral",
     "name": "Nome do espaço",
     "renamePrompt": "Renomear espaço",
     "deleteConfirm": "Excluir o espaço \"{{name}}\" e mover as notas para \"{{fallback}}\"?",
@@ -249,7 +252,19 @@
     "output": "Output",
     "clear": "Limpar",
     "run": "Rodar",
-    "toggle": "Toggle terminal (Ctrl+`)"
+    "toggle": "Toggle terminal (Ctrl+`)",
+    "timeout": "timeout",
+    "ready": "Shell pronto. Digite um comando e pressione Enter.",
+    "cwdChanged": "Diretório atual: {{cwd}}",
+    "processRunning": "Já existe um processo em execução no terminal.",
+    "processFinished": "Processo finalizado com código {{code}}{{signal}}.",
+    "cancelled": "Processo cancelado via Ctrl+C.",
+    "commandPlaceholder": "Digite um comando...",
+    "historyHint": "Setas navegam pelo histórico",
+    "runHint": "Enter executa. Ctrl+C cancela o processo atual.",
+    "unsupportedHint": "A saída aparece aqui quando a linguagem da nota suporta execução.",
+    "noStdout": "Sem stdout ainda.",
+    "noStderr": "Sem stderr ainda."
   },
   "priority": {
     "urgente": "Urgente",

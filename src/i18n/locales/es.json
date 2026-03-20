@@ -15,6 +15,7 @@
     "rename": "Renombrar",
     "delete": "Eliminar",
     "create": "Crear",
+    "copy": "Copiar",
     "allNotes": "Todas las notas",
     "untitled": "Sin título",
     "none": "—",
@@ -47,6 +48,7 @@
     "languageLabel": "Lenguaje",
     "tagsLabel": "Etiquetas",
     "deleteConfirm": "¿Mover \"{{title}}\" a la papelera?",
+    "deleteDirtyDescription": "Esta nota tiene cambios sin guardar. Se guardarán antes de moverla a la papelera.",
     "closeDirtyTitle": "Esta nota tiene cambios sin guardar.",
     "closeDirtyDescription": "¿Quieres guardar antes de cerrarla?",
     "closeWindowTitle": "¿Cerrar SiriusPad con cambios sin guardar?",
@@ -58,6 +60,7 @@
     "open": "Abrir nota: {{title}}"
   },
   "workspace": {
+    "default": "General",
     "name": "Nombre del espacio",
     "renamePrompt": "Renombrar espacio",
     "deleteConfirm": "¿Eliminar el espacio \"{{name}}\" y mover sus notas a \"{{fallback}}\"?",
@@ -231,12 +234,56 @@
   "updater": {
     "available": "SiriusPad {{version}} disponible",
     "description": "Una nueva versión está lista para instalar.",
+    "downloading": "Descargando... {{progress}}%",
+    "readyToInstall": "Lista para instalar",
+    "installAndRestart": "Instalar y reiniciar",
     "updateNow": "Actualizar ahora",
     "viewRelease": "Ver novedades",
     "later": "Más tarde",
     "installing": "Instalando...",
     "installedRestart": "Actualización instalada. Reinicia para aplicar.",
     "installFailed": "Error en la actualización"
+  },
+  "terminal": {
+    "title": "Terminal",
+    "terminal": "Terminal",
+    "output": "Salida",
+    "clear": "Limpiar",
+    "run": "Ejecutar",
+    "toggle": "Alternar terminal (Ctrl+`)",
+    "timeout": "timeout",
+    "ready": "Shell listo. Escribe un comando y presiona Enter.",
+    "cwdChanged": "Directorio actual: {{cwd}}",
+    "processRunning": "Ya hay un proceso ejecutándose en el terminal.",
+    "processFinished": "Proceso finalizado con código {{code}}{{signal}}.",
+    "cancelled": "Proceso cancelado con Ctrl+C.",
+    "commandPlaceholder": "Escribe un comando...",
+    "historyHint": "Las flechas recorren el historial",
+    "runHint": "Enter ejecuta. Ctrl+C cancela el proceso actual.",
+    "unsupportedHint": "La salida aparece aquí cuando el lenguaje de la nota permite ejecución.",
+    "noStdout": "Todavía no hay stdout.",
+    "noStderr": "Todavía no hay stderr."
+  },
+  "priority": {
+    "urgente": "Urgente",
+    "alta": "Alta",
+    "media": "Media",
+    "baixa": "Baja"
+  },
+  "onboarding": {
+    "skip": "Saltar tutorial",
+    "next": "Siguiente",
+    "prev": "Anterior",
+    "start": "Empezar a usar SiriusPad",
+    "reopen": "Ver tutorial otra vez"
+  },
+  "rightPanel": {
+    "filterTags": "Filtrar por etiqueta",
+    "noTags": "Todavía no hay etiquetas.",
+    "info": "Info",
+    "createdAt": "Creado en",
+    "words": "Palabras",
+    "shortcuts": "Atajos"
   },
   "toasts": {
     "copied": "Contenido de la nota copiado",

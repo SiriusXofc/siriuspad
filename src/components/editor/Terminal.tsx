@@ -6,6 +6,7 @@ import {
   LoaderCircle,
   Play,
   RotateCcw,
+  Square,
   SquareTerminal,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -127,6 +128,10 @@ function createEntry(
   }
 }
 
+function createInitialEntries(readyText: string) {
+  return [createEntry('system', readyText)]
+}
+
 export function Terminal({
   platform,
   language,
@@ -144,9 +149,12 @@ export function Terminal({
     platform === 'windows' ? '%USERPROFILE%' : '~',
   )
   const [inputValue, setInputValue] = useState('')
-  const [entries, setEntries] = useState<TerminalEntry[]>([
-    createEntry('system', 'Shell pronto. Digite um comando e pressione Enter.'),
-  ])
+  const [entries, setEntries] = useState<TerminalEntry[]>(() =>
+    createInitialEntries(t('terminal.ready')),
+  )
+  const [history, setHistory] = useState<string[]>([])
+  const [historyIndex, setHistoryIndex] = useState<number | null>(null)
+  const [processRunning, setProcessRunning] = useState(false)
   const resizeStateRef = useRef<{ startY: number; startHeight: number } | null>(null)
   const childRef = useRef<Child | null>(null)
   const viewportRef = useRef<HTMLDivElement | null>(null)
@@ -241,6 +249,10 @@ export function Terminal({
     setEntries((current) => [...current, entry])
   }
 
+  const resetTerminal = () => {
+    setEntries(createInitialEntries(t('terminal.ready')))
+  }
+
   const handleCommand = async () => {
     const command = inputValue.trim()
     if (!command) {
@@ -248,11 +260,13 @@ export function Terminal({
     }
 
     setInputValue('')
+    setHistoryIndex(null)
     setTab('terminal')
     appendEntry(createEntry('command', command, cwd))
+    setHistory((current) => [command, ...current.filter((item) => item !== command)].slice(0, 50))
 
     if (command.toLowerCase() === 'clear') {
-      setEntries([])
+      resetTerminal()
       return
     }
 
@@ -263,13 +277,15 @@ export function Terminal({
         command.replace(/^cd\s*/i, ''),
       )
       setCwd(nextCwd)
-      appendEntry(createEntry('system', `Diretório atual: ${nextCwd}`))
+      appendEntry(
+        createEntry('system', t('terminal.cwdChanged', { cwd: nextCwd })),
+      )
       return
     }
 
     if (childRef.current) {
       appendEntry(
-        createEntry('system', 'Já existe um processo em execução no terminal.'),
+        createEntry('system', t('terminal.processRunning')),
       )
       return
     }
@@ -296,24 +312,29 @@ export function Terminal({
 
     shellCommand.on('close', ({ code, signal }) => {
       childRef.current = null
+      setProcessRunning(false)
       appendEntry(
         createEntry(
           'system',
-          `Processo finalizado com código ${code ?? 'null'}${
-            signal ? ` (sinal ${signal})` : ''
-          }.`,
+          t('terminal.processFinished', {
+            code: code ?? 'null',
+            signal: signal ? ` (signal ${signal})` : '',
+          }),
         ),
       )
     })
 
     shellCommand.on('error', (error) => {
       childRef.current = null
+      setProcessRunning(false)
       appendEntry(createEntry('stderr', error))
     })
 
     try {
       childRef.current = await shellCommand.spawn()
+      setProcessRunning(true)
     } catch (error) {
+      setProcessRunning(false)
       appendEntry(
         createEntry(
           'stderr',
@@ -325,7 +346,7 @@ export function Terminal({
 
   const clearCurrentTab = () => {
     if (tab === 'terminal') {
-      setEntries([])
+      resetTerminal()
       return
     }
 
@@ -336,6 +357,17 @@ export function Terminal({
     await navigator.clipboard.writeText(
       [runner.result?.stdout, runner.result?.stderr].filter(Boolean).join('\n\n'),
     )
+  }
+
+  const stopCurrentProcess = async () => {
+    if (!childRef.current) {
+      return
+    }
+
+    await childRef.current.kill()
+    childRef.current = null
+    setProcessRunning(false)
+    appendEntry(createEntry('system', t('terminal.cancelled')))
   }
 
   if (!open) {
@@ -373,8 +405,23 @@ export function Terminal({
       />
 
       <div className="flex h-full flex-col pt-1">
-        <div className="flex h-9 items-center justify-between border-b border-border px-3">
-          <div className="flex items-center gap-1">
+        <div className="flex h-10 items-center justify-between border-b border-border px-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-text-secondary">
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  processRunning || runner.running ? 'bg-accent' : 'bg-text-muted'
+                }`}
+              />
+              <span>{t('terminal.title')}</span>
+            </div>
+            <span className="truncate rounded-md border border-border bg-[#111111] px-2 py-1 text-[11px] text-text-secondary">
+              {cwd}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 rounded-md border border-border bg-[#111111] p-1">
             {(['terminal', 'output'] as TerminalTab[]).map((item) => (
               <button
                 key={item}
@@ -390,11 +437,10 @@ export function Terminal({
               </button>
             ))}
           </div>
-
-          <div className="flex items-center gap-2">
+ 
             {tab === 'output' ? (
               <label className="inline-flex items-center gap-2 rounded-md border border-border bg-[#161616] px-2.5 py-1 text-[11px] text-text-secondary">
-                <span>timeout</span>
+                <span>{t('terminal.timeout')}</span>
                 <select
                   className="bg-transparent text-text-primary outline-none"
                   value={runner.timeoutSeconds}
@@ -435,7 +481,7 @@ export function Terminal({
                 disabled={!runner.result}
               >
                 <Copy className="h-3.5 w-3.5" />
-                Copiar
+                {t('common.copy')}
               </button>
             ) : null}
 
@@ -463,11 +509,22 @@ export function Terminal({
           <>
             <div
               ref={viewportRef}
-              className="min-h-0 flex-1 overflow-y-auto px-3 py-3 font-mono text-xs"
+              className="min-h-0 flex-1 overflow-y-auto bg-[#0d0d0d] px-3 py-3 font-mono text-xs"
             >
               <div className="grid gap-2">
                 {entries.map((entry) => (
-                  <div key={entry.id} className="whitespace-pre-wrap leading-6">
+                  <div
+                    key={entry.id}
+                    className={`whitespace-pre-wrap rounded-md border px-3 py-2 leading-6 ${
+                      entry.kind === 'command'
+                        ? 'border-border bg-[#111111]'
+                        : entry.kind === 'stdout'
+                          ? 'border-[#153126] bg-[#0f1713]'
+                          : entry.kind === 'stderr'
+                            ? 'border-[#402020] bg-[#1a1111]'
+                            : 'border-border bg-[#101010]'
+                    }`}
+                  >
                     {entry.kind === 'command' ? (
                       <p className="text-text-primary">
                         <span className="text-text-secondary">{entry.prompt} $ </span>
@@ -485,15 +542,20 @@ export function Terminal({
               </div>
             </div>
 
-            <div className="border-t border-border px-3 py-2">
-              <label className="flex items-center gap-2 text-xs text-text-secondary">
-                <span className="shrink-0">{cwd} $</span>
+            <div className="border-t border-border bg-[#101010] px-3 py-3">
+              <label className="flex items-center gap-2 rounded-md border border-border bg-[#0b0b0b] px-3 py-2 text-xs text-text-secondary">
+                <span className="max-w-[40%] shrink-0 truncate rounded-sm bg-[#161616] px-2 py-1 text-[11px] text-text-secondary">
+                  {cwd} $
+                </span>
                 <input
                   ref={promptRef}
                   className="w-full bg-transparent text-text-primary outline-none"
                   style={{ caretColor: 'var(--accent)' }}
                   value={inputValue}
-                  onChange={(event) => setInputValue(event.target.value)}
+                  onChange={(event) => {
+                    setInputValue(event.target.value)
+                    setHistoryIndex(null)
+                  }}
                   onKeyDown={(event) => {
                     event.stopPropagation()
 
@@ -504,22 +566,79 @@ export function Terminal({
 
                     if (event.key.toLowerCase() === 'c' && event.ctrlKey && childRef.current) {
                       event.preventDefault()
-                      void childRef.current.kill()
-                      childRef.current = null
-                      appendEntry(createEntry('system', 'Processo cancelado via Ctrl+C.'))
+                      void stopCurrentProcess()
+                    }
+
+                    if (event.key === 'ArrowUp') {
+                      event.preventDefault()
+                      if (!history.length) {
+                        return
+                      }
+
+                      const nextIndex =
+                        historyIndex === null
+                          ? 0
+                          : Math.min(historyIndex + 1, history.length - 1)
+                      setHistoryIndex(nextIndex)
+                      setInputValue(history[nextIndex] ?? '')
+                    }
+
+                    if (event.key === 'ArrowDown') {
+                      event.preventDefault()
+                      if (!history.length) {
+                        return
+                      }
+
+                      if (historyIndex === null) {
+                        setInputValue('')
+                        return
+                      }
+
+                      const nextIndex = historyIndex - 1
+                      if (nextIndex < 0) {
+                        setHistoryIndex(null)
+                        setInputValue('')
+                        return
+                      }
+
+                      setHistoryIndex(nextIndex)
+                      setInputValue(history[nextIndex] ?? '')
                     }
                   }}
-                  placeholder="Digite um comando..."
+                  placeholder={t('terminal.commandPlaceholder')}
                 />
+                <button
+                  type="button"
+                  className="inline-flex h-8 items-center gap-1 rounded-md border border-border bg-[#161616] px-2 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary disabled:opacity-40"
+                  onClick={() => void handleCommand()}
+                  disabled={!inputValue.trim() || processRunning}
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  {t('terminal.run')}
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-8 items-center gap-1 rounded-md border border-border bg-[#161616] px-2 text-[11px] text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171] disabled:opacity-40"
+                  onClick={() => void stopCurrentProcess()}
+                  disabled={!processRunning}
+                >
+                  <Square className="h-3.5 w-3.5" />
+                  {t('common.close')}
+                </button>
               </label>
+
+              <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-text-secondary">
+                <span>{t('terminal.runHint')}</span>
+                <span>{t('terminal.historyHint')}</span>
+              </div>
             </div>
           </>
         ) : (
           <div
             ref={viewportRef}
-            className="grid min-h-0 flex-1 gap-3 overflow-y-auto px-3 py-3"
+            className="grid min-h-0 flex-1 gap-3 overflow-y-auto bg-[#0d0d0d] px-3 py-3 lg:grid-cols-2"
           >
-            <div className="rounded-lg border border-border bg-[#111111] p-3">
+            <div className="rounded-md border border-border bg-[#111111] p-3">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <h3 className="text-[11px] uppercase tracking-[0.16em] text-text-muted">
                   {t('terminal.output')}
@@ -527,11 +646,11 @@ export function Terminal({
                 <span className="text-[11px] text-text-secondary">{language}</span>
               </div>
               <pre className="max-h-28 overflow-auto whitespace-pre-wrap font-mono text-xs leading-6 text-[#34d399]">
-                {runner.result?.stdout || 'Sem stdout ainda.'}
+                {runner.result?.stdout || t('terminal.noStdout')}
               </pre>
             </div>
 
-            <div className="rounded-lg border border-border bg-[#111111] p-3">
+            <div className="rounded-md border border-border bg-[#111111] p-3">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <h3 className="text-[11px] uppercase tracking-[0.16em] text-text-muted">
                   stderr
@@ -543,23 +662,23 @@ export function Terminal({
                 ) : null}
               </div>
               <pre className="max-h-28 overflow-auto whitespace-pre-wrap font-mono text-xs leading-6 text-[#f87171]">
-                {runner.result?.stderr || 'Sem stderr ainda.'}
+                {runner.result?.stderr || t('terminal.noStderr')}
               </pre>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-[11px] text-text-secondary">
+            <div className="lg:col-span-2 flex flex-wrap items-center gap-3 rounded-md border border-border bg-[#101010] px-3 py-2 text-[11px] text-text-secondary">
               {runner.result ? (
                 <>
-                  <span>Duração: {runner.result.duration_ms}ms</span>
+                  <span>{t('runner.duration', { ms: runner.result.duration_ms })}</span>
                   {runner.result.timed_out ? (
-                    <span className="text-[#fbbf24]">Tempo limite atingido.</span>
+                    <span className="text-[#fbbf24]">{t('runner.timedOut')}</span>
                   ) : null}
                 </>
               ) : (
                 <span>
                   {canRunSnippet
-                    ? 'Use Ctrl+Enter para executar o conteúdo da nota.'
-                    : 'A saída aparece aqui quando a linguagem da nota suporta execução.'}
+                    ? t('terminal.runHint')
+                    : t('terminal.unsupportedHint')}
                 </span>
               )}
             </div>

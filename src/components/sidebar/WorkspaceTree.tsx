@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import { DEFAULT_WORKSPACE_ID } from '@/lib/constants'
 import { getWorkspaceIcon } from '@/lib/icons'
+import { getWorkspaceDisplayName } from '@/lib/workspaceLabel'
 import type { Workspace } from '@/types'
 
 interface WorkspaceTreeProps {
@@ -89,6 +90,7 @@ export function WorkspaceTree({
         {workspaces.map((workspace) => {
           const Icon = getWorkspaceIcon(workspace.icon)
           const isActive = workspace.id === activeWorkspaceId
+          const displayName = getWorkspaceDisplayName(workspace, t)
 
           return (
             <button
@@ -108,14 +110,14 @@ export function WorkspaceTree({
                   y: event.clientY,
                 })
               }}
-              title={t('workspace.select', { name: workspace.name })}
+              title={t('workspace.select', { name: displayName })}
             >
               <span
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: workspace.color }}
               />
               <Icon className="h-4 w-4" />
-              <span className="truncate">{workspace.name}</span>
+              <span className="truncate">{displayName}</span>
             </button>
           )
         })}

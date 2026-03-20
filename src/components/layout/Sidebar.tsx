@@ -26,6 +26,9 @@ interface SidebarProps {
   onCycleWorkspaceColor: (workspaceId: string) => Promise<void>
   onCycleWorkspaceIcon: (workspaceId: string) => Promise<void>
   onOpenNote: (noteId: string) => Promise<void>
+  onDuplicateNote: (noteId: string) => Promise<void>
+  onTogglePinNote: (noteId: string) => Promise<void>
+  onDeleteNote: (noteId: string) => Promise<void>
   onCreateNote: () => Promise<void>
   onTagClick: (tag: string | null) => void
   onResize: (nextWidth: number) => void
@@ -50,6 +53,9 @@ export function Sidebar({
   onCycleWorkspaceColor,
   onCycleWorkspaceIcon,
   onOpenNote,
+  onDuplicateNote,
+  onTogglePinNote,
+  onDeleteNote,
   onCreateNote,
   onTagClick,
   onResize,
@@ -133,6 +139,9 @@ export function Sidebar({
           activeNoteId={activeNoteId}
           activeTag={activeTag}
           onOpenNote={onOpenNote}
+          onDuplicateNote={onDuplicateNote}
+          onTogglePinNote={onTogglePinNote}
+          onDeleteNote={onDeleteNote}
           onCreateNote={onCreateNote}
           onTagClick={onTagClick}
         />

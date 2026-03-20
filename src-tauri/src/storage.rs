@@ -15,6 +15,18 @@ const APP_DIR_NAME: &str = "siriuspad";
 const DEFAULT_WORKSPACE: &str = "general";
 const LEGACY_DEFAULT_WORKSPACE: &str = "geral";
 
+fn is_default_workspace_alias(name: &str) -> bool {
+    matches!(name, DEFAULT_WORKSPACE | LEGACY_DEFAULT_WORKSPACE)
+}
+
+fn normalize_workspace_name(name: &str) -> String {
+    if is_default_workspace_alias(name.trim()) {
+        DEFAULT_WORKSPACE.to_string()
+    } else {
+        name.trim().to_string()
+    }
+}
+
 fn frontmatter_regex() -> Regex {
     Regex::new(r"(?s)\A---\r?\n(.*?)\r?\n---\r?\n?").expect("valid frontmatter regex")
 }
@@ -79,7 +91,7 @@ fn sanitize_workspace_name(name: &str) -> Result<String, String> {
         return Err("Workspace name cannot contain path separators.".into());
     }
 
-    Ok(trimmed.to_string())
+    Ok(normalize_workspace_name(trimmed))
 }
 
 fn app_data_dir() -> Result<PathBuf, String> {
@@ -108,7 +120,9 @@ fn legacy_default_workspace_dir() -> Result<PathBuf, String> {
 }
 
 fn note_path_for(workspace: &str, id: &str) -> Result<PathBuf, String> {
-    Ok(notes_dir()?.join(workspace).join(format!("{id}.md")))
+    Ok(notes_dir()?
+        .join(normalize_workspace_name(workspace))
+        .join(format!("{id}.md")))
 }
 
 fn note_history_dir(note_id: &str) -> Result<PathBuf, String> {
@@ -130,7 +144,7 @@ fn parse_note_from_file(path: &Path, content: &str) -> Note {
     let base = Note {
         id: Uuid::new_v4().to_string(),
         title: "Untitled".into(),
-        workspace,
+        workspace: normalize_workspace_name(&workspace),
         language: "markdown".into(),
         tags: vec![],
         created_at: now_iso(),
@@ -176,7 +190,9 @@ fn parse_note_from_file(path: &Path, content: &str) -> Note {
         Ok(frontmatter) => Note {
             id: frontmatter.id.unwrap_or(base.id),
             title: frontmatter.title.unwrap_or(base.title),
-            workspace: frontmatter.workspace.unwrap_or(base.workspace),
+            workspace: normalize_workspace_name(
+                frontmatter.workspace.as_deref().unwrap_or(&base.workspace),
+            ),
             language: frontmatter.language.unwrap_or(base.language),
             tags: frontmatter.tags.unwrap_or_default(),
             created_at: frontmatter.created_at.unwrap_or(base.created_at),
@@ -283,7 +299,7 @@ fn is_markdown_file(path: &Path) -> bool {
 fn list_note_paths(workspace: Option<&str>) -> Result<Vec<PathBuf>, String> {
     let root = notes_dir()?;
     let target = match workspace {
-        Some(name) => root.join(name),
+        Some(name) => root.join(normalize_workspace_name(name)),
         None => root,
     };
 
@@ -339,8 +355,22 @@ pub fn ensure_directories() -> Result<(), String> {
     let legacy_default_dir = legacy_default_workspace_dir()?;
     let default_dir = default_workspace_dir()?;
 
-    if legacy_default_dir.exists() && !default_dir.exists() {
-        fs::rename(&legacy_default_dir, &default_dir).map_err(|error| error.to_string())?;
+    if legacy_default_dir.exists() {
+        if !default_dir.exists() {
+            fs::rename(&legacy_default_dir, &default_dir).map_err(|error| error.to_string())?;
+        } else {
+            for entry in fs::read_dir(&legacy_default_dir).map_err(|error| error.to_string())? {
+                let entry = entry.map_err(|error| error.to_string())?;
+                let source = entry.path();
+                let destination = default_dir.join(entry.file_name());
+
+                if !destination.exists() {
+                    fs::rename(&source, destination).map_err(|error| error.to_string())?;
+                }
+            }
+
+            fs::remove_dir_all(&legacy_default_dir).map_err(|error| error.to_string())?;
+        }
     }
 
     fs::create_dir_all(default_workspace_dir()?).map_err(|error| error.to_string())?;
@@ -376,7 +406,7 @@ pub fn list_workspace_names() -> Result<Vec<String>, String> {
     for entry in fs::read_dir(notes_dir()?).map_err(|error| error.to_string())? {
         let entry = entry.map_err(|error| error.to_string())?;
         if entry.path().is_dir() {
-            let name = entry.file_name().to_string_lossy().to_string();
+            let name = normalize_workspace_name(&entry.file_name().to_string_lossy());
             if !workspaces.contains(&name) {
                 workspaces.push(name);
             }

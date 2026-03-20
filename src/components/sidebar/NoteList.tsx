@@ -1,5 +1,6 @@
 import { format, formatDistanceToNow } from 'date-fns'
 import { Pin, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { getDateFnsLocale } from '@/lib/date'
@@ -12,8 +13,17 @@ interface NoteListProps {
   activeNoteId: string | null
   activeTag: string | null
   onOpenNote: (noteId: string) => Promise<void>
+  onDuplicateNote: (noteId: string) => Promise<void>
+  onTogglePinNote: (noteId: string) => Promise<void>
+  onDeleteNote: (noteId: string) => Promise<void>
   onCreateNote: () => Promise<void>
   onTagClick: (tag: string | null) => void
+}
+
+interface ContextMenuState {
+  note: NoteMetadata
+  x: number
+  y: number
 }
 
 export function NoteList({
@@ -21,10 +31,34 @@ export function NoteList({
   activeNoteId,
   activeTag,
   onOpenNote,
+  onDuplicateNote,
+  onTogglePinNote,
+  onDeleteNote,
   onCreateNote,
   onTagClick,
 }: NoteListProps) {
   const { t, i18n } = useTranslation()
+  const [menu, setMenu] = useState<ContextMenuState | null>(null)
+
+  useEffect(() => {
+    if (!menu) {
+      return
+    }
+
+    const closeMenu = () => setMenu(null)
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenu(null)
+      }
+    }
+
+    window.addEventListener('click', closeMenu)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.removeEventListener('click', closeMenu)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [menu])
 
   return (
     <section className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
@@ -56,6 +90,14 @@ export function NoteList({
                   : 'border-border bg-[#111111] hover:border-focus hover:bg-hover'
               }`}
               onClick={() => void onOpenNote(note.id)}
+              onContextMenu={(event) => {
+                event.preventDefault()
+                setMenu({
+                  note,
+                  x: event.clientX,
+                  y: event.clientY,
+                })
+              }}
             >
               <span
                 className={`absolute inset-y-0 left-0 w-0.5 ${
@@ -114,6 +156,42 @@ export function NoteList({
           </div>
         ) : null}
       </div>
+
+      {menu ? (
+        <div
+          className="fixed z-[65] w-52 rounded-md border border-border bg-[#161616] p-1"
+          style={{ left: menu.x, top: menu.y }}
+        >
+          <button
+            type="button"
+            className="workspace-menu-item"
+            onClick={() => void onOpenNote(menu.note.id)}
+          >
+            {t('common.open')}
+          </button>
+          <button
+            type="button"
+            className="workspace-menu-item"
+            onClick={() => void onDuplicateNote(menu.note.id)}
+          >
+            {t('commands.duplicateNote')}
+          </button>
+          <button
+            type="button"
+            className="workspace-menu-item"
+            onClick={() => void onTogglePinNote(menu.note.id)}
+          >
+            {menu.note.pinned ? t('commands.unpinNote') : t('commands.pinNote')}
+          </button>
+          <button
+            type="button"
+            className="workspace-menu-item text-red hover:bg-red/10"
+            onClick={() => void onDeleteNote(menu.note.id)}
+          >
+            {t('common.delete')}
+          </button>
+        </div>
+      ) : null}
     </section>
   )
 }

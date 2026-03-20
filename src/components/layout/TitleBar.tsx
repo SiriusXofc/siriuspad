@@ -9,6 +9,7 @@ import {
   Square,
   X,
 } from 'lucide-react'
+import type { MouseEvent as ReactMouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { AppPlatform } from '@/types'
@@ -34,14 +35,39 @@ function controlButtonClassName(
           ? 'border-[#c79a1b] bg-[#ffbd2e]'
           : 'border-[#1e9e3f] bg-[#28c840]'
 
-    return `group relative z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full border ${palette} text-[9px] text-black/65 transition hover:brightness-105`
+    return `group relative z-20 flex h-3.5 w-3.5 items-center justify-center rounded-full border ${palette} text-[9px] text-black/65 transition hover:brightness-105`
   }
 
   if (tone === 'danger') {
-    return 'relative z-10 flex h-8 w-8 items-center justify-center border-l border-border text-text-secondary transition hover:bg-red/20 hover:text-red'
+    return 'relative z-20 flex h-8 w-8 items-center justify-center border-l border-border text-text-secondary transition hover:bg-red/20 hover:text-red'
   }
 
-  return 'relative z-10 flex h-8 w-8 items-center justify-center border-l border-border text-text-secondary transition hover:bg-hover hover:text-text-primary'
+  return 'relative z-20 flex h-8 w-8 items-center justify-center border-l border-border text-text-secondary transition hover:bg-hover hover:text-text-primary'
+}
+
+function isInteractiveTarget(target: EventTarget | null) {
+  return target instanceof HTMLElement
+    ? Boolean(target.closest('[data-no-drag="true"]'))
+    : false
+}
+
+function stopDragPropagation(event: ReactMouseEvent<HTMLElement>) {
+  event.stopPropagation()
+}
+
+async function toggleWindowMaximize() {
+  await runWindowAction(async (windowHandle) => {
+    if (await windowHandle.isMaximized()) {
+      await windowHandle.unmaximize()
+      return
+    }
+
+    await windowHandle.maximize()
+  })
+}
+
+async function startWindowDragging() {
+  await runWindowAction((windowHandle) => windowHandle.startDragging())
 }
 
 function controlOrder(platform: AppPlatform) {
@@ -61,8 +87,7 @@ function controlOrder(platform: AppPlatform) {
       tone: 'default' as const,
       icon: <Square className="h-3 w-3" />,
       compactIcon: <Square className="h-1.5 w-1.5 opacity-0 transition group-hover:opacity-100" />,
-      onClick: () =>
-        runWindowAction((windowHandle) => windowHandle.toggleMaximize()),
+      onClick: () => toggleWindowMaximize(),
     },
     {
       id: 'close',
@@ -98,7 +123,12 @@ function WindowControls({ platform }: { platform: AppPlatform }) {
             key={control.id}
             type="button"
             className={controlButtonClassName(platform, control.tone)}
-            onClick={() => void control.onClick()}
+            data-no-drag="true"
+            onMouseDown={stopDragPropagation}
+            onClick={(event) => {
+              event.stopPropagation()
+              void control.onClick()
+            }}
             title={label}
             aria-label={label}
           >
@@ -130,6 +160,23 @@ export function TitleBar({
 }: TitleBarProps) {
   const { t } = useTranslation()
 
+  const handleDragMouseDown = (event: ReactMouseEvent<HTMLElement>) => {
+    if (event.button !== 0 || isInteractiveTarget(event.target)) {
+      return
+    }
+
+    event.preventDefault()
+    void startWindowDragging()
+  }
+
+  const handleDragDoubleClick = (event: ReactMouseEvent<HTMLElement>) => {
+    if (isInteractiveTarget(event.target)) {
+      return
+    }
+
+    void toggleWindowMaximize()
+  }
+
   return (
     <header className="relative z-10 flex h-9 items-stretch border-b border-[#1e1e1e] bg-[#0f0f0f]">
       {platform === 'macos' ? <WindowControls platform={platform} /> : null}
@@ -137,7 +184,9 @@ export function TitleBar({
       <div className="relative z-10 flex items-center pl-2">
         <button
           type="button"
+          data-no-drag="true"
           className="flex h-7 w-7 items-center justify-center rounded-md border border-transparent text-text-secondary transition hover:border-border hover:bg-hover hover:text-text-primary"
+          onMouseDown={stopDragPropagation}
           onClick={onToggleSidebar}
           title={t('titlebar.toggleSidebar')}
           aria-label={t('titlebar.toggleSidebar')}
@@ -147,8 +196,10 @@ export function TitleBar({
       </div>
 
       <div
-        className="flex min-w-0 flex-1 items-center gap-3 px-3"
+        className="flex min-w-0 flex-1 select-none items-center gap-3 px-3"
         data-tauri-drag-region
+        onMouseDown={handleDragMouseDown}
+        onDoubleClick={handleDragDoubleClick}
       >
         <div className="flex min-w-0 items-center gap-2" data-tauri-drag-region>
           <span className="h-2.5 w-2.5 rounded-full bg-accent" />
@@ -162,7 +213,9 @@ export function TitleBar({
       <div className="relative z-10 flex items-center gap-2 px-2">
         <button
           type="button"
+          data-no-drag="true"
           className="inline-flex h-7 items-center gap-2 rounded-md border border-border bg-[#161616] px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          onMouseDown={stopDragPropagation}
           onClick={onFocusSearch}
           title={t('titlebar.search')}
         >
@@ -171,7 +224,9 @@ export function TitleBar({
         </button>
         <button
           type="button"
+          data-no-drag="true"
           className="inline-flex h-7 items-center gap-2 rounded-md border border-border bg-[#161616] px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          onMouseDown={stopDragPropagation}
           onClick={onToggleFullscreen}
           title={t('commands.toggleFullscreen')}
           aria-label={t('commands.toggleFullscreen')}
@@ -184,7 +239,9 @@ export function TitleBar({
         </button>
         <button
           type="button"
+          data-no-drag="true"
           className="inline-flex h-7 items-center gap-2 rounded-md border border-border bg-[#161616] px-2 text-xs text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+          onMouseDown={stopDragPropagation}
           onClick={onOpenSettings}
           title={t('titlebar.settings')}
         >
