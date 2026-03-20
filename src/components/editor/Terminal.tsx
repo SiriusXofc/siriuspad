@@ -164,6 +164,15 @@ export function Terminal({
     () => Boolean(runner.result?.stdout || runner.result?.stderr),
     [runner.result],
   )
+  const quickActions = useMemo(
+    () => [
+      platform === 'windows' ? 'dir' : 'ls -la',
+      'git status',
+      'npm run dev',
+      'clear',
+    ],
+    [platform],
+  )
 
   useEffect(() => {
     if (!open) {
@@ -407,13 +416,18 @@ export function Terminal({
       <div className="flex h-full flex-col pt-1">
         <div className="flex h-10 items-center justify-between border-b border-border px-3">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-text-secondary">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  processRunning || runner.running ? 'bg-accent' : 'bg-text-muted'
-                }`}
-              />
-              <span>{t('terminal.title')}</span>
+            <div className="flex flex-col">
+              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-text-secondary">
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    processRunning || runner.running ? 'bg-accent' : 'bg-text-muted'
+                  }`}
+                />
+                <span>{t('terminal.title')}</span>
+              </div>
+              <span className="text-[11px] text-text-muted">
+                {t('terminal.subtitle')}
+              </span>
             </div>
             <span className="truncate rounded-md border border-border bg-[#111111] px-2 py-1 text-[11px] text-text-secondary">
               {cwd}
@@ -509,7 +523,7 @@ export function Terminal({
           <>
             <div
               ref={viewportRef}
-              className="min-h-0 flex-1 overflow-y-auto bg-[#0d0d0d] px-3 py-3 font-mono text-xs"
+              className="min-h-0 flex-1 overflow-y-auto bg-[#0b0b0b] px-3 py-3 font-mono text-xs"
             >
               <div className="grid gap-2">
                 {entries.map((entry) => (
@@ -519,10 +533,10 @@ export function Terminal({
                       entry.kind === 'command'
                         ? 'border-border bg-[#111111]'
                         : entry.kind === 'stdout'
-                          ? 'border-[#153126] bg-[#0f1713]'
+                          ? 'border-[#153126] bg-[#101b15]'
                           : entry.kind === 'stderr'
-                            ? 'border-[#402020] bg-[#1a1111]'
-                            : 'border-border bg-[#101010]'
+                            ? 'border-[#402020] bg-[#1a1010]'
+                            : 'border-border bg-[#0f0f0f]'
                     }`}
                   >
                     {entry.kind === 'command' ? (
@@ -542,9 +556,25 @@ export function Terminal({
               </div>
             </div>
 
-            <div className="border-t border-border bg-[#101010] px-3 py-3">
+            <div className="border-t border-border bg-[#0f0f0f] px-3 py-3">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                {quickActions.map((command) => (
+                  <button
+                    key={command}
+                    type="button"
+                    className="rounded-md border border-border bg-[#111111] px-2.5 py-1 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+                    onClick={() => {
+                      setInputValue(command)
+                      promptRef.current?.focus()
+                    }}
+                  >
+                    {command}
+                  </button>
+                ))}
+              </div>
+
               <label className="flex items-center gap-2 rounded-md border border-border bg-[#0b0b0b] px-3 py-2 text-xs text-text-secondary">
-                <span className="max-w-[40%] shrink-0 truncate rounded-sm bg-[#161616] px-2 py-1 text-[11px] text-text-secondary">
+                <span className="max-w-[40%] shrink-0 truncate rounded-sm border border-border bg-[#161616] px-2 py-1 text-[11px] text-text-secondary">
                   {cwd} $
                 </span>
                 <input
@@ -623,11 +653,11 @@ export function Terminal({
                   disabled={!processRunning}
                 >
                   <Square className="h-3.5 w-3.5" />
-                  {t('common.close')}
+                  {t('terminal.stop')}
                 </button>
               </label>
 
-              <div className="mt-2 flex items-center justify-between gap-3 text-[11px] text-text-secondary">
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-[11px] text-text-secondary">
                 <span>{t('terminal.runHint')}</span>
                 <span>{t('terminal.historyHint')}</span>
               </div>

@@ -5,6 +5,7 @@ export const DEFAULT_WORKSPACE_ID = 'general'
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'dark',
+  uiZoom: 1,
   fontSize: 14,
   fontFamily: 'JetBrains Mono',
   tabSize: 2,
@@ -90,6 +91,10 @@ export const FONT_OPTIONS = [
   'Fira Code',
   'Cascadia Code',
 ] as const
+
+export const UI_ZOOM_MIN = 0.8
+export const UI_ZOOM_MAX = 1.6
+export const UI_ZOOM_STEP = 0.1
 
 export const LANGUAGE_OPTIONS: Array<{ value: AppLanguage; label: string }> = [
   { value: 'en', label: 'English' },

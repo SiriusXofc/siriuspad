@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import {
   isRegistered as isShortcutRegistered,
   register as registerGlobalShortcut,
@@ -14,6 +15,9 @@ import { useSearch } from '@/hooks/useSearch'
 import { useUpdater } from '@/hooks/useUpdater'
 import {
   DEFAULT_WORKSPACE_ID,
+  UI_ZOOM_MAX,
+  UI_ZOOM_MIN,
+  UI_ZOOM_STEP,
   WORKSPACE_COLORS,
   WORKSPACE_ICONS,
 } from '@/lib/constants'
@@ -60,6 +64,10 @@ function cycleValue(values: string[], current: string) {
   return values[(index + 1) % values.length] ?? values[0]
 }
 
+function clampUiZoom(value: number) {
+  return Math.min(UI_ZOOM_MAX, Math.max(UI_ZOOM_MIN, Number(value.toFixed(2))))
+}
+
 function isEditableTarget(target: EventTarget | null) {
   const element = target as HTMLElement | null
   if (!element) {
@@ -88,6 +96,9 @@ export default function App() {
   const allowWindowCloseRef = useRef(false)
   const shortcutHandlersRef = useRef<{
     toggleFullscreen: () => Promise<void>
+    zoomIn: () => Promise<void>
+    zoomOut: () => Promise<void>
+    resetZoom: () => Promise<void>
     toggleZenMode: () => void
     toggleFocusMode: () => void
     cyclePreviewMode: () => void
@@ -109,6 +120,9 @@ export default function App() {
     setActiveWorkspace: (workspaceId: string | null) => void
   }>({
     toggleFullscreen: async () => {},
+    zoomIn: async () => {},
+    zoomOut: async () => {},
+    resetZoom: async () => {},
     toggleZenMode: () => {},
     toggleFocusMode: () => {},
     cyclePreviewMode: () => {},
@@ -166,6 +180,25 @@ export default function App() {
     }
 
     useUiStore.getState().closeConfirm()
+    await requestWindowClose(true)
+  }
+
+  const requestWindowClose = async (force = false) => {
+    const dirtyTabs = useNotesStore.getState().openTabs.filter((tab) => tab.isDirty)
+
+    if (!force && dirtyTabs.length) {
+      useUiStore.getState().showConfirm({
+        title: t('note.closeWindowTitle'),
+        description: t('note.closeWindowDescription'),
+        confirmLabel: t('common.save'),
+        secondaryLabel: t('common.discard'),
+        cancelLabel: t('common.cancel'),
+        onConfirm: async () => closeWindowAfterDecision('save'),
+        onSecondary: async () => closeWindowAfterDecision('discard'),
+      })
+      return
+    }
+
     allowWindowCloseRef.current = true
 
     try {
@@ -561,6 +594,24 @@ export default function App() {
     }
   }
 
+  const setUiZoom = async (nextZoom: number) => {
+    await settingsState.update({
+      uiZoom: clampUiZoom(nextZoom),
+    })
+  }
+
+  const zoomIn = async () => {
+    await setUiZoom(settingsState.settings.uiZoom + UI_ZOOM_STEP)
+  }
+
+  const zoomOut = async () => {
+    await setUiZoom(settingsState.settings.uiZoom - UI_ZOOM_STEP)
+  }
+
+  const resetZoom = async () => {
+    await setUiZoom(1)
+  }
+
   const restoreHistoryVersion = async (timestamp: string) => {
     if (!notes.activeNote) {
       return
@@ -592,12 +643,14 @@ export default function App() {
       id: 'note:new',
       label: t('commands.newNote'),
       group: t('commands.groups.notes'),
+      shortcut: 'Ctrl+N',
       perform: () => createNote(),
     },
     {
       id: 'note:duplicate',
       label: t('commands.duplicateNote'),
       group: t('commands.groups.notes'),
+      shortcut: 'Ctrl+D',
       perform: () => duplicateActiveNote(),
     },
     {
@@ -612,12 +665,14 @@ export default function App() {
         ? t('commands.unpinNote')
         : t('commands.pinNote'),
       group: t('commands.groups.notes'),
+      shortcut: 'Ctrl+Shift+P',
       perform: () => togglePin(),
     },
     {
       id: 'action:copy',
       label: t('commands.copyNote'),
       group: t('commands.groups.actions'),
+      shortcut: 'Ctrl+Shift+C',
       perform: () => copyCurrentNote(),
     },
     {
@@ -630,6 +685,7 @@ export default function App() {
       id: 'action:gist',
       label: t('commands.exportGist'),
       group: t('commands.groups.actions'),
+      shortcut: 'Ctrl+Shift+G',
       perform: () => exportCurrentNoteToGist(),
     },
     {
@@ -654,6 +710,7 @@ export default function App() {
       id: 'app:settings',
       label: t('commands.openSettings'),
       group: t('commands.groups.app'),
+      shortcut: 'Ctrl+,',
       perform: async () => {
         uiState.setSettingsOpen(true)
       },
@@ -680,12 +737,44 @@ export default function App() {
       id: 'app:fullscreen',
       label: t('commands.toggleFullscreen'),
       group: t('commands.groups.app'),
+      shortcut: 'F11',
       perform: () => toggleFullscreen(),
+    },
+    {
+      id: 'app:zoom-in',
+      label: t('commands.zoomIn'),
+      description: t('settings.fields.uiZoomValue', {
+        value: Math.round(settingsState.settings.uiZoom * 100),
+      }),
+      group: t('commands.groups.app'),
+      shortcut: 'Ctrl++',
+      perform: () => zoomIn(),
+    },
+    {
+      id: 'app:zoom-out',
+      label: t('commands.zoomOut'),
+      description: t('settings.fields.uiZoomValue', {
+        value: Math.round(settingsState.settings.uiZoom * 100),
+      }),
+      group: t('commands.groups.app'),
+      shortcut: 'Ctrl+-',
+      perform: () => zoomOut(),
+    },
+    {
+      id: 'app:zoom-reset',
+      label: t('commands.resetZoom'),
+      description: t('settings.fields.uiZoomValue', {
+        value: Math.round(settingsState.settings.uiZoom * 100),
+      }),
+      group: t('commands.groups.app'),
+      shortcut: 'Ctrl+0',
+      perform: () => resetZoom(),
     },
     {
       id: 'app:zen',
       label: t('commands.zenMode'),
       group: t('commands.groups.app'),
+      shortcut: 'Ctrl+Shift+Z',
       perform: async () => {
         uiState.toggleZenMode()
       },
@@ -694,6 +783,7 @@ export default function App() {
       id: 'app:focus',
       label: t('commands.focusMode'),
       group: t('commands.groups.app'),
+      shortcut: 'Ctrl+Shift+F',
       perform: async () => {
         uiState.toggleFocusMode()
       },
@@ -702,6 +792,7 @@ export default function App() {
       id: 'app:preview',
       label: t('commands.markdownPreview'),
       group: t('commands.groups.app'),
+      shortcut: 'Ctrl+Shift+M',
       perform: async () => {
         uiState.cyclePreviewMode()
       },
@@ -718,6 +809,7 @@ export default function App() {
       id: 'app:find-replace',
       label: t('commands.findReplace'),
       group: t('commands.groups.app'),
+      shortcut: 'Ctrl+H',
       perform: async () => {
         setFindReplaceNonce((current) => current + 1)
       },
@@ -725,6 +817,7 @@ export default function App() {
     ...workspaceState.workspaces.map((workspace) => ({
       id: `workspace:${workspace.id}`,
       label: t('workspace.goTo', { name: getWorkspaceDisplayName(workspace, t) }),
+      description: workspace.name,
       group: t('commands.groups.navigation'),
       keywords: [workspace.name, getWorkspaceDisplayName(workspace, t)],
       perform: async () => {
@@ -734,6 +827,9 @@ export default function App() {
     ...notes.notes.map((note) => ({
       id: `note:${note.id}`,
       label: t('note.open', { title: note.title }),
+      description: [getWorkspaceNameFromId(note.workspace, t), ...note.tags]
+        .filter(Boolean)
+        .join(' • '),
       group: t('commands.groups.navigation'),
       keywords: [note.title, note.workspace, ...note.tags],
       perform: () => openNote(note.id),
@@ -831,15 +927,7 @@ export default function App() {
           }
 
           event.preventDefault()
-          useUiStore.getState().showConfirm({
-            title: t('note.closeWindowTitle'),
-            description: t('note.closeWindowDescription'),
-            confirmLabel: t('common.save'),
-            secondaryLabel: t('common.discard'),
-            cancelLabel: t('common.cancel'),
-            onConfirm: async () => closeWindowAfterDecision('save'),
-            onSecondary: async () => closeWindowAfterDecision('discard'),
-          })
+          await requestWindowClose()
         })
       } catch (error) {
         console.warn('Window listeners unavailable', error)
@@ -856,6 +944,9 @@ export default function App() {
 
   shortcutHandlersRef.current = {
     toggleFullscreen,
+    zoomIn,
+    zoomOut,
+    resetZoom,
     toggleZenMode: () => useUiStore.getState().toggleZenMode(),
     toggleFocusMode: () => useUiStore.getState().toggleFocusMode(),
     cyclePreviewMode: () => useUiStore.getState().cyclePreviewMode(),
@@ -878,6 +969,37 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!settingsState.ready) {
+      return
+    }
+
+    let cancelled = false
+
+    const applyUiZoom = async () => {
+      try {
+        await getCurrentWebviewWindow().setZoom(settingsState.settings.uiZoom)
+        if (typeof document !== 'undefined') {
+          document.body.style.zoom = ''
+        }
+      } catch (error) {
+        if (typeof document !== 'undefined') {
+          document.body.style.zoom = String(settingsState.settings.uiZoom)
+        }
+
+        if (!cancelled) {
+          console.warn('Webview zoom unavailable', error)
+        }
+      }
+    }
+
+    void applyUiZoom()
+
+    return () => {
+      cancelled = true
+    }
+  }, [settingsState.ready, settingsState.settings.uiZoom])
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const handlers = shortcutHandlersRef.current
       const meta = event.ctrlKey || event.metaKey
@@ -898,6 +1020,38 @@ export default function App() {
       if (meta && event.shiftKey && event.key.toLowerCase() === 'f') {
         event.preventDefault()
         handlers.toggleFocusMode()
+        return
+      }
+
+      if (
+        meta &&
+        !event.altKey &&
+        (event.key === '+' ||
+          event.key === '=' ||
+          event.code === 'NumpadAdd')
+      ) {
+        event.preventDefault()
+        void handlers.zoomIn()
+        return
+      }
+
+      if (
+        meta &&
+        !event.altKey &&
+        (event.key === '-' || event.code === 'NumpadSubtract')
+      ) {
+        event.preventDefault()
+        void handlers.zoomOut()
+        return
+      }
+
+      if (
+        meta &&
+        !event.altKey &&
+        (event.key === '0' || event.code === 'Numpad0')
+      ) {
+        event.preventDefault()
+        void handlers.resetZoom()
         return
       }
 
@@ -1063,6 +1217,7 @@ export default function App() {
           isFullscreen={uiState.isFullscreen}
           onFocusSearch={() => uiState.focusSearch()}
           onOpenSettings={() => uiState.setSettingsOpen(true)}
+          onRequestWindowClose={() => void requestWindowClose()}
           onToggleSidebar={() => setSidebarVisible((current) => !current)}
           onToggleFullscreen={() => void toggleFullscreen()}
         />

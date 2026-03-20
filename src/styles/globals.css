@@ -91,6 +91,10 @@ textarea {
   font: inherit;
 }
 
+input[type='range'] {
+  accent-color: var(--accent);
+}
+
 button {
   cursor: pointer;
 }
@@ -151,7 +155,7 @@ button:disabled {
   margin: 0.125rem 0;
   border: 1px solid transparent;
   border-radius: 8px;
-  padding: 0.75rem;
+  padding: 0.875rem 0.75rem;
   font-size: 13px;
   color: var(--text-secondary);
   transition: border-color 120ms ease, background-color 120ms ease,

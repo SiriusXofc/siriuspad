@@ -18,6 +18,7 @@ interface TitleBarProps {
   isFullscreen: boolean
   onFocusSearch: () => void
   onOpenSettings: () => void
+  onRequestWindowClose: () => void
   onToggleSidebar: () => void
   onToggleFullscreen: () => void
 }
@@ -44,7 +45,10 @@ function controlButtonClassName(
   return 'relative z-20 flex h-8 w-8 items-center justify-center border-l border-border text-text-secondary transition hover:bg-hover hover:text-text-primary'
 }
 
-function controlOrder(platform: AppPlatform) {
+function controlOrder(
+  platform: AppPlatform,
+  onRequestWindowClose: () => void,
+) {
   const controls = [
     {
       id: 'minimize',
@@ -70,8 +74,7 @@ function controlOrder(platform: AppPlatform) {
       tone: 'danger' as const,
       icon: <X className="h-3.5 w-3.5" />,
       compactIcon: <X className="h-2 w-2 opacity-0 transition group-hover:opacity-100" />,
-      onClick: () =>
-        runWindowAction((windowHandle) => windowHandle.close()),
+      onClick: onRequestWindowClose,
     },
   ]
 
@@ -80,9 +83,15 @@ function controlOrder(platform: AppPlatform) {
     : controls
 }
 
-function WindowControls({ platform }: { platform: AppPlatform }) {
+function WindowControls({
+  platform,
+  onRequestWindowClose,
+}: {
+  platform: AppPlatform
+  onRequestWindowClose: () => void
+}) {
   const { t } = useTranslation()
-  const controls = controlOrder(platform)
+  const controls = controlOrder(platform, onRequestWindowClose)
 
   return (
     <div
@@ -125,6 +134,7 @@ export function TitleBar({
   isFullscreen,
   onFocusSearch,
   onOpenSettings,
+  onRequestWindowClose,
   onToggleSidebar,
   onToggleFullscreen,
 }: TitleBarProps) {
@@ -132,7 +142,12 @@ export function TitleBar({
 
   return (
     <header className="relative z-10 flex h-9 items-stretch border-b border-[#1e1e1e] bg-[#0f0f0f]">
-      {platform === 'macos' ? <WindowControls platform={platform} /> : null}
+      {platform === 'macos' ? (
+        <WindowControls
+          platform={platform}
+          onRequestWindowClose={onRequestWindowClose}
+        />
+      ) : null}
 
       <div className="relative z-10 flex items-center pl-2">
         <button
@@ -193,7 +208,12 @@ export function TitleBar({
         </button>
       </div>
 
-      {platform !== 'macos' ? <WindowControls platform={platform} /> : null}
+      {platform !== 'macos' ? (
+        <WindowControls
+          platform={platform}
+          onRequestWindowClose={onRequestWindowClose}
+        />
+      ) : null}
     </header>
   )
 }

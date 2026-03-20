@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { FONT_OPTIONS, LANGUAGE_OPTIONS } from '@/lib/constants'
-import { THEMES } from '@/lib/themes'
+import {
+  FONT_OPTIONS,
+  LANGUAGE_OPTIONS,
+  UI_ZOOM_MAX,
+  UI_ZOOM_MIN,
+  UI_ZOOM_STEP,
+} from '@/lib/constants'
 import { getWorkspaceDisplayName } from '@/lib/workspaceLabel'
 import { Modal } from '@/components/ui/Modal'
 import type { AppLanguage, Settings, Workspace } from '@/types'
@@ -81,7 +86,7 @@ function Field({
 }
 
 function controlClassName() {
-  return 'w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-focus'
+  return 'w-full rounded-lg border border-border bg-[#111111] px-3 py-2 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-focus'
 }
 
 export function SettingsModal({
@@ -98,12 +103,16 @@ export function SettingsModal({
   const { t } = useTranslation()
   const [variableKey, setVariableKey] = useState('')
   const [variableValue, setVariableValue] = useState('')
+  const zoomPercent = Math.round(settings.uiZoom * 100)
 
   const shortcuts = [
     { key: 'Ctrl+N', action: t('commands.newNote') },
     { key: 'Ctrl+K', action: t('commands.commandPalette') },
     { key: 'Ctrl+F', action: t('titlebar.search') },
     { key: 'Ctrl+S', action: t('common.save') },
+    { key: 'Ctrl++', action: t('commands.zoomIn') },
+    { key: 'Ctrl+-', action: t('commands.zoomOut') },
+    { key: 'Ctrl+0', action: t('commands.resetZoom') },
     { key: 'Ctrl+Enter', action: t('runner.run') },
     { key: 'Ctrl+`', action: t('terminal.toggle') },
     { key: 'Ctrl+W', action: t('commands.closeNote') },
@@ -211,22 +220,17 @@ export function SettingsModal({
         resetLabel={t('settings.reset')}
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label={t('settings.fields.theme')}>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {THEMES.map((theme) => (
-                <button
-                  key={theme.id}
-                  type="button"
-                  className={`rounded-xl border px-3 py-2 text-sm transition ${
-                    settings.theme === theme.id
-                      ? 'border-accent bg-accent/10 text-text-primary'
-                      : 'border-border bg-surface text-text-secondary hover:border-focus hover:bg-hover'
-                  }`}
-                  onClick={() => void onUpdate({ theme: theme.id })}
-                >
-                  {t(`themes.${theme.id}`)}
-                </button>
-              ))}
+          <Field
+            label={t('settings.fields.theme')}
+            description={t('settings.fields.themeLocked')}
+          >
+            <div className="rounded-lg border border-[#2d2060] bg-[#151224] px-3 py-3 text-sm text-text-primary">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-medium">{t('themes.dark')}</span>
+                <span className="rounded-md border border-[#3a2c70] bg-[rgba(124,58,237,0.12)] px-2 py-1 text-[11px] uppercase tracking-[0.16em] text-[#c4b5fd]">
+                  {t('settings.fields.darkOnly')}
+                </span>
+              </div>
             </div>
           </Field>
           <Field label={t('settings.fields.fontFamily')}>
@@ -243,6 +247,64 @@ export function SettingsModal({
                 </option>
               ))}
             </select>
+          </Field>
+          <Field
+            label={t('settings.fields.uiZoom')}
+            description={t('settings.fields.uiZoomHint')}
+          >
+            <div className="grid gap-3 rounded-lg border border-border bg-[#101010] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+                  onClick={() =>
+                    void onUpdate({
+                      uiZoom: Math.max(UI_ZOOM_MIN, settings.uiZoom - UI_ZOOM_STEP),
+                    })
+                  }
+                >
+                  -
+                </button>
+                <div className="text-center">
+                  <div className="text-lg font-semibold text-text-primary">
+                    {zoomPercent}%
+                  </div>
+                  <div className="text-xs text-text-secondary">
+                    {t('settings.fields.uiZoomValue', { value: zoomPercent })}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+                  onClick={() =>
+                    void onUpdate({
+                      uiZoom: Math.min(UI_ZOOM_MAX, settings.uiZoom + UI_ZOOM_STEP),
+                    })
+                  }
+                >
+                  +
+                </button>
+              </div>
+
+              <input
+                type="range"
+                min={UI_ZOOM_MIN}
+                max={UI_ZOOM_MAX}
+                step={UI_ZOOM_STEP}
+                value={settings.uiZoom}
+                onChange={(event) =>
+                  void onUpdate({ uiZoom: Number(event.target.value) })
+                }
+              />
+
+              <button
+                type="button"
+                className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+                onClick={() => void onUpdate({ uiZoom: 1 })}
+              >
+                {t('commands.resetZoom')}
+              </button>
+            </div>
           </Field>
         </div>
       </Section>
@@ -280,7 +342,7 @@ export function SettingsModal({
           {shortcuts.map((item) => (
             <div
               key={item.key}
-              className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-secondary"
+              className="rounded-lg border border-border bg-[#111111] px-3 py-2 text-sm text-text-secondary"
             >
               <span className="font-medium text-text-primary">{item.key}</span>
               <span className="mx-2 text-text-muted">-</span>
@@ -325,7 +387,7 @@ export function SettingsModal({
             Object.entries(settings.variables).map(([key, value]) => (
               <div
                 key={key}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-[#111111] px-3 py-2"
               >
                 <div className="min-w-0">
                   <p className="truncate font-mono text-sm text-text-primary">{key}</p>
@@ -341,7 +403,7 @@ export function SettingsModal({
               </div>
             ))
           ) : (
-            <div className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
+            <div className="rounded-lg border border-dashed border-border px-3 py-4 text-sm text-text-secondary">
               {t('settings.variables.empty')}
             </div>
           )}
@@ -362,7 +424,7 @@ export function SettingsModal({
           />
           <button
             type="button"
-            className="rounded-xl border border-border bg-surface px-4 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+            className="rounded-lg border border-border bg-[#111111] px-4 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
             onClick={() => {
               if (!variableKey.trim()) {
                 return

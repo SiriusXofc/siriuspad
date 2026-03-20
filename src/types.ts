@@ -81,6 +81,7 @@ export interface ThemeDefinition {
 
 export interface Settings {
   theme: AppTheme
+  uiZoom: number
   fontSize: number
   fontFamily: string
   tabSize: 2 | 4
@@ -138,6 +139,8 @@ export interface CommandItem {
   id: string
   label: string
   group: string
+  description?: string
   keywords?: string[]
+  shortcut?: string
   perform: () => void | Promise<void>
 }

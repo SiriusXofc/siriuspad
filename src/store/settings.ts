@@ -1,7 +1,12 @@
 import { create } from 'zustand'
 
 import i18n from '@/i18n'
-import { DEFAULT_SETTINGS } from '@/lib/constants'
+import {
+  DEFAULT_SETTINGS,
+  UI_ZOOM_MAX,
+  UI_ZOOM_MIN,
+  UI_ZOOM_STEP,
+} from '@/lib/constants'
 import { getAppStore } from '@/lib/storage'
 import { applyTheme } from '@/lib/themes'
 import type { AppLanguage, Settings } from '@/types'
@@ -28,6 +33,29 @@ async function persistSettings(settings: Settings) {
   const store = await getAppStore()
   await store.set('settings', settings)
   await store.save()
+}
+
+function normalizeUiZoom(value: number | null | undefined) {
+  const numeric = Number(value)
+
+  if (!Number.isFinite(numeric)) {
+    return DEFAULT_SETTINGS.uiZoom
+  }
+
+  const rounded = Math.round(numeric / UI_ZOOM_STEP) * UI_ZOOM_STEP
+  return Math.min(UI_ZOOM_MAX, Math.max(UI_ZOOM_MIN, Number(rounded.toFixed(2))))
+}
+
+function applyInterfaceSettings(settings: Settings) {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  const fontStack = `"${settings.fontFamily}", "JetBrains Mono", "Fira Code", "Cascadia Code", monospace`
+  const root = document.documentElement
+
+  root.style.setProperty('--font-ui', fontStack)
+  root.style.setProperty('--font-mono', fontStack)
 }
 
 function normalizeLanguage(language: string | null | undefined): AppLanguage {
@@ -65,6 +93,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       ...DEFAULT_SETTINGS,
       ...persisted,
       language,
+      uiZoom: normalizeUiZoom(persisted?.uiZoom),
       variables: {
         ...DEFAULT_SETTINGS.variables,
         ...(persisted?.variables ?? {}),
@@ -73,6 +102,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
     set({ settings, ready: true })
     applyTheme(settings.theme)
+    applyInterfaceSettings(settings)
     await i18n.changeLanguage(settings.language)
     await persistSettings(settings)
   },
@@ -84,6 +114,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       ...get().settings,
       ...patch,
       language: nextLanguage,
+      uiZoom:
+        patch.uiZoom === undefined
+          ? get().settings.uiZoom
+          : normalizeUiZoom(patch.uiZoom),
       variables: patch.variables
         ? { ...patch.variables }
         : { ...get().settings.variables },
@@ -91,6 +125,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
     set({ settings })
     applyTheme(settings.theme)
+    applyInterfaceSettings(settings)
 
     if (patch.language) {
       await i18n.changeLanguage(nextLanguage)
@@ -147,6 +182,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       case 'appearance':
         next = {
           ...current,
+          uiZoom: DEFAULT_SETTINGS.uiZoom,
           theme: DEFAULT_SETTINGS.theme,
           fontFamily: DEFAULT_SETTINGS.fontFamily,
         }
@@ -180,6 +216,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
     set({ settings: next })
     applyTheme(next.theme)
+    applyInterfaceSettings(next)
 
     if (section === 'language') {
       await i18n.changeLanguage(next.language)

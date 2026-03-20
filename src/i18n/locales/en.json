@@ -118,6 +118,9 @@
     "toggleLineNumbers": "Toggle line numbers",
     "toggleWordWrap": "Toggle word wrap",
     "toggleFullscreen": "Toggle fullscreen",
+    "zoomIn": "Zoom in interface",
+    "zoomOut": "Zoom out interface",
+    "resetZoom": "Reset interface zoom",
     "zenMode": "Toggle zen mode",
     "focusMode": "Toggle focus mode",
     "markdownPreview": "Cycle markdown preview",
@@ -134,7 +137,7 @@
       },
       "appearance": {
         "title": "Appearance",
-        "description": "Theme and editor font family."
+        "description": "Interface zoom, dark-only theme, and the font used across the UI."
       },
       "shortcuts": {
         "title": "Shortcuts",
@@ -154,7 +157,7 @@
       }
     },
     "fields": {
-      "fontSize": "Font size",
+      "fontSize": "Editor font size",
       "tabSize": "Tab size",
       "tabSize2": "2 spaces",
       "tabSize4": "4 spaces",
@@ -163,6 +166,11 @@
       "autosave": "Autosave",
       "autosaveDelay": "Autosave delay (ms)",
       "theme": "Theme",
+      "themeLocked": "SiriusPad is dark-only. Use this section to adjust interface scale and typography.",
+      "darkOnly": "Dark only",
+      "uiZoom": "Interface zoom",
+      "uiZoomHint": "Scales the whole app, similar to browser zoom.",
+      "uiZoomValue": "{{value}}% scale",
       "fontFamily": "Font family",
       "defaultWorkspace": "Default workspace",
       "githubToken": "GitHub token",
@@ -196,6 +204,12 @@
   },
   "searchPanel": {
     "placeholder": "Type a command or search notes...",
+    "commandHelp": "Quick actions, note navigation, and app controls in one place.",
+    "hints": {
+      "navigate": "↑↓ navigate",
+      "execute": "Enter runs",
+      "close": "Esc closes"
+    },
     "recent": "Recent",
     "empty": "No matching commands."
   },
@@ -246,11 +260,14 @@
   },
   "terminal": {
     "title": "Terminal",
+    "subtitle": "Local shell without leaving the note.",
     "terminal": "Terminal",
     "output": "Output",
     "clear": "Clear",
     "run": "Run",
+    "stop": "Stop",
     "toggle": "Toggle terminal (Ctrl+`)",
+    "toggleTitle": "Open or close terminal",
     "timeout": "timeout",
     "ready": "Shell ready. Type a command and press Enter.",
     "cwdChanged": "Current directory: {{cwd}}",
@@ -275,7 +292,47 @@
     "next": "Next",
     "prev": "Previous",
     "start": "Start using SiriusPad",
-    "reopen": "View tutorial again"
+    "reopen": "View tutorial again",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to SiriusPad",
+        "description": "SiriusPad is built to keep bugs, ideas, snippets, commands, and technical notes nearby without slowing your flow."
+      },
+      "notes": {
+        "title": "Fast notes, still organized",
+        "description": "Each note combines title, Markdown, tags, priority, color, and workspace. It works as a personal backlog, debug pad, or snippet base."
+      },
+      "tags": {
+        "title": "Read context at a glance",
+        "description": "Colored tags and priority make it easy to spot whether something is a bug, urgent item, idea, or already done."
+      },
+      "terminal": {
+        "title": "A real embedded terminal",
+        "description": "Open it with Ctrl+`. Type commands directly, browse history with arrow keys, stop running tasks with Ctrl+C, and send note blocks to the terminal."
+      },
+      "command": {
+        "title": "Command palette, made clear",
+        "description": "Ctrl+K opens the app command center. Type an action, note name, or workspace; use arrow keys to navigate and Enter to run."
+      },
+      "shortcuts": {
+        "title": "Shortcuts worth memorizing",
+        "description": "These are the ones that speed up everyday use the most. You do not need all of them now, but they stay visible in the UI."
+      },
+      "ready": {
+        "title": "Ready to go",
+        "description": "If you forget something, you can reopen the tutorial from settings. The goal is to be quick to start and comfortable to keep using."
+      }
+    },
+    "visuals": {
+      "notesTitle": "Example note",
+      "notesBody": "Fix updater flow and review window shortcuts",
+      "welcomeBadge": "A dark, local, no-nonsense pad for people who live between code, terminal, and checklists.",
+      "welcomePoint1": "Markdown for writing fast without losing structure.",
+      "welcomePoint2": "Workspaces to separate context without clutter.",
+      "welcomePoint3": "Terminal, history, and shortcuts wired into the flow.",
+      "readyBadge": "Everything stays local and the app opens ready to continue.",
+      "readyHint": "Start with Ctrl+N, use Ctrl+K when you do not remember a command, and open the terminal with Ctrl+` when you need to run something."
+    }
   },
   "rightPanel": {
     "filterTags": "Filter by tag",
