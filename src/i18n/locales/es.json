@@ -141,7 +141,7 @@
       },
       "shortcuts": {
         "title": "Atajos",
-        "description": "Atajos locales activos dentro de la app. La paleta global es Ctrl+Shift+K."
+        "description": "Atajos locales activos dentro de la app. La paleta principal se abre con Ctrl+K."
       },
       "variables": {
         "title": "Variables globales",
@@ -150,6 +150,10 @@
       "integrations": {
         "title": "Integraciones",
         "description": "La exportación a Gist usa un token con el alcance gist."
+      },
+      "about": {
+        "title": "Proyecto y seguridad",
+        "description": "Información pública del proyecto SiriusPad, avisos de uso, enlaces útiles y los canales correctos para soporte y vulnerabilidades."
       },
       "language": {
         "title": "Idioma",
@@ -188,6 +192,29 @@
       "valuePlaceholder": "https://api.example.com",
       "add": "Agregar",
       "remove": "Quitar"
+    },
+    "about": {
+      "version": "Versión",
+      "maintainer": "Desarrollado por",
+      "maintainerHint": "Proyecto público mantenido por SiriusX.",
+      "license": "Licencia",
+      "licenseHint": "Uso, copia y distribución bajo MIT.",
+      "projectType": "Proyecto",
+      "publicProject": "Open source público",
+      "projectHint": "Código, issues, changelog y releases viven en el repositorio GitHub de SiriusPad.",
+      "privacyTitle": "Privacidad local-first",
+      "privacyBody": "Las notas se quedan en tu disco. SiriusPad no requiere cuenta para el flujo principal y los servicios externos solo se usan cuando activas algo como exportar Gist o revisar actualizaciones.",
+      "securityTitle": "Seguridad y reportes",
+      "securityBody": "Las fallas de seguridad no deben ir a una issue pública. Usa la política de seguridad y, cuando haga falta, abre una advisory privada para corregirlas con responsabilidad.",
+      "commandsTitle": "Terminal y snippets",
+      "commandsBody": "El terminal embebido y el runner ejecutan comandos en tu máquina. Revisa scripts, snippets y comandos antes de ejecutarlos, especialmente si vienen de terceros.",
+      "integrationsTitle": "Integraciones opcionales",
+      "integrationsBody": "El token de GitHub para Gist se guarda localmente. Usa solo el alcance necesario y elimina el token cuando ya no lo necesites.",
+      "openRepository": "Abrir repositorio",
+      "openChangelog": "Ver changelog",
+      "openLicense": "Leer licencia",
+      "openSecurity": "Política de seguridad",
+      "reportSecurity": "Reportar vulnerabilidad"
     },
     "reset": "Restablecer"
   },
@@ -341,6 +368,10 @@
         "title": "Paleta de comandos sin confusión",
         "description": "Ctrl+K abre el centro rápido de la app. Escribe una acción, el nombre de una nota o un espacio; usa las flechas para navegar y Enter para ejecutar. Piensa en ella como la forma más rápida de encontrar cualquier cosa sin romper el flujo."
       },
+      "project": {
+        "title": "Proyecto público, uso responsable",
+        "description": "SiriusPad está mantenido por SiriusX como proyecto público. Es local-first, tiene licencia MIT y deja claro cuando una acción toca el terminal, el token, el disco o una integración externa."
+      },
       "shortcuts": {
         "title": "Atajos que vale la pena recordar",
         "description": "Estos son los que más aceleran el uso diario. No necesitas memorizarlos todos ahora, pero quedan visibles en la UI."
@@ -357,8 +388,18 @@
       "welcomePoint1": "Markdown para escribir rápido sin perder estructura.",
       "welcomePoint2": "Espacios para separar contexto sin desorden.",
       "welcomePoint3": "Terminal, historial y atajos integrados al flujo.",
+      "welcomePoint4": "Proyecto público mantenido por SiriusX con foco real en productividad para desarrolladores.",
+      "terminalSnippetLabel": "Bloque con lenguaje",
+      "terminalCommandLabel": "Comando de shell",
+      "projectPoint1": "Desarrollado por SiriusX y distribuido como proyecto público en GitHub.",
+      "projectPoint2": "Licencia MIT para uso, estudio, modificación y distribución.",
+      "projectPoint3": "Las notas se quedan locales; las integraciones externas son opcionales.",
+      "projectPoint4": "El terminal y los snippets corren en tu máquina, así que revisa antes de ejecutar.",
       "readyBadge": "Todo queda local y la app abre lista para continuar.",
-      "readyHint": "Empieza con Ctrl+N, usa Ctrl+K cuando olvides una acción y abre el terminal con Ctrl+` para ejecutar comandos en la carpeta de la nota o correr bloques con lenguaje."
+      "readyHint": "Empieza con Ctrl+N, usa Ctrl+K cuando olvides una acción y abre el terminal con Ctrl+` para ejecutar comandos en la carpeta de la nota o correr bloques con lenguaje.",
+      "readyPoint1": "Configuración ahora muestra versión, licencia, enlaces del proyecto y política de seguridad.",
+      "readyPoint2": "Puedes volver a abrir este tutorial en cualquier momento desde configuración.",
+      "readyPoint3": "Usa issues para bugs y advisory privada para vulnerabilidades."
     }
   },
   "rightPanel": {

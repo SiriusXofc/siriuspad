@@ -28,7 +28,7 @@ O que está acontecendo de fato?
 
 - **Sistema operacional:** ex. Ubuntu 24.04, Windows 11, macOS 14
 - **Versão do SiriusPad:** ex. 1.0.1
-- **Formato de instalação:** `.deb`, `.AppImage`, `.msi`, `.exe`, `.dmg` ou compilado do fonte
+- **Formato de instalação:** `.deb`, `.exe` ou compilado do fonte
 
 ## Logs ou screenshots
 

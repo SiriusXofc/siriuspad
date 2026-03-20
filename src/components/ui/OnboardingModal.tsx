@@ -14,6 +14,7 @@ const STEPS = [
   { id: 'tags', icon: '#', visual: 'tags' },
   { id: 'terminal', icon: '>_', visual: 'terminal' },
   { id: 'command', icon: '⌘', visual: 'command' },
+  { id: 'project', icon: '▣', visual: 'project' },
   { id: 'shortcuts', icon: '⌨', visual: 'shortcuts' },
   { id: 'ready', icon: '✓', visual: 'ready' },
 ] as const
@@ -79,8 +80,17 @@ function StepVisual({
             <div className="mt-2 text-[#34d399]">VITE ready in 412ms</div>
           </div>
           <div className="rounded-md border border-border bg-[#111111] p-3">
-            <div className="mb-1 text-text-secondary">{t('terminal.output')}</div>
+            <div className="mb-1 text-text-secondary">
+              {t('onboarding.visuals.terminalSnippetLabel')}
+            </div>
             <div className="text-[#34d399]">console.log('teste') -&gt; teste</div>
+          </div>
+          <div className="rounded-md border border-border bg-[#111111] p-3">
+            <div className="mb-1 text-text-secondary">
+              {t('onboarding.visuals.terminalCommandLabel')}
+            </div>
+            <div className="text-text-primary">ls</div>
+            <div className="mt-2 text-[#34d399]">fix-janela.md</div>
           </div>
           <div className="flex flex-wrap gap-2 text-[11px]">
             {['Ctrl+`', 'Enter', 'Ctrl+C', 'Ctrl+Enter'].map((shortcut) => (
@@ -92,6 +102,24 @@ function StepVisual({
               </span>
             ))}
           </div>
+        </div>
+      )
+    case 'project':
+      return (
+        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs">
+          {[
+            t('onboarding.visuals.projectPoint1'),
+            t('onboarding.visuals.projectPoint2'),
+            t('onboarding.visuals.projectPoint3'),
+            t('onboarding.visuals.projectPoint4'),
+          ].map((text) => (
+            <div
+              key={text}
+              className="rounded-md border border-border bg-[#111111] px-3 py-3 text-text-secondary"
+            >
+              {text}
+            </div>
+          ))}
         </div>
       )
     case 'command':
@@ -147,6 +175,7 @@ function StepVisual({
             <div>{t('onboarding.visuals.welcomePoint1')}</div>
             <div>{t('onboarding.visuals.welcomePoint2')}</div>
             <div>{t('onboarding.visuals.welcomePoint3')}</div>
+            <div>{t('onboarding.visuals.welcomePoint4')}</div>
           </div>
         </div>
       )
@@ -156,7 +185,12 @@ function StepVisual({
           <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] px-3 py-3 text-text-primary">
             {t('onboarding.visuals.readyBadge')}
           </div>
-          <div>{t('onboarding.visuals.readyHint')}</div>
+          <div className="text-xs leading-6">{t('onboarding.visuals.readyHint')}</div>
+          <div className="grid gap-2 text-xs">
+            <div>{t('onboarding.visuals.readyPoint1')}</div>
+            <div>{t('onboarding.visuals.readyPoint2')}</div>
+            <div>{t('onboarding.visuals.readyPoint3')}</div>
+          </div>
         </div>
       )
   }

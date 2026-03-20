@@ -73,6 +73,10 @@ function normalizeLanguage(language: string | null | undefined): AppLanguage {
 }
 
 function detectSystemLanguage(): AppLanguage {
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return normalizeLanguage(navigator.language)
+  }
+
   return DEFAULT_SETTINGS.language
 }
 

@@ -21,3 +21,7 @@ Existe alguma solução atual? Por que ela não resolve bem?
 ## Contexto adicional
 
 Links, referências, prints ou exemplos ajudam bastante aqui.
+
+## Segurança ou impacto
+
+Se a sugestão toca execução de comandos, leitura/escrita de arquivos, updater ou token do GitHub, descreva o impacto esperado.

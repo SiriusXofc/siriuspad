@@ -141,7 +141,7 @@
       },
       "shortcuts": {
         "title": "Shortcuts",
-        "description": "Local shortcuts active inside the app. Global palette is Ctrl+Shift+K."
+        "description": "Local shortcuts active inside the app. The main command palette opens with Ctrl+K."
       },
       "variables": {
         "title": "Global Variables",
@@ -150,6 +150,10 @@
       "integrations": {
         "title": "Integrations",
         "description": "GitHub Gist export uses a token with the gist scope."
+      },
+      "about": {
+        "title": "Project and security",
+        "description": "Public SiriusPad project info, usage notices, useful links, and the right channels for support and vulnerabilities."
       },
       "language": {
         "title": "Language",
@@ -188,6 +192,29 @@
       "valuePlaceholder": "https://api.example.com",
       "add": "Add",
       "remove": "Remove"
+    },
+    "about": {
+      "version": "Version",
+      "maintainer": "Developed by",
+      "maintainerHint": "Public project maintained by SiriusX.",
+      "license": "License",
+      "licenseHint": "Usage, copying, and distribution under MIT.",
+      "projectType": "Project",
+      "publicProject": "Public open source",
+      "projectHint": "Code, issues, changelog, and releases live on the SiriusPad GitHub repository.",
+      "privacyTitle": "Local-first privacy",
+      "privacyBody": "Notes stay on your disk. SiriusPad does not require an account for the main flow, and external services are only used when you trigger something like Gist export or update checks.",
+      "securityTitle": "Security and reporting",
+      "securityBody": "Security flaws should not go to a public issue. Use the security policy and, when needed, open a private advisory so fixes can happen responsibly.",
+      "commandsTitle": "Terminal and snippets",
+      "commandsBody": "The embedded terminal and snippet runner execute commands on your machine. Review scripts, snippets, and commands before running them, especially from third parties.",
+      "integrationsTitle": "Optional integrations",
+      "integrationsBody": "The GitHub token for Gist is stored locally. Use only the scope you need and remove the token when you no longer need it.",
+      "openRepository": "Open repository",
+      "openChangelog": "View changelog",
+      "openLicense": "Read license",
+      "openSecurity": "Security policy",
+      "reportSecurity": "Report vulnerability"
     },
     "reset": "Reset"
   },
@@ -341,6 +368,10 @@
         "title": "Command palette, made clear",
         "description": "Ctrl+K opens the app command center. Type an action, note name, or workspace; use arrow keys to navigate and Enter to run. Think of it as the fastest way to find anything without breaking flow."
       },
+      "project": {
+        "title": "Public project, responsible usage",
+        "description": "SiriusPad is maintained by SiriusX as a public project. It is local-first, MIT licensed, and explicit when an action touches the terminal, token, disk, or an external integration."
+      },
       "shortcuts": {
         "title": "Shortcuts worth memorizing",
         "description": "These are the ones that speed up everyday use the most. You do not need all of them now, but they stay visible in the UI."
@@ -357,8 +388,18 @@
       "welcomePoint1": "Markdown for writing fast without losing structure.",
       "welcomePoint2": "Workspaces to separate context without clutter.",
       "welcomePoint3": "Terminal, history, and shortcuts wired into the flow.",
+      "welcomePoint4": "A public project maintained by SiriusX with a practical developer-first focus.",
+      "terminalSnippetLabel": "Language-aware block",
+      "terminalCommandLabel": "Shell command",
+      "projectPoint1": "Developed by SiriusX and shipped as a public GitHub project.",
+      "projectPoint2": "MIT license for use, study, modification, and distribution.",
+      "projectPoint3": "Notes stay local; external integrations are optional.",
+      "projectPoint4": "Terminal and snippets run on your machine, so review before executing.",
       "readyBadge": "Everything stays local and the app opens ready to continue.",
-      "readyHint": "Start with Ctrl+N, use Ctrl+K when you forget an action, and open the terminal with Ctrl+` to run commands in the note folder or execute language-aware blocks."
+      "readyHint": "Start with Ctrl+N, use Ctrl+K when you forget an action, and open the terminal with Ctrl+` to run commands in the note folder or execute language-aware blocks.",
+      "readyPoint1": "Settings now show version, license, project links, and the security policy.",
+      "readyPoint2": "You can reopen this tutorial anytime from settings.",
+      "readyPoint3": "Use issues for bugs and a private advisory for vulnerabilities."
     }
   },
   "rightPanel": {

@@ -94,7 +94,15 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'SiriusPad ${{ github.ref_name }}'
-          releaseBody: 'Automated SiriusPad release. See CHANGELOG.md for release notes.'
+          releaseBody: |
+            Nova versão pública do SiriusPad.
+
+            Esta release mantém a distribuição oficial do app em:
+            - `.deb` para Linux
+            - `.exe` para Windows
+            - `latest.json` para o fluxo de auto-update
+
+            Consulte o `CHANGELOG.md` para ver os detalhes da versão.
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

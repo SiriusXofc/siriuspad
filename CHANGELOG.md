@@ -7,6 +7,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.11] - 2026-03-20
+
+### Adicionado
+- Seção de projeto, segurança, privacidade e links úteis nas configurações
+- Tutorial de boas-vindas mais completo, com contexto sobre terminal, projeto público, licença e uso responsável
+- Arquivos públicos do repositório para projeto open source: `NOTICE.md`, `CODE_OF_CONDUCT.md` e configuração de templates do GitHub
+
+### Alterado
+- README, CONTRIBUTING e SECURITY foram reescritos em PT-BR com foco em clareza para usuários e contribuidores
+- Metadados públicos do projeto agora apontam o app como mantido por SiriusX
+- Workflow de release ganhou mensagem pública mais clara para futuras versões
+- Scripts de instalação e documentação oficial foram alinhados somente aos formatos `.deb` e `.exe`
+
+### Corrigido
+- Detecção inicial de idioma volta a respeitar o idioma do sistema quando possível
+- Distribuição do Tauri foi reduzida para os bundles realmente usados pelo projeto
+- Ícone do aplicativo e favicon foram trocados por uma identidade visual própria
+- Assets legados e arquivos de plataformas não distribuídas foram removidos do repositório
+
 ## [1.0.3] - 2026-03-18
 
 ### Adicionado

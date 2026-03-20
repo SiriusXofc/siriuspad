@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "SiriusPad",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "identifier": "dev.siriusdev.siriuspad",
   "build": {
     "frontendDist": "../dist",
@@ -30,7 +30,10 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "deb",
+      "nsis"
+    ],
     "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
@@ -40,9 +43,6 @@
     "linux": {
       "deb": {
         "depends": []
-      },
-      "appimage": {
-        "bundleMediaFramework": false
       }
     }
   },

@@ -1,7 +1,15 @@
 import { useState } from 'react'
+import { open as openExternal } from '@tauri-apps/plugin-shell'
 import { useTranslation } from 'react-i18next'
 
 import {
+  APP_CHANGELOG_URL,
+  APP_LICENSE_URL,
+  APP_MAINTAINER,
+  APP_REPOSITORY_URL,
+  APP_SECURITY_ADVISORY_URL,
+  APP_SECURITY_URL,
+  APP_VERSION,
   FONT_OPTIONS,
   LANGUAGE_OPTIONS,
   UI_ZOOM_MAX,
@@ -89,6 +97,28 @@ function controlClassName() {
   return 'w-full rounded-lg border border-border bg-[#111111] px-3 py-2 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-focus'
 }
 
+function InfoTile({
+  label,
+  value,
+  description,
+}: {
+  label: string
+  value: string
+  description?: string
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-[#111111] px-3 py-3">
+      <div className="text-[11px] uppercase tracking-[0.16em] text-text-muted">
+        {label}
+      </div>
+      <div className="mt-2 text-base font-semibold text-text-primary">{value}</div>
+      {description ? (
+        <div className="mt-2 text-xs leading-6 text-text-secondary">{description}</div>
+      ) : null}
+    </div>
+  )
+}
+
 export function SettingsModal({
   open,
   settings,
@@ -127,6 +157,14 @@ export function SettingsModal({
     { key: 'Ctrl+H', action: t('commands.findReplace') },
     { key: 'F11', action: t('commands.toggleFullscreen') },
     { key: 'Alt+1..9', action: t('commands.switchWorkspace') },
+  ]
+
+  const projectLinks = [
+    { label: t('settings.about.openRepository'), href: APP_REPOSITORY_URL },
+    { label: t('settings.about.openChangelog'), href: APP_CHANGELOG_URL },
+    { label: t('settings.about.openLicense'), href: APP_LICENSE_URL },
+    { label: t('settings.about.openSecurity'), href: APP_SECURITY_URL },
+    { label: t('settings.about.reportSecurity'), href: APP_SECURITY_ADVISORY_URL },
   ]
 
   return (
@@ -461,6 +499,78 @@ export function SettingsModal({
           />
         </Field>
       </Section>
+
+      <section className="px-6 py-5">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-text-primary">
+            {t('settings.sections.about.title')}
+          </h3>
+          <p className="mt-1 text-xs text-text-secondary">
+            {t('settings.sections.about.description')}
+          </p>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <InfoTile label={t('settings.about.version')} value={`v${APP_VERSION}`} />
+          <InfoTile
+            label={t('settings.about.maintainer')}
+            value={APP_MAINTAINER}
+            description={t('settings.about.maintainerHint')}
+          />
+          <InfoTile
+            label={t('settings.about.license')}
+            value="MIT"
+            description={t('settings.about.licenseHint')}
+          />
+          <InfoTile
+            label={t('settings.about.projectType')}
+            value={t('settings.about.publicProject')}
+            description={t('settings.about.projectHint')}
+          />
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {[
+            {
+              title: t('settings.about.privacyTitle'),
+              body: t('settings.about.privacyBody'),
+            },
+            {
+              title: t('settings.about.securityTitle'),
+              body: t('settings.about.securityBody'),
+            },
+            {
+              title: t('settings.about.commandsTitle'),
+              body: t('settings.about.commandsBody'),
+            },
+            {
+              title: t('settings.about.integrationsTitle'),
+              body: t('settings.about.integrationsBody'),
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="rounded-lg border border-border bg-[#0f0f0f] px-4 py-4"
+            >
+              <div className="text-sm font-medium text-text-primary">{item.title}</div>
+              <div className="mt-2 text-xs leading-6 text-text-secondary">{item.body}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {projectLinks.map((link) => (
+            <button
+              key={link.href}
+              type="button"
+              className="rounded-md border border-border bg-[#111111] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+              onClick={() => void openExternal(link.href)}
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
+      </section>
     </Modal>
   )
 }

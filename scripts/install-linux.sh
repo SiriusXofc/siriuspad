@@ -19,12 +19,10 @@ require_cmd() {
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/install-linux.sh [--deb|--appimage|--rpm]
+  bash scripts/install-linux.sh [--deb]
 
 Options:
   --deb       Download and install the latest .deb package
-  --appimage  Download the latest AppImage into ~/.local/bin
-  --rpm       Download and install the latest .rpm package
 
 Environment:
   SIRIUSPAD_REPO=owner/repo  Override the GitHub repository used for releases
@@ -35,12 +33,6 @@ for arg in "$@"; do
   case "$arg" in
     --deb)
       FORMAT="deb"
-      ;;
-    --appimage)
-      FORMAT="appimage"
-      ;;
-    --rpm)
-      FORMAT="rpm"
       ;;
     -h|--help)
       usage
@@ -73,8 +65,6 @@ payload = json.load(sys.stdin)
 wanted = sys.argv[1]
 suffix_map = {
     "deb": ".deb",
-    "appimage": ".AppImage",
-    "rpm": ".rpm",
 }
 suffix = suffix_map[wanted]
 for asset in payload.get("assets", []):
@@ -118,27 +108,6 @@ case "$FORMAT" in
       print_error "apt-get is required to install the .deb package"
       exit 1
     fi
-    ;;
-  rpm)
-    if command -v rpm >/dev/null 2>&1; then
-      printf 'Installing %s via rpm\n' "$asset_name"
-      if [[ "${EUID}" -eq 0 ]]; then
-        rpm -Uvh "$asset_path"
-      else
-        sudo rpm -Uvh "$asset_path"
-      fi
-    else
-      print_error "rpm is required to install the .rpm package"
-      exit 1
-    fi
-    ;;
-  appimage)
-    target_dir="${HOME}/.local/bin"
-    mkdir -p "$target_dir"
-    target_path="${target_dir}/SiriusPad.AppImage"
-    install -m 0755 "$asset_path" "$target_path"
-    printf 'Installed AppImage to %s\n' "$target_path"
-    printf 'You can run it with: %s\n' "$target_path"
     ;;
 esac
 

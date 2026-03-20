@@ -1,7 +1,9 @@
 {
   "name": "siriuspad",
   "private": true,
-  "version": "1.0.10",
+  "version": "1.0.11",
+  "description": "Bloco de notas desktop local para desenvolvedores, com Markdown, terminal embutido e organização por workspaces.",
+  "author": "SiriusX",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -11,6 +13,15 @@
   "bugs": {
     "url": "https://github.com/Nic85796/siriuspad/issues"
   },
+  "keywords": [
+    "tauri",
+    "react",
+    "typescript",
+    "markdown",
+    "notes",
+    "developer",
+    "desktop"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
