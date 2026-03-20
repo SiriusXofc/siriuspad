@@ -32,6 +32,7 @@ pub fn run() {
             fs::ensure_dirs,
             fs::list_notes,
             fs::read_note,
+            fs::get_note_directory,
             fs::write_note,
             fs::delete_note,
             fs::trash_note,

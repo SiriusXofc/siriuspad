@@ -335,6 +335,14 @@ fn find_note_path(id: &str) -> Result<Option<PathBuf>, String> {
     Ok(None)
 }
 
+pub fn note_directory(id: &str) -> Result<PathBuf, String> {
+    ensure_directories()?;
+    let path = find_note_path(id)?.ok_or_else(|| "Note not found.".to_string())?;
+    path.parent()
+        .map(Path::to_path_buf)
+        .ok_or_else(|| "Unable to resolve note directory.".to_string())
+}
+
 pub fn load_all_notes() -> Result<Vec<Note>, String> {
     let mut notes = Vec::new();
 

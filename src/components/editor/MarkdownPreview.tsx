@@ -7,7 +7,10 @@ import { useTranslation } from 'react-i18next'
 
 interface MarkdownPreviewProps {
   content: string
-  onRunCodeInTerminal?: (code: string) => void
+  onRunCodeInTerminal?: (payload: {
+    code: string
+    language: string | null
+  }) => void
 }
 
 function extractCodeText(children: React.ReactNode): string {
@@ -23,6 +26,30 @@ function extractCodeText(children: React.ReactNode): string {
   }
 
   return `${children ?? ''}`
+}
+
+function extractCodeLanguage(children: React.ReactNode): string | null {
+  const resolveFromClassName = (className?: string) => {
+    const match = className?.match(/language-([a-z0-9#+-]+)/i)
+    return match?.[1] ?? null
+  }
+
+  if (isValidElement<{ className?: string; children?: React.ReactNode }>(children)) {
+    return resolveFromClassName(children.props.className)
+  }
+
+  if (Array.isArray(children)) {
+    for (const child of children) {
+      if (
+        isValidElement<{ className?: string }>(child) &&
+        child.props.className
+      ) {
+        return resolveFromClassName(child.props.className)
+      }
+    }
+  }
+
+  return null
 }
 
 export function MarkdownPreview({
@@ -69,6 +96,7 @@ export function MarkdownPreview({
             },
             pre(props) {
               const code = extractCodeText(props.children).trimEnd()
+              const language = extractCodeLanguage(props.children)
 
               return (
                 <div className="relative mb-4 overflow-hidden rounded-lg border border-border bg-[#0f0f0f]">
@@ -76,7 +104,12 @@ export function MarkdownPreview({
                     <button
                       type="button"
                       className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-[#161616] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
-                      onClick={() => onRunCodeInTerminal(code)}
+                      onClick={() =>
+                        onRunCodeInTerminal({
+                          code,
+                          language,
+                        })
+                      }
                     >
                       <Play className="h-3 w-3" />
                       {t('terminal.run')}

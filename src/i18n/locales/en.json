@@ -248,6 +248,11 @@
   "updater": {
     "available": "SiriusPad {{version}} is available",
     "description": "A new version is ready to install.",
+    "newVersionBadge": "New update detected",
+    "versionLabel": "Version",
+    "updateActionLabel": "Recommended action",
+    "largeNotice": "App update",
+    "restartNotice": "The download has finished. Restart SiriusPad now to install the new version.",
     "downloading": "Downloading... {{progress}}%",
     "readyToInstall": "Ready to install",
     "installAndRestart": "Install and restart",
@@ -260,23 +265,36 @@
   },
   "terminal": {
     "title": "Terminal",
-    "subtitle": "Local shell without leaving the note.",
-    "terminal": "Terminal",
-    "output": "Output",
+    "subtitle": "cmd.exe on Windows and bash on Linux/macOS, always pointed at the active note folder.",
+    "terminal": "Shell",
+    "output": "Snippet",
     "clear": "Clear",
     "run": "Run",
     "stop": "Stop",
     "toggle": "Toggle terminal (Ctrl+`)",
     "toggleTitle": "Open or close terminal",
+    "noteFolder": "Note folder",
+    "resetCwd": "Back to note",
     "timeout": "timeout",
-    "ready": "Shell ready. Type a command and press Enter.",
+    "ready": "{{shell}} ready. Type a command and press Enter.",
+    "noteDirectoryReady": "Terminal now points to the note folder: {{cwd}}",
+    "noteDirectoryFallback": "Using the shell default directory: {{cwd}}",
     "cwdChanged": "Current directory: {{cwd}}",
     "processRunning": "There is already a process running in the terminal.",
     "processFinished": "Process finished with code {{code}}{{signal}}.",
     "cancelled": "Process cancelled with Ctrl+C.",
-    "commandPlaceholder": "Type a command...",
+    "blockMissingLanguage": "This block has no language set. Mark it as js, ts, py, or bash to run it correctly.",
+    "blockUnsupported": "This block is marked as {{language}}, which is not executable here. It was sent to the prompt so you can adjust it.",
+    "runningBlock": "Running {{language}} block with the correct interpreter in the note folder.",
+    "codeBlockLabel": "{{language}} block",
+    "blockSource": "block",
+    "noteSource": "note",
+    "commandPlaceholder": "Type a command for {{shell}}...",
     "historyHint": "Arrow keys browse history",
     "runHint": "Enter runs. Ctrl+C cancels the current process.",
+    "cwdHint": "Use cd to move around, or jump back to the note folder with one click.",
+    "shellBanner": "Real shell: {{shell}}",
+    "outputHint": "Run the whole note with Ctrl+Enter or use the ▶ button on blocks that declare a language.",
     "unsupportedHint": "Output appears here when the note language supports execution.",
     "noStdout": "No stdout yet.",
     "noStderr": "No stderr yet."
@@ -308,11 +326,11 @@
       },
       "terminal": {
         "title": "A real embedded terminal",
-        "description": "Open it with Ctrl+`. Type commands directly, browse history with arrow keys, stop running tasks with Ctrl+C, and send note blocks to the terminal."
+        "description": "Open it with Ctrl+`. SiriusPad uses the real platform shell and starts in the active note folder. Terminal commands go to the shell; js, ts, py, and bash blocks run with the right interpreter."
       },
       "command": {
         "title": "Command palette, made clear",
-        "description": "Ctrl+K opens the app command center. Type an action, note name, or workspace; use arrow keys to navigate and Enter to run."
+        "description": "Ctrl+K opens the app command center. Type an action, note name, or workspace; use arrow keys to navigate and Enter to run. Think of it as the fastest way to find anything without breaking flow."
       },
       "shortcuts": {
         "title": "Shortcuts worth memorizing",
@@ -331,7 +349,7 @@
       "welcomePoint2": "Workspaces to separate context without clutter.",
       "welcomePoint3": "Terminal, history, and shortcuts wired into the flow.",
       "readyBadge": "Everything stays local and the app opens ready to continue.",
-      "readyHint": "Start with Ctrl+N, use Ctrl+K when you do not remember a command, and open the terminal with Ctrl+` when you need to run something."
+      "readyHint": "Start with Ctrl+N, use Ctrl+K when you forget an action, and open the terminal with Ctrl+` to run commands in the note folder or execute language-aware blocks."
     }
   },
   "rightPanel": {

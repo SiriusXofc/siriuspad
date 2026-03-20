@@ -91,6 +91,7 @@ export default function App() {
   const [findReplaceNonce, setFindReplaceNonce] = useState(0)
   const [toggleTerminalNonce, setToggleTerminalNonce] = useState(0)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [activeNoteDirectory, setActiveNoteDirectory] = useState<string | null>(null)
 
   const bootstrappedRef = useRef(false)
   const allowWindowCloseRef = useRef(false)
@@ -152,6 +153,7 @@ export default function App() {
   const runner = useRunner(
     notes.activeNote,
     settingsState.settings.variables,
+    activeNoteDirectory,
   )
   const updater = useUpdater(settingsState.ready)
 
@@ -202,11 +204,10 @@ export default function App() {
     allowWindowCloseRef.current = true
 
     try {
-      await getCurrentWindow().close()
-    } finally {
-      window.setTimeout(() => {
-        allowWindowCloseRef.current = false
-      }, 300)
+      await getCurrentWindow().destroy()
+    } catch (error) {
+      allowWindowCloseRef.current = false
+      console.warn('Window close unavailable', error)
     }
   }
 
@@ -874,6 +875,37 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!notes.activeNoteId) {
+      setActiveNoteDirectory(null)
+      return
+    }
+
+    let cancelled = false
+
+    const loadNoteDirectory = async () => {
+      try {
+        const directory = await invoke<string>('get_note_directory', {
+          id: notes.activeNoteId,
+        })
+        if (!cancelled) {
+          setActiveNoteDirectory(directory)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setActiveNoteDirectory(null)
+        }
+        console.warn('Unable to resolve note directory', error)
+      }
+    }
+
+    void loadNoteDirectory()
+
+    return () => {
+      cancelled = true
+    }
+  }, [notes.activeNoteId])
+
+  useEffect(() => {
     const shortcut = 'CommandOrControl+Shift+K'
     let registered = false
 
@@ -1271,6 +1303,7 @@ export default function App() {
           <EditorPane
             platform={uiState.platform}
             note={notes.activeNote}
+            noteDirectory={activeNoteDirectory}
             settings={settingsState.settings}
             workspaces={workspaceState.workspaces}
             allTags={allTags}

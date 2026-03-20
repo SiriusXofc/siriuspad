@@ -19,6 +19,11 @@ pub fn read_note(id: String) -> Result<Note, String> {
 }
 
 #[tauri::command]
+pub fn get_note_directory(id: String) -> Result<String, String> {
+    storage::note_directory(&id).map(|path| path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
 pub fn write_note(note: Note) -> Result<(), String> {
     storage::write_note(note)
 }

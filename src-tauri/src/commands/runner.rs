@@ -1,7 +1,14 @@
-use std::{collections::HashMap, fs, process::Stdio, time::Duration};
+use std::{
+    collections::HashMap,
+    fs,
+    path::{Path, PathBuf},
+    process::Stdio,
+    time::Duration,
+};
 
 use tempfile::tempdir;
 use tokio::{process::Command, time::timeout};
+use uuid::Uuid;
 
 use crate::models::RunResult;
 
@@ -70,19 +77,38 @@ fn prepare_script(language: &str, code: &str) -> String {
     format!("package main\n\nfunc main() {{\n{code}\n}}\n")
 }
 
+fn build_script_path(base_dir: &Path, extension: &str) -> PathBuf {
+    base_dir.join(format!(".siriuspad-snippet-{}.{}", Uuid::new_v4(), extension))
+}
+
 #[tauri::command]
 pub async fn run_snippet(
     code: String,
     language: String,
     env_vars: HashMap<String, String>,
     timeout_secs: Option<u64>,
+    cwd: Option<String>,
 ) -> Result<RunResult, String> {
     let started_at = std::time::Instant::now();
     let interpreter = resolve_interpreter(&language)?;
     let extension = script_extension(&language);
-    let temp_dir = tempdir().map_err(|error| error.to_string())?;
-    let script_path = temp_dir.path().join(format!("snippet.{extension}"));
     let timeout_duration = Duration::from_secs(timeout_secs.unwrap_or(10));
+    let cwd_path = cwd
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from);
+    let temp_dir = cwd_path.is_none()
+        .then(|| tempdir().map_err(|error| error.to_string()))
+        .transpose()?;
+    let script_path = if let Some(dir) = cwd_path.as_deref() {
+        build_script_path(dir, extension)
+    } else {
+        temp_dir
+            .as_ref()
+            .map(|dir| dir.path().join(format!("snippet.{extension}")))
+            .ok_or_else(|| "Unable to prepare snippet directory.".to_string())?
+    };
 
     fs::write(&script_path, prepare_script(&language, &code)).map_err(|error| error.to_string())?;
 
@@ -93,9 +119,13 @@ pub async fn run_snippet(
     command.stderr(Stdio::piped());
     command.args(&interpreter.args);
     command.arg(&script_path);
+    if let Some(dir) = cwd_path.as_ref() {
+        command.current_dir(dir);
+    }
 
     let output = timeout(timeout_duration, command.output()).await;
     let duration_ms = started_at.elapsed().as_millis() as u64;
+    let _ = fs::remove_file(&script_path);
 
     match output {
         Ok(result) => {

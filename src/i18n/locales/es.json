@@ -248,6 +248,11 @@
   "updater": {
     "available": "SiriusPad {{version}} disponible",
     "description": "Una nueva versión está lista para instalar.",
+    "newVersionBadge": "Nueva actualización detectada",
+    "versionLabel": "Versión",
+    "updateActionLabel": "Acción recomendada",
+    "largeNotice": "Actualización de la app",
+    "restartNotice": "La descarga terminó. Reinicia SiriusPad ahora para instalar la nueva versión.",
     "downloading": "Descargando... {{progress}}%",
     "readyToInstall": "Lista para instalar",
     "installAndRestart": "Instalar y reiniciar",
@@ -260,23 +265,36 @@
   },
   "terminal": {
     "title": "Terminal",
-    "subtitle": "Shell local sin salir de la nota.",
-    "terminal": "Terminal",
-    "output": "Salida",
+    "subtitle": "cmd.exe en Windows y bash en Linux/macOS, siempre apuntando a la carpeta de la nota activa.",
+    "terminal": "Shell",
+    "output": "Snippet",
     "clear": "Limpiar",
     "run": "Ejecutar",
     "stop": "Detener",
     "toggle": "Alternar terminal (Ctrl+`)",
     "toggleTitle": "Abrir o cerrar terminal",
+    "noteFolder": "Carpeta de la nota",
+    "resetCwd": "Volver a la nota",
     "timeout": "timeout",
-    "ready": "Shell listo. Escribe un comando y presiona Enter.",
+    "ready": "{{shell}} listo. Escribe un comando y presiona Enter.",
+    "noteDirectoryReady": "El terminal ahora apunta a la carpeta de la nota: {{cwd}}",
+    "noteDirectoryFallback": "Usando el directorio predeterminado del shell: {{cwd}}",
     "cwdChanged": "Directorio actual: {{cwd}}",
     "processRunning": "Ya hay un proceso ejecutándose en el terminal.",
     "processFinished": "Proceso finalizado con código {{code}}{{signal}}.",
     "cancelled": "Proceso cancelado con Ctrl+C.",
-    "commandPlaceholder": "Escribe un comando...",
+    "blockMissingLanguage": "Este bloque no tiene lenguaje definido. Márcalo como js, ts, py o bash para ejecutarlo correctamente.",
+    "blockUnsupported": "Este bloque está marcado como {{language}}, que no es ejecutable aquí. Se envió al prompt para que puedas ajustarlo.",
+    "runningBlock": "Ejecutando bloque {{language}} con el intérprete correcto en la carpeta de la nota.",
+    "codeBlockLabel": "Bloque {{language}}",
+    "blockSource": "bloque",
+    "noteSource": "nota",
+    "commandPlaceholder": "Escribe un comando para {{shell}}...",
     "historyHint": "Las flechas recorren el historial",
     "runHint": "Enter ejecuta. Ctrl+C cancela el proceso actual.",
+    "cwdHint": "Usa cd para navegar o vuelve a la carpeta de la nota con un clic.",
+    "shellBanner": "Shell real: {{shell}}",
+    "outputHint": "Ejecuta la nota completa con Ctrl+Enter o usa el botón ▶ en bloques con lenguaje.",
     "unsupportedHint": "La salida aparece aquí cuando el lenguaje de la nota permite ejecución.",
     "noStdout": "Todavía no hay stdout.",
     "noStderr": "Todavía no hay stderr."
@@ -308,11 +326,11 @@
       },
       "terminal": {
         "title": "Un terminal embebido de verdad",
-        "description": "Ábrelo con Ctrl+`. Escribe comandos, navega el historial con las flechas, detén procesos con Ctrl+C y envía bloques de la nota al terminal."
+        "description": "Ábrelo con Ctrl+`. SiriusPad usa el shell real de la plataforma y empieza en la carpeta de la nota activa. Los comandos van al shell; los bloques js, ts, py y bash se ejecutan con el intérprete correcto."
       },
       "command": {
         "title": "Paleta de comandos sin confusión",
-        "description": "Ctrl+K abre el centro rápido de la app. Escribe una acción, el nombre de una nota o un espacio; usa las flechas para navegar y Enter para ejecutar."
+        "description": "Ctrl+K abre el centro rápido de la app. Escribe una acción, el nombre de una nota o un espacio; usa las flechas para navegar y Enter para ejecutar. Piensa en ella como la forma más rápida de encontrar cualquier cosa sin romper el flujo."
       },
       "shortcuts": {
         "title": "Atajos que vale la pena recordar",
@@ -331,7 +349,7 @@
       "welcomePoint2": "Espacios para separar contexto sin desorden.",
       "welcomePoint3": "Terminal, historial y atajos integrados al flujo.",
       "readyBadge": "Todo queda local y la app abre lista para continuar.",
-      "readyHint": "Empieza con Ctrl+N, usa Ctrl+K cuando no recuerdes un comando y abre el terminal con Ctrl+` cuando necesites ejecutar algo."
+      "readyHint": "Empieza con Ctrl+N, usa Ctrl+K cuando olvides una acción y abre el terminal con Ctrl+` para ejecutar comandos en la carpeta de la nota o correr bloques con lenguaje."
     }
   },
   "rightPanel": {

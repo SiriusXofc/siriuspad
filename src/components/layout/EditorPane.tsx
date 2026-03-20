@@ -18,6 +18,7 @@ import type {
 interface EditorPaneProps {
   platform: AppPlatform
   note: Note | null
+  noteDirectory: string | null
   settings: Settings
   workspaces: Workspace[]
   allTags: string[]
@@ -29,7 +30,19 @@ interface EditorPaneProps {
     result: RunResult | null
     running: boolean
     timeoutSeconds: number
+    lastRun: {
+      label: string
+      language: string
+      source: 'note' | 'block'
+    } | null
     run: () => Promise<void>
+    runSnippet: (input: {
+      code: string
+      language: string
+      label?: string
+      source?: 'note' | 'block'
+      cwd?: string | null
+    }) => Promise<void>
     clear: () => void
     setTimeoutSeconds: (value: number) => void
   }
@@ -49,6 +62,7 @@ interface EditorPaneProps {
 export function EditorPane({
   platform,
   note,
+  noteDirectory,
   settings,
   workspaces,
   allTags,
@@ -77,10 +91,20 @@ export function EditorPane({
   } | null>(null)
   const [terminalOpen, setTerminalOpen] = useState(false)
   const [terminalHeight, setTerminalHeight] = useState(180)
-  const [terminalSeed, setTerminalSeed] = useState<{
-    id: number
-    value: string
-  } | null>(null)
+  const [terminalSeed, setTerminalSeed] = useState<
+    | {
+        id: number
+        kind: 'command'
+        value: string
+      }
+    | {
+        id: number
+        kind: 'snippet'
+        code: string
+        language: string | null
+      }
+    | null
+  >(null)
 
   useEffect(() => {
     const onMouseMove = (event: MouseEvent) => {
@@ -209,11 +233,13 @@ export function EditorPane({
           >
             <MarkdownPreview
               content={note.content}
-              onRunCodeInTerminal={(code) => {
+              onRunCodeInTerminal={({ code, language }) => {
                 setTerminalOpen(true)
                 setTerminalSeed({
                   id: Date.now(),
-                  value: code,
+                  kind: 'snippet',
+                  code,
+                  language,
                 })
               }}
             />
@@ -224,6 +250,8 @@ export function EditorPane({
       <Terminal
         platform={platform}
         language={note.language}
+        noteTitle={note.title}
+        noteDirectory={noteDirectory}
         open={terminalOpen}
         height={terminalHeight}
         canRunSnippet={canRunSnippet}

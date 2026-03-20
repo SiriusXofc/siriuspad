@@ -65,20 +65,32 @@ function StepVisual({
     case 'terminal':
       return (
         <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 font-mono text-xs">
+          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] p-3">
+            <div className="text-[11px] uppercase tracking-[0.16em] text-[#c4b5fd]">
+              {t('terminal.terminal')}
+            </div>
+            <div className="mt-2 text-text-primary">cmd.exe / bash</div>
+            <div className="mt-1 text-text-secondary">
+              {t('terminal.noteFolder')} ~/siriuspad/notes/fix-janela
+            </div>
+          </div>
           <div className="rounded-md border border-border bg-[#111111] p-3">
-            <div className="text-text-secondary">~/project $ npm run dev</div>
+            <div className="text-text-secondary">~/siriuspad/notes/fix-janela $ npm run dev</div>
             <div className="mt-2 text-[#34d399]">VITE ready in 412ms</div>
           </div>
+          <div className="rounded-md border border-border bg-[#111111] p-3">
+            <div className="mb-1 text-text-secondary">{t('terminal.output')}</div>
+            <div className="text-[#34d399]">console.log('teste') -&gt; teste</div>
+          </div>
           <div className="flex flex-wrap gap-2 text-[11px]">
-            <span className="rounded-md border border-border bg-[#111111] px-2 py-1 text-text-secondary">
-              Ctrl+`
-            </span>
-            <span className="rounded-md border border-border bg-[#111111] px-2 py-1 text-text-secondary">
-              Enter
-            </span>
-            <span className="rounded-md border border-border bg-[#111111] px-2 py-1 text-text-secondary">
-              Ctrl+C
-            </span>
+            {['Ctrl+`', 'Enter', 'Ctrl+C', 'Ctrl+Enter'].map((shortcut) => (
+              <span
+                key={shortcut}
+                className="rounded-md border border-border bg-[#111111] px-2 py-1 text-text-secondary"
+              >
+                {shortcut}
+              </span>
+            ))}
           </div>
         </div>
       )
