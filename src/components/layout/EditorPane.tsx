@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { EXECUTABLE_LANGUAGES } from '@/lib/constants'
-import { NoteEnhancements } from '@/components/editor/NoteEnhancements'
 import { MarkdownPreview } from '@/components/editor/MarkdownPreview'
 import { NoteEditor, NoteEditorHeader } from '@/components/editor/NoteEditor'
 import { Terminal } from '@/components/editor/Terminal'
@@ -15,8 +14,6 @@ import type {
   Settings,
   Workspace,
 } from '@/types'
-
-type CalloutTemplateTone = 'note' | 'tip' | 'warning' | 'danger'
 
 interface EditorPaneProps {
   platform: AppPlatform
@@ -187,26 +184,6 @@ export function EditorPane({
   }
 
   const canRunSnippet = EXECUTABLE_LANGUAGES.has(note.language.toLowerCase())
-  const appendTemplate = (template: string) => {
-    const trimmedTemplate = template.trimEnd()
-    const nextContent = note.content.trim()
-      ? `${note.content.trimEnd()}\n\n${trimmedTemplate}\n`
-      : `${trimmedTemplate}\n`
-
-    onContentChange(nextContent)
-    onPreviewModeChange('split')
-  }
-
-  const insertCalloutTemplate = (tone: CalloutTemplateTone) => {
-    const templates: Record<CalloutTemplateTone, string> = {
-      note: `> [!NOTE] ${t('note.calloutTemplateNoteTitle')}\n> ${t('note.calloutTemplateNoteBody')}`,
-      tip: `> [!TIP] ${t('note.calloutTemplateTipTitle')}\n> ${t('note.calloutTemplateTipBody')}`,
-      warning: `> [!WARNING] ${t('note.calloutTemplateWarningTitle')}\n> ${t('note.calloutTemplateWarningBody')}`,
-      danger: `> [!BUG] ${t('note.calloutTemplateDangerTitle')}\n> ${t('note.calloutTemplateDangerBody')}`,
-    }
-
-    appendTemplate(templates[tone])
-  }
 
   return (
     <main className="flex min-h-0 flex-1 flex-col bg-base">
@@ -221,13 +198,6 @@ export function EditorPane({
         onPreviewModeChange={onPreviewModeChange}
         onOpenFindReplace={onOpenFindReplace}
         onOpenHistory={onOpenHistory}
-      />
-
-      <NoteEnhancements
-        key={note.id}
-        note={note}
-        onChecklistChange={(checklist) => onNoteChange({ checklist })}
-        onInsertCallout={insertCalloutTemplate}
       />
 
       <div className="relative flex min-h-0 flex-1">

@@ -7,6 +7,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.13] - 2026-03-20
+
+### Changed
+- área central da nota voltou a ficar mais limpa, mantendo checklist, cor e callouts no painel lateral
+- painel direito ficou mais organizado, com personalização visual melhor, cor livre e cards mais legíveis
+- abas, lista de notas e onboarding receberam acabamento visual para um fluxo mais minimalista e consistente
+
+### Fixed
+- tutorial inicial agora se adapta melhor a telas menores e mantém os botões acessíveis
+
 ## [1.0.12] - 2026-03-20
 
 ### Added

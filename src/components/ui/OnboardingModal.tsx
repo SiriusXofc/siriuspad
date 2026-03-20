@@ -144,7 +144,7 @@ function StepVisual({
       )
     case 'project':
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs">
+        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
           {[
             t('onboarding.visuals.projectPoint1'),
             t('onboarding.visuals.projectPoint2'),
@@ -191,7 +191,7 @@ function StepVisual({
       )
     case 'shortcuts':
       return (
-        <div className="grid gap-2 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs">
+        <div className="grid gap-2 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
           {shortcuts.map((shortcut) => (
             <div
               key={shortcut.key}
@@ -205,7 +205,7 @@ function StepVisual({
       )
     case 'practice':
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs">
+        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
           {[
             {
               step: '01',
@@ -241,7 +241,7 @@ function StepVisual({
               </div>
             </div>
           ))}
-          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.08)] px-3 py-3 text-xs leading-6 text-text-secondary">
+          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.08)] px-3 py-3 text-xs leading-6 text-text-secondary sm:col-span-2">
             {t('onboarding.visuals.practiceFooter')}
           </div>
         </div>
@@ -295,79 +295,81 @@ export function OnboardingModal({ onComplete }: OnboardingModalProps) {
   )
 
   return (
-    <div className="absolute inset-0 z-[90] flex items-center justify-center bg-black/85 px-4 py-8">
-      <div className="w-full max-w-[540px] rounded-[12px] border border-[#2d2060] bg-[#111111]">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <div className="inline-flex items-center gap-3">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#161616] text-sm text-text-primary">
-              {step.icon}
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-text-primary">
-                {t(`onboarding.steps.${step.id}.title`)}
-              </p>
-              <p className="text-xs text-text-secondary">
-                {index + 1} / {STEPS.length}
-              </p>
+    <div className="absolute inset-0 z-[90] overflow-y-auto bg-black/85 px-4 py-4 sm:py-8">
+      <div className="flex min-h-full items-start justify-center sm:items-center">
+        <div className="flex w-full max-w-[560px] flex-col overflow-hidden rounded-[12px] border border-[#2d2060] bg-[#111111] sm:max-h-[calc(100vh-4rem)]">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div className="inline-flex items-center gap-3">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#161616] text-sm text-text-primary">
+                {step.icon}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-text-primary">
+                  {t(`onboarding.steps.${step.id}.title`)}
+                </p>
+                <p className="text-xs text-text-secondary">
+                  {index + 1} / {STEPS.length}
+                </p>
+              </div>
             </div>
-          </div>
-          <button
-            type="button"
-            className="text-xs text-text-secondary transition hover:text-text-primary"
-            onClick={onComplete}
-          >
-            {t('onboarding.skip')}
-          </button>
-        </div>
-
-        <div className="px-5 py-5">
-          <p className="mb-4 text-sm leading-7 text-text-secondary">
-            {t(`onboarding.steps.${step.id}.description`)}
-          </p>
-
-          <StepVisual step={step} shortcuts={shortcuts} />
-
-          <div className="mt-5 flex items-center justify-center gap-2">
-            {STEPS.map((item, dotIndex) => (
-              <span
-                key={item.id}
-                className={`h-2 w-2 rounded-full ${
-                  dotIndex === index ? 'bg-accent' : 'bg-[#2a2a2a]'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-border px-5 py-4">
-          <button
-            type="button"
-            className="rounded-md border border-border bg-transparent px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary disabled:opacity-40"
-            onClick={() => setIndex((current) => Math.max(0, current - 1))}
-            disabled={index === 0}
-          >
-            {t('onboarding.prev')}
-          </button>
-
-          {isLast ? (
             <button
               type="button"
-              className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+              className="text-xs text-text-secondary transition hover:text-text-primary"
               onClick={onComplete}
             >
-              {t('onboarding.start')}
+              {t('onboarding.skip')}
             </button>
-          ) : (
+          </div>
+
+          <div className="min-h-0 overflow-y-auto px-5 py-5">
+            <p className="mb-4 text-sm leading-7 text-text-secondary">
+              {t(`onboarding.steps.${step.id}.description`)}
+            </p>
+
+            <StepVisual step={step} shortcuts={shortcuts} />
+
+            <div className="mt-5 flex items-center justify-center gap-2">
+              {STEPS.map((item, dotIndex) => (
+                <span
+                  key={item.id}
+                  className={`h-2 w-2 rounded-full ${
+                    dotIndex === index ? 'bg-accent' : 'bg-[#2a2a2a]'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-border px-5 py-4">
             <button
               type="button"
-              className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
-              onClick={() =>
-                setIndex((current) => Math.min(STEPS.length - 1, current + 1))
-              }
+              className="rounded-md border border-border bg-transparent px-3 py-2 text-sm text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary disabled:opacity-40"
+              onClick={() => setIndex((current) => Math.max(0, current - 1))}
+              disabled={index === 0}
             >
-              {t('onboarding.next')}
+              {t('onboarding.prev')}
             </button>
-          )}
+
+            {isLast ? (
+              <button
+                type="button"
+                className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+                onClick={onComplete}
+              >
+                {t('onboarding.start')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+                onClick={() =>
+                  setIndex((current) => Math.min(STEPS.length - 1, current + 1))
+                }
+              >
+                {t('onboarding.next')}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

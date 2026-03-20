@@ -176,6 +176,43 @@ export default function App() {
   const showTabs = !uiState.isZenMode
   const showRightPanel = !uiState.isZenMode && !uiState.isFocusMode
 
+  const insertCalloutIntoActiveNote = (input: {
+    tone: 'note' | 'tip' | 'warning'
+    title?: string
+  }) => {
+    if (!notes.activeNote) {
+      return
+    }
+
+    const templates = {
+      note: {
+        marker: 'NOTE',
+        title: t('note.calloutTemplateNoteTitle'),
+        body: t('note.calloutTemplateNoteBody'),
+      },
+      tip: {
+        marker: 'TIP',
+        title: t('note.calloutTemplateTipTitle'),
+        body: t('note.calloutTemplateTipBody'),
+      },
+      warning: {
+        marker: 'WARNING',
+        title: t('note.calloutTemplateWarningTitle'),
+        body: t('note.calloutTemplateWarningBody'),
+      },
+    } as const
+
+    const template = templates[input.tone]
+    const title = input.title?.trim() || template.title
+    const block = `> [!${template.marker}] ${title}\n> ${template.body}`
+    const nextContent = notes.activeNote.content.trim()
+      ? `${notes.activeNote.content.trimEnd()}\n\n${block}\n`
+      : `${block}\n`
+
+    notes.updateActiveContent(nextContent)
+    uiState.setPreviewMode('split')
+  }
+
   const closeWindowAfterDecision = async (mode: 'save' | 'discard') => {
     if (mode === 'save') {
       await useNotesStore.getState().saveAllDirtyTabs()
@@ -1351,10 +1388,12 @@ export default function App() {
 
         {showRightPanel ? (
           <RightPanel
+            key={`${notes.activeNote?.id ?? 'empty'}:${notes.activeNote?.color ?? 'none'}`}
             note={notes.activeNote}
             notes={workspaceScopedNotes}
             activeTag={notes.activeTag}
             onTagClick={(tag) => notes.setActiveTag(tag)}
+            onNoteChange={(patch) => notes.updateActiveNote(patch)}
             onColorSelect={(color) => {
               if (!notes.activeNote) {
                 return
@@ -1362,6 +1401,7 @@ export default function App() {
 
               notes.updateActiveNote({ color })
             }}
+            onInsertCallout={insertCalloutIntoActiveNote}
           />
         ) : null}
       </div>

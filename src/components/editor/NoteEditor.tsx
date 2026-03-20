@@ -11,7 +11,6 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
-  NOTE_COLOR_SWATCHES,
   NOTE_LANGUAGES,
 } from '@/lib/constants'
 import { withAlpha } from '@/lib/color'
@@ -226,33 +225,6 @@ export function NoteEditorHeader({
               <option value="baixa">{t('priority.baixa')}</option>
             </select>
           </label>
-
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-[0.16em] text-text-muted">
-              {t('note.colorLabel')}
-            </span>
-            <div className="flex items-center gap-1">
-              {NOTE_COLOR_SWATCHES.map((swatch) => {
-                const selected = note.color === swatch
-
-                return (
-                  <button
-                    key={swatch}
-                    type="button"
-                    className={`h-6 w-6 rounded-md border transition ${
-                      selected
-                        ? 'border-white/50 ring-1 ring-white/35'
-                        : 'border-border hover:border-focus'
-                    }`}
-                    style={{ backgroundColor: swatch }}
-                    onClick={() => onChange({ color: selected ? undefined : swatch })}
-                    aria-label={`${t('note.colorLabel')}: ${swatch}`}
-                    aria-pressed={selected}
-                  />
-                )
-              })}
-            </div>
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

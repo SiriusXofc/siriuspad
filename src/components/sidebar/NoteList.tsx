@@ -119,9 +119,17 @@ export function NoteList({
               />
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-[12px] font-medium text-text-primary">
-                    {note.title}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    {note.color ? (
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full border border-white/10"
+                        style={{ backgroundColor: note.color }}
+                      />
+                    ) : null}
+                    <p className="truncate text-[12px] font-medium text-text-primary">
+                      {note.title || t('common.untitled')}
+                    </p>
+                  </div>
                 </div>
                 {note.pinned ? (
                   <Pin

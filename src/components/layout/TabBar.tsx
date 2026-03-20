@@ -25,17 +25,17 @@ export function TabBar({
 
   return (
     <div className="border-b border-border bg-[#0f0f0f]">
-      <div className="flex h-8 overflow-x-auto px-2">
+      <div className="flex h-9 items-end gap-1 overflow-x-auto px-2 pt-2">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId
 
           return (
             <div
               key={tab.id}
-              className={`group inline-flex h-full min-w-0 shrink-0 cursor-pointer items-center gap-2 border-r border-border px-3 text-[12px] transition ${
+              className={`group inline-flex h-8 min-w-0 shrink-0 cursor-pointer items-center gap-2 rounded-t-md border px-3 text-[12px] transition ${
                 isActive
-                  ? 'bg-[#161616] text-text-primary'
-                  : 'bg-transparent text-text-secondary hover:bg-hover hover:text-text-primary'
+                  ? 'border-border border-b-[#161616] bg-[#161616] text-text-primary'
+                  : 'border-transparent bg-transparent text-text-secondary hover:border-border/70 hover:bg-hover hover:text-text-primary'
               }`}
               style={{
                 boxShadow: tab.color ? `inset 0 -2px 0 ${tab.color}` : undefined,

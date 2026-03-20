@@ -98,10 +98,10 @@ jobs:
             Nova versão pública do SiriusPad.
 
             Destaques desta versão:
-            - checklist real por nota
-            - callout blocks no preview com sintaxe estilo `> [!TIP]`
-            - cor da nota aplicada de forma visível no layout
-            - tutorial de primeiro uso mais prático, com roteiro real de teste
+            - editor central mais limpo, com organização da nota concentrada no painel lateral
+            - painel direito redesenhado para cor, checklist e callouts ficarem mais práticos
+            - lista de notas, abas e onboarding com visual mais consistente
+            - tutorial inicial mais confortável em telas menores
 
             Distribuição oficial:
             - `.deb` para Linux
