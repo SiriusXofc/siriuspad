@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { UpdateInfo } from '@/types'
 
@@ -27,8 +27,58 @@ const INITIAL_STATE: UpdateState = {
 }
 
 export function useUpdater(enabled = true) {
-  const checkedRef = useRef(false)
   const [state, setState] = useState<UpdateState>(INITIAL_STATE)
+
+  useEffect(() => {
+    if (!enabled) {
+      return
+    }
+
+    let disposed = false
+
+    const checkForUpdates = async () => {
+      try {
+        const update = await invoke<UpdateInfo | null>('check_for_update')
+        if (!update || disposed) {
+          return
+        }
+
+        setState((current) => {
+          if (
+            current.available?.version === update.version ||
+            current.downloading ||
+            current.readyToInstall
+          ) {
+            return current
+          }
+
+          return {
+            ...current,
+            available: update,
+            error: null,
+          }
+        })
+      } catch (error) {
+        console.warn('Updater check unavailable', error)
+      }
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void checkForUpdates()
+    }, 1500)
+
+    const onFocus = () => {
+      void checkForUpdates()
+    }
+
+    window.addEventListener('focus', onFocus)
+
+    return () => {
+      disposed = true
+      window.clearTimeout(timeoutId)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [enabled])
 
   useEffect(() => {
     const setupProgressListener = async () => {
@@ -55,35 +105,6 @@ export function useUpdater(enabled = true) {
       unlisten?.()
     }
   }, [])
-
-  useEffect(() => {
-    if (!enabled || checkedRef.current) {
-      return
-    }
-
-    checkedRef.current = true
-
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const update = await invoke<UpdateInfo | null>('check_for_update')
-        if (!update) {
-          return
-        }
-
-        setState((current) => ({
-          ...current,
-          available: update,
-          error: null,
-        }))
-      } catch {
-        // Ignore updater availability issues silently.
-      }
-    }, 3000)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [enabled])
 
   const dismiss = () => {
     setState(INITIAL_STATE)

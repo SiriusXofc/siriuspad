@@ -37,6 +37,7 @@ interface NotesState {
   saveNote: (id: string) => Promise<void>
   saveAllDirtyTabs: () => Promise<void>
   duplicateActiveNote: () => Promise<void>
+  trashNote: (id: string) => Promise<void>
   trashActiveNote: () => Promise<void>
   setActiveTag: (tag: string | null) => void
   replaceWorkspaceId: (currentId: string, nextId: string) => void
@@ -389,23 +390,26 @@ export const useNotesStore = create<NotesState>((set, get) => ({
       content: current.content,
     })
   },
-  async trashActiveNote() {
-    const current = get().activeNote
+  async trashNote(id) {
+    const state = get()
+    const current = state.noteDrafts[id] ?? state.notes.find((note) => note.id === id)
 
     if (!current) {
       return
     }
 
     await invoke('trash_note', {
-      id: current.id,
+      id,
     })
 
-    const state = get()
-    const remainingNotes = state.notes.filter((note) => note.id !== current.id)
-    const nextTabs = state.openTabs.filter((tab) => tab.id !== current.id)
-    const nextDrafts = removeFromRecord(state.noteDrafts, current.id)
-    const nextStatuses = removeFromRecord(state.saveStatuses, current.id)
-    const nextActiveId = nextTabs[0]?.id ?? remainingNotes[0]?.id ?? null
+    const remainingNotes = state.notes.filter((note) => note.id !== id)
+    const nextTabs = state.openTabs.filter((tab) => tab.id !== id)
+    const nextDrafts = removeFromRecord(state.noteDrafts, id)
+    const nextStatuses = removeFromRecord(state.saveStatuses, id)
+    const nextActiveId =
+      state.activeNoteId === id
+        ? nextTabs[0]?.id ?? remainingNotes[0]?.id ?? null
+        : state.activeNoteId
 
     set({
       notes: remainingNotes,
@@ -419,6 +423,15 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     if (nextActiveId && !nextDrafts[nextActiveId]) {
       await get().openInTab(nextActiveId)
     }
+  },
+  async trashActiveNote() {
+    const current = get().activeNote
+
+    if (!current) {
+      return
+    }
+
+    await get().trashNote(current.id)
   },
   setActiveTag(tag) {
     set({ activeTag: tag })

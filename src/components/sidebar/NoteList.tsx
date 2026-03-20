@@ -40,6 +40,11 @@ export function NoteList({
   const { t, i18n } = useTranslation()
   const [menu, setMenu] = useState<ContextMenuState | null>(null)
 
+  const runMenuAction = (action: () => Promise<void>) => {
+    setMenu(null)
+    void action()
+  }
+
   useEffect(() => {
     if (!menu) {
       return
@@ -165,28 +170,28 @@ export function NoteList({
           <button
             type="button"
             className="workspace-menu-item"
-            onClick={() => void onOpenNote(menu.note.id)}
+            onClick={() => runMenuAction(() => onOpenNote(menu.note.id))}
           >
             {t('common.open')}
           </button>
           <button
             type="button"
             className="workspace-menu-item"
-            onClick={() => void onDuplicateNote(menu.note.id)}
+            onClick={() => runMenuAction(() => onDuplicateNote(menu.note.id))}
           >
             {t('commands.duplicateNote')}
           </button>
           <button
             type="button"
             className="workspace-menu-item"
-            onClick={() => void onTogglePinNote(menu.note.id)}
+            onClick={() => runMenuAction(() => onTogglePinNote(menu.note.id))}
           >
             {menu.note.pinned ? t('commands.unpinNote') : t('commands.pinNote')}
           </button>
           <button
             type="button"
             className="workspace-menu-item text-red hover:bg-red/10"
-            onClick={() => void onDeleteNote(menu.note.id)}
+            onClick={() => runMenuAction(() => onDeleteNote(menu.note.id))}
           >
             {t('common.delete')}
           </button>

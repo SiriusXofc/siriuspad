@@ -288,8 +288,7 @@ export default function App() {
           await useNotesStore.getState().saveNote(noteId)
         }
 
-        await invoke('trash_note', { id: noteId })
-        await notes.loadNotes()
+        await useNotesStore.getState().trashNote(noteId)
         useUiStore.getState().closeConfirm()
         useUiStore.getState().pushToast({
           kind: 'info',
