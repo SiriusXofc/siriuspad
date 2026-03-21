@@ -16,6 +16,7 @@ import { useUpdater } from "@/hooks/useUpdater";
 import {
   DEFAULT_WORKSPACE_ID,
   UI_ZOOM_MAX,
+  UI_ZOOM_BASELINE,
   UI_ZOOM_MIN,
   UI_ZOOM_STEP,
   WORKSPACE_COLORS,
@@ -66,6 +67,10 @@ function cycleValue(values: string[], current: string) {
 
 function clampUiZoom(value: number) {
   return Math.min(UI_ZOOM_MAX, Math.max(UI_ZOOM_MIN, Number(value.toFixed(2))));
+}
+
+function getEffectiveUiZoom(uiZoom: number) {
+  return Number((uiZoom * UI_ZOOM_BASELINE).toFixed(3));
 }
 
 function isEditableTarget(target: EventTarget | null) {
@@ -1140,14 +1145,16 @@ export default function App() {
     let cancelled = false;
 
     const applyUiZoom = async () => {
+      const effectiveZoom = getEffectiveUiZoom(settingsState.settings.uiZoom);
+
       try {
-        await getCurrentWebviewWindow().setZoom(settingsState.settings.uiZoom);
+        await getCurrentWebviewWindow().setZoom(effectiveZoom);
         if (typeof document !== "undefined") {
           document.body.style.zoom = "";
         }
       } catch (error) {
         if (typeof document !== "undefined") {
-          document.body.style.zoom = String(settingsState.settings.uiZoom);
+          document.body.style.zoom = String(effectiveZoom);
         }
 
         if (!cancelled) {

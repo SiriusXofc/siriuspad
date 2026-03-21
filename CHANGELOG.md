@@ -7,6 +7,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.27] - 2026-03-21
+
+### Changed
+
+- onboarding ficou mais prático e alinhado com o fluxo real do app, explicando melhor checklist, Markdown ao vivo, painel direito e adaptação do sistema
+- configurações agora podem seguir automaticamente o tema e o idioma do sistema, com fallback manual claro para quem prefere fixar a interface
+- tema claro recebeu revisão geral de contraste, com tons neutros e cores de destaque mais legíveis em painéis, badges, Markdown e terminal
+- escala padrão do app em `100%` ficou mais confortável, reduzindo a sensação de interface exagerada no desktop
+
+### Fixed
+
+- inicialização do i18n deixa de nascer sempre em `pt-BR` quando o usuário ainda não escolheu um idioma manual
+- componentes do tema claro que ainda herdavam cores escuras ou contraste fraco passaram a respeitar os tokens do tema atual
+- renderização ao vivo do Markdown no editor ficou mais consistente com títulos, código inline, listas e callouts
+
 ## [1.0.22] - 2026-03-20
 
 ### Changed

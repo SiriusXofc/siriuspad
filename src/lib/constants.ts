@@ -11,8 +11,9 @@ export const DEFAULT_WORKSPACE_ID = 'general'
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'dark',
+  useSystemTheme: true,
   uiZoom: 1,
-  fontSize: 14,
+  fontSize: 13,
   fontFamily: 'JetBrains Mono',
   tabSize: 2,
   wordWrap: true,
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
   githubToken: '',
   variables: {},
   language: 'pt-BR',
+  useSystemLanguage: true,
 }
 
 export const DEFAULT_WORKSPACE: Workspace = {
@@ -101,6 +103,7 @@ export const FONT_OPTIONS = [
 export const UI_ZOOM_MIN = 0.65
 export const UI_ZOOM_MAX = 1.6
 export const UI_ZOOM_STEP = 0.05
+export const UI_ZOOM_BASELINE = 0.92
 
 export const LANGUAGE_OPTIONS: Array<{ value: AppLanguage; label: string }> = [
   { value: 'en', label: 'English' },

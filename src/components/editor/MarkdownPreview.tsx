@@ -243,7 +243,7 @@ export function MarkdownPreview({
           return (
             <code
               {...props}
-              className={`${props.className ?? ''} rounded-md bg-[#161616] px-1.5 py-0.5 text-[0.9em]`}
+              className={`${props.className ?? ''} rounded-md bg-elevated px-1.5 py-0.5 text-[0.9em]`}
             />
           )
         },
@@ -252,11 +252,11 @@ export function MarkdownPreview({
           const language = extractCodeLanguage(props.children)
 
           return (
-            <div className="relative mb-4 overflow-hidden rounded-lg border border-border bg-[#0f0f0f]">
+            <div className="relative mb-4 overflow-hidden rounded-lg border border-border bg-base">
               {onRunCodeInTerminal && code ? (
                 <button
                   type="button"
-                  className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-[#161616] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+                  className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-elevated px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
                   onClick={() =>
                     onRunCodeInTerminal({
                       code,
@@ -297,7 +297,7 @@ export function MarkdownPreview({
           return (
             <th
               {...props}
-              className="border-b border-border bg-[#161616] px-3 py-2 text-left font-medium"
+              className="border-b border-border bg-elevated px-3 py-2 text-left font-medium"
             />
           )
         },
@@ -312,7 +312,7 @@ export function MarkdownPreview({
 
   return (
     <div
-      className="h-full overflow-y-auto bg-[#111111] px-6 py-5"
+      className="h-full overflow-y-auto bg-surface px-6 py-5"
       style={{
         boxShadow: accentColor ? `inset 3px 0 0 ${accentColor}` : undefined,
         backgroundImage: withAlpha(accentColor, 0.05)
@@ -343,7 +343,8 @@ export function MarkdownPreview({
                   style={{
                     borderColor: palette.border,
                     color: palette.badge,
-                    backgroundColor: 'rgba(0,0,0,0.18)',
+                    backgroundColor:
+                      withAlpha(palette.badge, 0.12) ?? 'var(--bg-elevated)',
                   }}
                 >
                   {palette.label}

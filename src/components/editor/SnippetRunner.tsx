@@ -91,7 +91,7 @@ export function SnippetRunner({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <section className="rounded-xl border border-border bg-[#0a0a0a] p-3">
+        <section className="rounded-xl border border-border bg-base p-3">
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
             {t('runner.stdout')}
           </h3>
@@ -99,7 +99,7 @@ export function SnippetRunner({
             {result?.stdout || t('runner.noStdout')}
           </pre>
         </section>
-        <section className="rounded-xl border border-border bg-[#0a0a0a] p-3">
+        <section className="rounded-xl border border-border bg-base p-3">
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-text-muted">
             {t('runner.stderr')}
           </h3>

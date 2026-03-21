@@ -81,6 +81,7 @@ export interface ThemeDefinition {
 
 export interface Settings {
   theme: AppTheme
+  useSystemTheme: boolean
   uiZoom: number
   fontSize: number
   fontFamily: string
@@ -93,6 +94,7 @@ export interface Settings {
   githubToken: string
   variables: Record<string, string>
   language: AppLanguage
+  useSystemLanguage: boolean
 }
 
 export type SaveStatus = 'saved' | 'dirty' | 'saving' | 'error'

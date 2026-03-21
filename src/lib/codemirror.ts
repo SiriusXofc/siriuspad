@@ -577,10 +577,10 @@ export const siriusPadEditorTheme = EditorView.theme({
     borderLeftColor: 'var(--accent)',
   },
   '.cm-selectionBackground, .cm-content ::selection': {
-    backgroundColor: 'rgba(124, 106, 247, 0.22) !important',
+    backgroundColor: 'var(--selection) !important',
   },
   '.cm-activeLine': {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'color-mix(in srgb, var(--bg-active) 28%, transparent)',
   },
   '.cm-gutters': {
     backgroundColor: 'transparent',

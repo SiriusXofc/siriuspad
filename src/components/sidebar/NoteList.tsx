@@ -147,7 +147,7 @@ export function NoteList({
                     <div className="flex items-center gap-2">
                       {note.color ? (
                         <span
-                          className="h-2 w-2 shrink-0 rounded-full border border-white/10"
+                          className="h-2 w-2 shrink-0 rounded-full border border-border"
                           style={{ backgroundColor: note.color }}
                         />
                       ) : null}

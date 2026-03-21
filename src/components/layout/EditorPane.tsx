@@ -131,7 +131,7 @@ export function EditorPane({
   if (!note) {
     return (
       <main className="motion-fade-in flex min-h-0 flex-1 items-center justify-center bg-base">
-        <div className="motion-pop max-w-md rounded-lg border border-dashed border-border bg-[#111111] px-6 py-10 text-center">
+        <div className="motion-pop max-w-md rounded-lg border border-dashed border-border bg-surface px-6 py-10 text-center">
           <p className="text-sm font-semibold text-text-primary">
             {t("note.noActive")}
           </p>
@@ -140,7 +140,7 @@ export function EditorPane({
           </p>
           <button
             type="button"
-            className="mt-5 rounded-md border border-border bg-[#161616] px-4 py-2 text-sm font-medium text-text-primary transition hover:border-focus hover:bg-hover"
+            className="mt-5 rounded-md border border-border bg-elevated px-4 py-2 text-sm font-medium text-text-primary transition hover:border-focus hover:bg-hover"
             onClick={() => void onCreateNote()}
           >
             {t("note.createFirstAction")}
@@ -170,7 +170,7 @@ export function EditorPane({
       />
 
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#111111]">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface">
           <NoteEditor
             noteId={note.id}
             value={note.content}

@@ -99,13 +99,12 @@ jobs:
             Nova versão pública do SiriusPad.
 
             Destaques desta versão:
-            - editor com Markdown ao vivo: títulos, listas, checklist, callouts e código aparecem formatados enquanto você escreve
-            - checklist e blocos da nota ficaram concentrados no painel direito, com fluxo mais limpo no editor
-            - refinamentos de layout e usabilidade no desktop e na beta mobile
-            - mobile agora pode ocultar detalhes da nota para liberar espaço de escrita
-            - interface ganhou tema claro além das variantes escuras
-            - pacote Linux agora inclui `.deb` e `.AppImage`, com descrição pública mais clara para distribuição
-            - APK beta Android agora usa assinatura estável para facilitar reinstalação por cima da versão anterior
+            - tutorial inicial ficou mais claro, mais prático e mais coerente com o fluxo real do SiriusPad
+            - configurações agora podem seguir automaticamente o tema e o idioma do sistema
+            - tema claro recebeu contraste melhor, especialmente em tons neutros, avisos, tags e estados informativos
+            - escala padrão da interface ficou mais equilibrada no desktop, sem aquele visual exagerado em `100%`
+            - editor ao vivo continua mostrando títulos, listas, checklist, callouts e código sem depender de um preview separado
+            - pacote Linux segue com `.deb` e `.AppImage`, e o desktop continua com `.exe`, `.apk` beta e `latest.json`
 
             Distribuição oficial:
             - `.deb` para Linux

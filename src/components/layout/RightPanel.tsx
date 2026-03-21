@@ -237,7 +237,7 @@ export function RightPanel({
             </div>
           <div className="flex items-center gap-2 rounded-md border border-border bg-base px-2 py-1 text-[11px] text-text-secondary">
               <span
-                className="h-2.5 w-2.5 rounded-full border border-white/10"
+                className="h-2.5 w-2.5 rounded-full border border-border"
                 style={{ backgroundColor: note?.color ?? "#2a2a2a" }}
               />
               {note?.color ?? t("common.none")}
@@ -259,7 +259,7 @@ export function RightPanel({
                   type="button"
                   className={`inline-flex h-10 items-center justify-center gap-2 rounded-md border px-3 text-[11px] transition ${
                     active
-                      ? "border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-text-primary"
+                      ? "border-accent/35 bg-accent/10 text-text-primary"
                       : "border-border bg-base text-text-secondary hover:border-focus hover:bg-hover hover:text-text-primary"
                   }`}
                   onClick={() => setMobileSection(item.key)}
@@ -310,7 +310,7 @@ export function RightPanel({
               <div className="mb-3 rounded-md border border-border bg-base px-3 py-2">
                 <div className="flex items-center gap-2">
                   <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/10"
+                    className="h-2.5 w-2.5 shrink-0 rounded-full border border-border"
                     style={{ backgroundColor: note.color ?? "#2a2a2a" }}
                   />
                   <div className="min-w-0">
@@ -335,7 +335,7 @@ export function RightPanel({
                 </button>
                 <button
                   type="button"
-                  className="inline-flex min-w-0 items-center justify-center gap-2 rounded-md border border-border bg-base px-3 py-2 text-xs text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-w-0 items-center justify-center gap-2 rounded-md border border-border bg-base px-3 py-2 text-xs text-text-secondary transition hover:border-red/30 hover:bg-red/10 hover:text-red disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => updateChecklist([])}
                   disabled={!checklist.length}
                 >
@@ -361,12 +361,14 @@ export function RightPanel({
                       <button
                         key={swatch}
                         type="button"
-                        className={`h-9 rounded-md border transition ${
-                          selected
-                            ? "border-white/50 ring-1 ring-white/35"
-                            : "border-border hover:border-focus"
-                        }`}
-                        style={{ backgroundColor: swatch }}
+                        className="h-9 rounded-md border transition hover:border-focus"
+                        style={{
+                          backgroundColor: swatch,
+                          borderColor: selected ? "var(--text-primary)" : "var(--border)",
+                          boxShadow: selected
+                            ? "0 0 0 1px var(--bg-surface), 0 0 0 2px var(--border-focus)"
+                            : undefined,
+                        }}
                         onClick={() =>
                           onColorSelect(selected ? undefined : swatch)
                         }

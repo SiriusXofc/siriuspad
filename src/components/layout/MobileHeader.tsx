@@ -34,7 +34,7 @@ export function MobileHeader({
     "inline-flex h-11 w-11 items-center justify-center rounded-md border border-border bg-elevated text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary";
 
   const activeButtonClassName =
-    "inline-flex h-11 w-11 items-center justify-center rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-text-primary transition hover:border-[#4a3590] hover:bg-[rgba(124,58,237,0.18)]";
+    "inline-flex h-11 w-11 items-center justify-center rounded-md border border-accent/35 bg-accent/10 text-text-primary transition hover:border-accent/50 hover:bg-accent/15";
 
   return (
     <header

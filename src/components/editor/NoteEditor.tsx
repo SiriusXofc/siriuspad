@@ -164,7 +164,7 @@ export function NoteEditorHeader({
         >
           <button
             type="button"
-            className={`interactive-lift inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-[#161616] text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary ${
+            className={`interactive-lift inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-elevated text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary ${
               compact ? 'w-8 justify-center px-0' : 'px-2.5'
             }`}
             onClick={onOpenFindReplace}
@@ -177,7 +177,7 @@ export function NoteEditorHeader({
 
           <button
             type="button"
-            className={`interactive-lift inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-[#161616] text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary ${
+            className={`interactive-lift inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-elevated text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary ${
               compact ? 'w-8 justify-center px-0' : 'px-2.5'
             }`}
             onClick={onOpenHistory}
@@ -190,7 +190,7 @@ export function NoteEditorHeader({
 
           <button
             type="button"
-            className="interactive-lift inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#161616] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+            className="interactive-lift inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-elevated text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
             onClick={() => void onTogglePin()}
             title={note.pinned ? t('commands.unpinNote') : t('commands.pinNote')}
           >
@@ -203,7 +203,7 @@ export function NoteEditorHeader({
 
           <button
             type="button"
-            className="interactive-lift inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#161616] text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171]"
+            className="interactive-lift inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-elevated text-text-secondary transition hover:border-red/30 hover:bg-red/10 hover:text-red"
             onClick={() => void onDelete()}
             title={t('commands.deleteNote')}
           >

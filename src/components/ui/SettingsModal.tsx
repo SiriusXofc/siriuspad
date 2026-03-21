@@ -135,6 +135,10 @@ export function SettingsModal({
   const [variableKey, setVariableKey] = useState('')
   const [variableValue, setVariableValue] = useState('')
   const zoomPercent = Math.round(settings.uiZoom * 100)
+  const activeThemeLabel = t(`themes.${settings.theme}`)
+  const activeLanguageLabel =
+    LANGUAGE_OPTIONS.find((option) => option.value === settings.language)?.label ??
+    settings.language
 
   const shortcuts = [
     { key: 'Ctrl+N', action: t('commands.newNote') },
@@ -180,8 +184,8 @@ export function SettingsModal({
             <input
               className={controlClassName()}
               type="number"
-              min={12}
-              max={20}
+              min={11}
+              max={18}
               value={settings.fontSize}
               onChange={(event) =>
                 void onUpdate({ fontSize: Number(event.target.value) })
@@ -260,9 +264,44 @@ export function SettingsModal({
         <div className="grid gap-4 md:grid-cols-2">
           <Field
             label={t('settings.fields.theme')}
-            description={t('settings.fields.themeHint')}
+            description={
+              settings.useSystemTheme
+                ? t('settings.fields.followSystemThemeActive', {
+                    theme: activeThemeLabel,
+                  })
+                : t('settings.fields.themeManualHint')
+            }
           >
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-3">
+              <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-base px-3 py-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-text-primary">
+                    {t('settings.fields.followSystemTheme')}
+                  </div>
+                  <div className="mt-1 text-xs leading-6 text-text-secondary">
+                    {t('settings.fields.followSystemThemeHint')}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className={`rounded-md border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] transition ${
+                    settings.useSystemTheme
+                      ? 'border-accent/35 bg-accent/10 text-accent'
+                      : 'border-border bg-surface text-text-secondary hover:border-focus hover:bg-hover hover:text-text-primary'
+                  }`}
+                  onClick={() =>
+                    void onUpdate({
+                      useSystemTheme: !settings.useSystemTheme,
+                    })
+                  }
+                >
+                  {settings.useSystemTheme
+                    ? t('settings.fields.followingSystem')
+                    : t('settings.fields.manualMode')}
+                </button>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
               {THEMES.map((theme) => {
                 const active = settings.theme === theme.id
 
@@ -275,19 +314,27 @@ export function SettingsModal({
                         ? 'border-accent bg-accent/10 text-text-primary'
                         : 'border-border bg-surface text-text-secondary hover:border-focus hover:bg-hover hover:text-text-primary'
                     }`}
-                    onClick={() => void onUpdate({ theme: theme.id })}
+                    onClick={() =>
+                      void onUpdate({
+                        useSystemTheme: false,
+                        theme: theme.id,
+                      })
+                    }
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-medium">{t(`themes.${theme.id}`)}</span>
                       {active ? (
                         <span className="rounded-md border border-accent/40 bg-accent/10 px-2 py-1 text-[11px] uppercase tracking-[0.16em] text-text-primary">
-                          {t('settings.fields.selectedTheme')}
+                          {settings.useSystemTheme
+                            ? t('settings.fields.systemModeBadge')
+                            : t('settings.fields.selectedTheme')}
                         </span>
                       ) : null}
                     </div>
                   </button>
                 )
               })}
+            </div>
             </div>
           </Field>
           <Field label={t('settings.fields.fontFamily')}>
@@ -372,20 +419,62 @@ export function SettingsModal({
         onReset={() => onResetSection('language')}
         resetLabel={t('settings.reset')}
       >
-        <Field label={t('settings.fields.language')}>
-          <select
-            className={controlClassName()}
-            value={settings.language}
-            onChange={(event) =>
-              void onUpdate({ language: event.target.value as AppLanguage })
-            }
-          >
-            {LANGUAGE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+        <Field
+          label={t('settings.fields.language')}
+          description={
+            settings.useSystemLanguage
+              ? t('settings.fields.followSystemLanguageActive', {
+                  language: activeLanguageLabel,
+                })
+              : t('settings.fields.languageManualHint')
+          }
+        >
+          <div className="grid gap-3">
+            <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-base px-3 py-3">
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-text-primary">
+                  {t('settings.fields.followSystemLanguage')}
+                </div>
+                <div className="mt-1 text-xs leading-6 text-text-secondary">
+                  {t('settings.fields.followSystemLanguageHint')}
+                </div>
+              </div>
+              <button
+                type="button"
+                className={`rounded-md border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] transition ${
+                  settings.useSystemLanguage
+                    ? 'border-accent/35 bg-accent/10 text-accent'
+                    : 'border-border bg-surface text-text-secondary hover:border-focus hover:bg-hover hover:text-text-primary'
+                }`}
+                onClick={() =>
+                  void onUpdate({
+                    useSystemLanguage: !settings.useSystemLanguage,
+                  })
+                }
+              >
+                {settings.useSystemLanguage
+                  ? t('settings.fields.followingSystem')
+                  : t('settings.fields.manualMode')}
+              </button>
+            </div>
+
+            <select
+              className={controlClassName()}
+              value={settings.language}
+              onChange={(event) =>
+                void onUpdate({
+                  useSystemLanguage: false,
+                  language: event.target.value as AppLanguage,
+                })
+              }
+            >
+              {LANGUAGE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </Field>
       </Section>
 

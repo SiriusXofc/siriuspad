@@ -157,7 +157,7 @@ export function NoteBlocks({
                         type="button"
                         className={`rounded-md border px-3 py-2 text-sm transition ${
                           calloutTone === tone
-                            ? "border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-text-primary"
+                            ? "border-accent/35 bg-accent/10 text-text-primary"
                             : "border-border bg-base text-text-secondary hover:border-focus hover:bg-hover hover:text-text-primary"
                         }`}
                         onClick={() => setCalloutTone(tone)}
@@ -192,12 +192,14 @@ export function NoteBlocks({
                         <button
                           key={swatch}
                           type="button"
-                          className={`h-9 rounded-md border transition ${
-                            selected
-                              ? "border-white/50 ring-1 ring-white/35"
-                              : "border-border hover:border-focus"
-                          }`}
-                          style={{ backgroundColor: swatch }}
+                          className="h-9 rounded-md border transition hover:border-focus"
+                          style={{
+                            backgroundColor: swatch,
+                            borderColor: selected ? "var(--text-primary)" : "var(--border)",
+                            boxShadow: selected
+                              ? "0 0 0 1px var(--bg-elevated), 0 0 0 2px var(--border-focus)"
+                              : undefined,
+                          }}
                           onClick={() => setCalloutColor(swatch)}
                           aria-label={`${t("note.calloutColorLabel")}: ${swatch}`}
                         />
@@ -233,7 +235,7 @@ export function NoteBlocks({
                 </button>
                 <button
                   type="button"
-                  className="rounded-md border border-accent/40 bg-accent/15 px-3 py-2 text-sm font-medium text-text-primary transition hover:bg-accent/20"
+                  className="rounded-md border border-accent/35 bg-accent/10 px-3 py-2 text-sm font-medium text-text-primary transition hover:border-accent/50 hover:bg-accent/15"
                   onClick={submitCallout}
                 >
                   {t("note.calloutAddAction")}
@@ -352,7 +354,8 @@ export function NoteBlocks({
                       className="rounded-md border px-2 py-1 text-[11px] text-text-primary"
                       style={{
                         borderColor: note.color ?? "var(--border)",
-                        backgroundColor: withAlpha(note.color, 0.14) ?? "#161616",
+                        backgroundColor:
+                          withAlpha(note.color, 0.14) ?? "var(--bg-elevated)",
                       }}
                     >
                       {checklistDoneCount}/{checklist.length}
@@ -363,7 +366,7 @@ export function NoteBlocks({
                     <div className="mb-3 flex justify-end">
                       <button
                         type="button"
-                        className="rounded-md border border-border bg-base px-3 py-2 text-xs text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171]"
+                        className="rounded-md border border-border bg-base px-3 py-2 text-xs text-text-secondary transition hover:border-red/30 hover:bg-red/10 hover:text-red"
                         onClick={() => updateChecklist([])}
                       >
                         {t("note.checklistClear")}
@@ -382,7 +385,7 @@ export function NoteBlocks({
                             type="button"
                             className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border transition ${
                               item.done
-                                ? "border-transparent text-black"
+                                ? "border-transparent text-white"
                                 : "border-border bg-surface text-transparent hover:border-focus"
                             }`}
                             style={{
@@ -429,7 +432,7 @@ export function NoteBlocks({
 
                           <button
                             type="button"
-                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-surface text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171]"
+                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-surface text-text-secondary transition hover:border-red/30 hover:bg-red/10 hover:text-red"
                             onClick={() =>
                               updateChecklist(
                                 checklist.filter((entry) => entry.id !== item.id),

@@ -36,8 +36,8 @@ function StepVisual({
   switch (step.visual) {
     case "notes":
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4">
-          <div className="rounded-md border border-border bg-[#111111] p-3">
+        <div className="grid gap-3 rounded-lg border border-border bg-base p-4">
+          <div className="rounded-md border border-border bg-surface p-3">
             <div className="mb-1 text-xs text-text-secondary">
               {t("onboarding.visuals.notesTitle")}
             </div>
@@ -45,7 +45,7 @@ function StepVisual({
               {t("onboarding.visuals.notesBody")}
             </div>
           </div>
-          <div className="rounded-md border border-border bg-[#111111] p-3">
+          <div className="rounded-md border border-border bg-surface p-3">
             <div className="mb-2 text-[11px] uppercase tracking-[0.16em] text-text-muted">
               {t("note.checklistTitle")}
             </div>
@@ -56,13 +56,13 @@ function StepVisual({
               ].map((item, index) => (
                 <div
                   key={item}
-                  className="flex items-center gap-2 rounded-md border border-border bg-[#0f0f0f] px-3 py-2 text-text-primary"
+                  className="flex items-center gap-2 rounded-md border border-border bg-base px-3 py-2 text-text-primary"
                 >
                   <span
                     className={`inline-flex h-4 w-4 items-center justify-center rounded border ${
                       index === 0
-                        ? "border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-[#c4b5fd]"
-                        : "border-border bg-[#111111] text-transparent"
+                        ? "border-accent/35 bg-accent/10 text-accent"
+                        : "border-border bg-surface text-transparent"
                     }`}
                   >
                     ✓
@@ -72,8 +72,8 @@ function StepVisual({
               ))}
             </div>
           </div>
-          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.08)] p-3">
-            <div className="mb-1 text-[11px] uppercase tracking-[0.16em] text-[#c4b5fd]">
+          <div className="rounded-md border border-accent/35 bg-accent/10 p-3">
+            <div className="mb-1 text-[11px] uppercase tracking-[0.16em] text-accent">
               &gt; [!TIP]
             </div>
             <div className="text-sm text-text-primary">
@@ -92,7 +92,7 @@ function StepVisual({
       );
     case "tags":
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4">
+        <div className="grid gap-3 rounded-lg border border-border bg-base p-4">
           <div className="flex flex-wrap gap-2">
             <TagPill tag="bug" />
             <TagPill tag="urgente" />
@@ -108,9 +108,9 @@ function StepVisual({
       );
     case "terminal":
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 font-mono text-xs">
-          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] p-3">
-            <div className="text-[11px] uppercase tracking-[0.16em] text-[#c4b5fd]">
+        <div className="grid gap-3 rounded-lg border border-border bg-base p-4 font-mono text-xs">
+          <div className="rounded-md border border-accent/35 bg-accent/10 p-3">
+            <div className="text-[11px] uppercase tracking-[0.16em] text-accent">
               {t("terminal.terminal")}
             </div>
             <div className="mt-2 text-text-primary">cmd.exe / bash</div>
@@ -118,32 +118,32 @@ function StepVisual({
               {t("terminal.noteFolder")} ~/siriuspad/notes/fix-janela
             </div>
           </div>
-          <div className="rounded-md border border-border bg-[#111111] p-3">
+          <div className="rounded-md border border-border bg-surface p-3">
             <div className="text-text-secondary">
               ~/siriuspad/notes/fix-janela $ npm run dev
             </div>
-            <div className="mt-2 text-[#34d399]">VITE ready in 412ms</div>
+            <div className="mt-2 text-green">VITE ready in 412ms</div>
           </div>
-          <div className="rounded-md border border-border bg-[#111111] p-3">
+          <div className="rounded-md border border-border bg-surface p-3">
             <div className="mb-1 text-text-secondary">
               {t("onboarding.visuals.terminalSnippetLabel")}
             </div>
-            <div className="text-[#34d399]">
+            <div className="text-green">
               console.log('teste') -&gt; teste
             </div>
           </div>
-          <div className="rounded-md border border-border bg-[#111111] p-3">
+          <div className="rounded-md border border-border bg-surface p-3">
             <div className="mb-1 text-text-secondary">
               {t("onboarding.visuals.terminalCommandLabel")}
             </div>
             <div className="text-text-primary">ls</div>
-            <div className="mt-2 text-[#34d399]">fix-janela.md</div>
+            <div className="mt-2 text-green">fix-janela.md</div>
           </div>
           <div className="flex flex-wrap gap-2 text-[11px]">
             {["Ctrl+`", "Enter", "Ctrl+C", "Ctrl+Enter"].map((shortcut) => (
               <span
                 key={shortcut}
-                className="rounded-md border border-border bg-[#111111] px-2 py-1 text-text-secondary"
+                className="rounded-md border border-border bg-surface px-2 py-1 text-text-secondary"
               >
                 {shortcut}
               </span>
@@ -153,7 +153,7 @@ function StepVisual({
       );
     case "project":
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
+        <div className="grid gap-3 rounded-lg border border-border bg-base p-4 text-xs sm:grid-cols-2">
           {[
             t("onboarding.visuals.projectPoint1"),
             t("onboarding.visuals.projectPoint2"),
@@ -162,7 +162,7 @@ function StepVisual({
           ].map((text) => (
             <div
               key={text}
-              className="rounded-md border border-border bg-[#111111] px-3 py-3 text-text-secondary"
+              className="rounded-md border border-border bg-surface px-3 py-3 text-text-secondary"
             >
               {text}
             </div>
@@ -171,7 +171,7 @@ function StepVisual({
       );
     case "command":
       return (
-        <div className="grid gap-2 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs">
+        <div className="grid gap-2 rounded-lg border border-border bg-base p-4 text-xs">
           {[
             {
               label: t("commands.newNote"),
@@ -188,10 +188,10 @@ function StepVisual({
           ].map((item) => (
             <div
               key={item.label}
-              className="flex items-center justify-between gap-3 rounded-md border border-border bg-[#111111] px-3 py-2"
+              className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface px-3 py-2"
             >
               <span className="text-text-primary">{item.label}</span>
-              <span className="rounded-md border border-border bg-[#161616] px-2 py-1 text-[11px] text-text-secondary">
+              <span className="rounded-md border border-border bg-elevated px-2 py-1 text-[11px] text-text-secondary">
                 {item.shortcut}
               </span>
             </div>
@@ -200,11 +200,11 @@ function StepVisual({
       );
     case "shortcuts":
       return (
-        <div className="grid gap-2 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
+        <div className="grid gap-2 rounded-lg border border-border bg-base p-4 text-xs sm:grid-cols-2">
           {shortcuts.map((shortcut) => (
             <div
               key={shortcut.key}
-              className="flex items-center justify-between gap-3 rounded-md border border-border bg-[#111111] px-3 py-2"
+              className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface px-3 py-2"
             >
               <span className="text-text-primary">{shortcut.key}</span>
               <span className="text-text-secondary">{shortcut.label}</span>
@@ -214,7 +214,7 @@ function StepVisual({
       );
     case "practice":
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-xs sm:grid-cols-2">
+        <div className="grid gap-3 rounded-lg border border-border bg-base p-4 text-xs sm:grid-cols-2">
           {[
             {
               step: "01",
@@ -241,9 +241,9 @@ function StepVisual({
             .map((item) => (
               <div
                 key={item.step}
-                className="flex items-start gap-3 rounded-md border border-border bg-[#111111] px-3 py-3"
+                className="flex items-start gap-3 rounded-md border border-border bg-surface px-3 py-3"
               >
-                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-[11px] font-semibold text-[#c4b5fd]">
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-accent/35 bg-accent/10 text-[11px] font-semibold text-accent">
                   {item.step}
                 </span>
                 <div className="min-w-0">
@@ -254,15 +254,15 @@ function StepVisual({
                 </div>
               </div>
             ))}
-          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.08)] px-3 py-3 text-xs leading-6 text-text-secondary sm:col-span-2">
+          <div className="rounded-md border border-accent/35 bg-accent/10 px-3 py-3 text-xs leading-6 text-text-secondary sm:col-span-2">
             {t("onboarding.visuals.practiceFooter")}
           </div>
         </div>
       );
     case "welcome":
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-sm text-text-secondary">
-          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] px-3 py-3 text-text-primary">
+        <div className="grid gap-3 rounded-lg border border-border bg-base p-4 text-sm text-text-secondary">
+          <div className="rounded-md border border-accent/35 bg-accent/10 px-3 py-3 text-text-primary">
             {t("onboarding.visuals.welcomeBadge")}
           </div>
           <div className="grid gap-2 text-xs">
@@ -275,8 +275,8 @@ function StepVisual({
       );
     default:
       return (
-        <div className="grid gap-3 rounded-lg border border-border bg-[#0f0f0f] p-4 text-sm text-text-secondary">
-          <div className="rounded-md border border-[#2d2060] bg-[rgba(124,58,237,0.12)] px-3 py-3 text-text-primary">
+        <div className="grid gap-3 rounded-lg border border-border bg-base p-4 text-sm text-text-secondary">
+          <div className="rounded-md border border-accent/35 bg-accent/10 px-3 py-3 text-text-primary">
             {t("onboarding.visuals.readyBadge")}
           </div>
           <div className="text-xs leading-6">
@@ -343,7 +343,7 @@ export function OnboardingModal({
         }}
       >
         <div
-          className="modal-panel flex max-h-[90dvh] w-full max-w-[560px] flex-col overflow-y-auto rounded-[12px] border border-[#2d2060] bg-[#111111] sm:overflow-hidden"
+          className="modal-panel flex max-h-[90dvh] w-full max-w-[560px] flex-col overflow-y-auto rounded-[12px] border border-accent/35 bg-surface sm:overflow-hidden"
           style={{
             maxHeight:
               "calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1.5rem)",
@@ -351,7 +351,7 @@ export function OnboardingModal({
         >
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <div className="inline-flex items-center gap-3">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#161616] text-sm text-text-primary">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-elevated text-sm text-text-primary">
                 {step.icon}
               </span>
               <div>
@@ -390,7 +390,7 @@ export function OnboardingModal({
                 <span
                   key={item.id}
                   className={`h-2 w-2 rounded-full ${
-                    dotIndex === index ? "bg-accent" : "bg-[#2a2a2a]"
+                    dotIndex === index ? "bg-accent" : "bg-border"
                   }`}
                 />
               ))}
@@ -410,7 +410,7 @@ export function OnboardingModal({
             {isLast ? (
               <button
                 type="button"
-                className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+                className="rounded-md border border-border bg-elevated px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
                 onClick={onComplete}
               >
                 {t("onboarding.start")}
@@ -418,7 +418,7 @@ export function OnboardingModal({
             ) : (
               <button
                 type="button"
-                className="rounded-md border border-border bg-[#161616] px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+                className="rounded-md border border-border bg-elevated px-3 py-2 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
                 onClick={() =>
                   setIndex((current) => Math.min(steps.length - 1, current + 1))
                 }

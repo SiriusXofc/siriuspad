@@ -192,11 +192,11 @@ export function UpdateModal({
   return (
     <div className="modal-backdrop absolute inset-0 z-[85] overflow-y-auto bg-black/80 px-4 py-5 sm:px-6 sm:py-8">
       <div className="flex min-h-full items-start justify-center">
-        <div className="modal-panel w-full max-w-[760px] overflow-hidden rounded-[12px] border border-[#2d2060] bg-[#111111]">
-          <div className="border-b border-border bg-[#0d0d0d] px-5 py-5">
+        <div className="modal-panel w-full max-w-[760px] overflow-hidden rounded-[12px] border border-accent/35 bg-surface">
+          <div className="border-b border-border bg-base px-5 py-5">
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">
               <div className="min-w-0 space-y-3">
-                <span className="accent-pulse inline-flex items-center gap-2 rounded-md border border-[#3a2c70] bg-[rgba(124,58,237,0.12)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[#c4b5fd]">
+                <span className="accent-pulse inline-flex items-center gap-2 rounded-md border border-accent/35 bg-accent/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-accent">
                   <Sparkles className="h-3.5 w-3.5" />
                   {t('updater.newVersionBadge')}
                 </span>
@@ -209,11 +209,11 @@ export function UpdateModal({
                   {state.error ? state.error : t('updater.description')}
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-md border border-border bg-[#111111] px-3 py-1.5 text-text-secondary">
+                  <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-text-secondary">
                     {statusLabel}
                   </span>
                   {releaseDate ? (
-                    <span className="rounded-md border border-border bg-[#111111] px-3 py-1.5 text-text-secondary">
+                    <span className="rounded-md border border-border bg-surface px-3 py-1.5 text-text-secondary">
                       {t('updater.releaseDate')}: {releaseDate}
                     </span>
                   ) : null}
@@ -221,7 +221,7 @@ export function UpdateModal({
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <div className="motion-fade-up surface-hover rounded-lg border border-border bg-[#111111] px-4 py-4">
+                <div className="motion-fade-up surface-hover rounded-lg border border-border bg-surface px-4 py-4">
                   <div className="text-[10px] uppercase tracking-[0.16em] text-text-muted">
                     {t('updater.currentVersion')}
                   </div>
@@ -230,10 +230,10 @@ export function UpdateModal({
                   </div>
                 </div>
                 <div
-                  className="motion-fade-up surface-hover rounded-lg border border-[#2d2060] bg-[rgba(124,58,237,0.08)] px-4 py-4"
+                  className="motion-fade-up surface-hover rounded-lg border border-accent/35 bg-accent/10 px-4 py-4"
                   style={{ animationDelay: '60ms' }}
                 >
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-[#a78bfa]">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-accent">
                     {t('updater.nextVersion')}
                   </div>
                   <div className="mt-2 text-2xl font-semibold text-text-primary">
@@ -246,14 +246,14 @@ export function UpdateModal({
 
           <div className="grid gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_260px]">
             <div className="space-y-5">
-              <div className="motion-fade-up rounded-lg border border-border bg-[#0d0d0d] p-4">
+              <div className="motion-fade-up rounded-lg border border-border bg-base p-4">
                 <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-text-primary">
                   <Sparkles className="h-4 w-4 text-accent" />
                   {t('updater.releaseNotes')}
                 </div>
 
                 {release.summary ? (
-                  <p className="rounded-md border border-border bg-[#111111] px-3 py-3 text-sm leading-7 text-text-secondary">
+                  <p className="rounded-md border border-border bg-surface px-3 py-3 text-sm leading-7 text-text-secondary">
                     {release.summary}
                   </p>
                 ) : null}
@@ -263,7 +263,7 @@ export function UpdateModal({
                     {release.highlights.map((item) => (
                       <div
                         key={item}
-                        className="motion-fade-up flex items-start gap-3 rounded-md border border-border bg-[#111111] px-3 py-3 text-sm leading-6 text-text-secondary"
+                        className="motion-fade-up flex items-start gap-3 rounded-md border border-border bg-surface px-3 py-3 text-sm leading-6 text-text-secondary"
                       >
                         <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent" />
                         <span className="min-w-0">{item}</span>
@@ -271,14 +271,14 @@ export function UpdateModal({
                     ))}
                   </div>
                 ) : !release.summary ? (
-                  <div className="rounded-md border border-dashed border-border bg-[#111111] px-3 py-3 text-sm text-text-secondary">
+                  <div className="rounded-md border border-dashed border-border bg-surface px-3 py-3 text-sm text-text-secondary">
                     {t('updater.releaseNotesEmpty')}
                   </div>
                 ) : null}
               </div>
 
               <div
-                className="motion-fade-up rounded-lg border border-border bg-[#0d0d0d] p-4"
+                className="motion-fade-up rounded-lg border border-border bg-base p-4"
                 style={{ animationDelay: '90ms' }}
               >
                 <div className="mb-3 text-sm font-semibold text-text-primary">
@@ -290,14 +290,14 @@ export function UpdateModal({
                     return (
                       <div
                         key={item.key}
-                        className="motion-fade-up flex items-center gap-3 rounded-md border border-border bg-[#111111] px-3 py-3"
+                        className="motion-fade-up flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-3"
                         style={{ animationDelay: `${120 + index * 40}ms` }}
                       >
                         <span
                           className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-xs font-semibold ${
                             item.done
-                              ? 'border-[#2d2060] bg-[rgba(124,58,237,0.12)] text-[#c4b5fd]'
-                              : 'border-border bg-[#0d0d0d] text-text-secondary'
+                              ? 'border-accent/35 bg-accent/10 text-accent'
+                              : 'border-border bg-base text-text-secondary'
                           }`}
                         >
                           {item.done ? (
@@ -324,7 +324,7 @@ export function UpdateModal({
 
             <div className="space-y-5">
               <div
-                className="motion-fade-up rounded-lg border border-border bg-[#0d0d0d] p-4"
+                className="motion-fade-up rounded-lg border border-border bg-base p-4"
                 style={{ animationDelay: '140ms' }}
               >
                 <div className="text-[11px] uppercase tracking-[0.16em] text-text-muted">
@@ -336,7 +336,7 @@ export function UpdateModal({
               </div>
 
               {state.downloading ? (
-                <div className="motion-fade-up rounded-lg border border-[#2d2060] bg-[rgba(124,58,237,0.08)] p-4">
+                <div className="motion-fade-up rounded-lg border border-accent/35 bg-accent/10 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-sm font-semibold text-text-primary">
                       {t('updater.downloading', { progress: state.downloadProgress })}
@@ -345,7 +345,7 @@ export function UpdateModal({
                       {t('updater.progressLabel')}
                     </span>
                   </div>
-                  <div className="progress-shimmer mt-4 h-3 overflow-hidden rounded-full border border-border bg-[#090909]">
+                  <div className="progress-shimmer mt-4 h-3 overflow-hidden rounded-full border border-border bg-base">
                     <div
                       className="h-full bg-accent transition-[width] duration-200"
                       style={{ width: `${state.downloadProgress}%` }}
@@ -358,7 +358,7 @@ export function UpdateModal({
               ) : null}
 
               {state.readyToInstall && state.available ? (
-                <div className="motion-fade-up rounded-lg border border-[#2d2060] bg-[rgba(124,58,237,0.08)] p-4">
+                <div className="motion-fade-up rounded-lg border border-accent/35 bg-accent/10 p-4">
                   <p className="text-base font-semibold text-text-primary">
                     {t('updater.readyToInstall')}
                   </p>
@@ -369,11 +369,11 @@ export function UpdateModal({
               ) : null}
 
               {state.error ? (
-                <div className="motion-fade-up rounded-lg border border-[#4a2020] bg-[#221212] p-4">
-                  <div className="text-sm font-semibold text-[#fca5a5]">
+                <div className="motion-fade-up rounded-lg border border-red/30 bg-red/10 p-4">
+                  <div className="text-sm font-semibold text-red">
                     {t('updater.installFailed')}
                   </div>
-                  <div className="mt-2 text-sm leading-7 text-[#f1b8b8]">
+                  <div className="mt-2 text-sm leading-7 text-red">
                     {state.error}
                   </div>
                 </div>
@@ -385,7 +385,7 @@ export function UpdateModal({
             {state.error ? (
               <button
                 type="button"
-                className="interactive-lift rounded-md border border-border bg-[#161616] px-4 py-2.5 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+                className="interactive-lift rounded-md border border-border bg-elevated px-4 py-2.5 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
                 onClick={() => void onRetry()}
               >
                 {state.readyToInstall
@@ -395,7 +395,7 @@ export function UpdateModal({
             ) : state.readyToInstall ? (
               <button
                 type="button"
-                className="interactive-lift inline-flex items-center gap-2 rounded-md border border-[#3a2c70] bg-[rgba(124,58,237,0.12)] px-4 py-2.5 text-sm text-text-primary transition hover:border-[#4a3590] hover:bg-[rgba(124,58,237,0.18)] disabled:opacity-50"
+                className="interactive-lift inline-flex items-center gap-2 rounded-md border border-accent/35 bg-accent/10 px-4 py-2.5 text-sm text-text-primary transition hover:border-accent/50 hover:bg-accent/15 disabled:opacity-50"
                 onClick={() => void handleInstall()}
                 disabled={installing}
               >
@@ -408,7 +408,7 @@ export function UpdateModal({
               <>
                 <button
                   type="button"
-                  className="interactive-lift rounded-md border border-[#3a2c70] bg-[rgba(124,58,237,0.12)] px-4 py-2.5 text-sm text-text-primary transition hover:border-[#4a3590] hover:bg-[rgba(124,58,237,0.18)]"
+                  className="interactive-lift rounded-md border border-accent/35 bg-accent/10 px-4 py-2.5 text-sm text-text-primary transition hover:border-accent/50 hover:bg-accent/15"
                   onClick={() => void onDownload()}
                 >
                   {t('updater.updateNow')}

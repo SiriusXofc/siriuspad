@@ -78,6 +78,69 @@ interface TerminalProps {
   onHeightChange: (height: number) => void
 }
 
+function resolveTerminalTheme() {
+  if (typeof document === 'undefined') {
+    return {
+      background: '#0d0d0d',
+      foreground: '#e0e0e0',
+      cursor: '#7c3aed',
+      selectionBackground: '#222222',
+      black: '#0a0a0a',
+      red: '#f87171',
+      green: '#34d399',
+      yellow: '#fbbf24',
+      blue: '#60a5fa',
+      magenta: '#a78bfa',
+      cyan: '#22d3ee',
+      white: '#e0e0e0',
+      brightBlack: '#666666',
+      brightRed: '#fca5a5',
+      brightGreen: '#6ee7b7',
+      brightYellow: '#fde68a',
+      brightBlue: '#93c5fd',
+      brightMagenta: '#c4b5fd',
+      brightCyan: '#67e8f9',
+      brightWhite: '#f5f5f5',
+    }
+  }
+
+  const styles = getComputedStyle(document.documentElement)
+  const isLight = document.documentElement.dataset.theme === 'light'
+  const bgBase = styles.getPropertyValue('--bg-base').trim() || '#0d0d0d'
+  const bgSurface = styles.getPropertyValue('--bg-surface').trim() || '#111111'
+  const bgElevated = styles.getPropertyValue('--bg-elevated').trim() || '#161616'
+  const textPrimary = styles.getPropertyValue('--text-primary').trim() || '#e0e0e0'
+  const textSecondary = styles.getPropertyValue('--text-secondary').trim() || '#666666'
+  const accent = styles.getPropertyValue('--accent').trim() || '#7c3aed'
+  const green = styles.getPropertyValue('--green').trim() || '#34d399'
+  const yellow = styles.getPropertyValue('--yellow').trim() || '#fbbf24'
+  const blue = styles.getPropertyValue('--blue').trim() || '#60a5fa'
+  const red = styles.getPropertyValue('--red').trim() || '#f87171'
+
+  return {
+    background: bgBase,
+    foreground: textPrimary,
+    cursor: accent,
+    selectionBackground: isLight ? '#dfe6f2' : '#222222',
+    black: bgBase,
+    red,
+    green,
+    yellow,
+    blue,
+    magenta: accent,
+    cyan: '#22d3ee',
+    white: textPrimary,
+    brightBlack: textSecondary,
+    brightRed: isLight ? '#dc2626' : '#fca5a5',
+    brightGreen: isLight ? '#059669' : '#6ee7b7',
+    brightYellow: isLight ? '#d97706' : '#fde68a',
+    brightBlue: isLight ? '#2563eb' : '#93c5fd',
+    brightMagenta: isLight ? '#7c3aed' : '#c4b5fd',
+    brightCyan: isLight ? '#0891b2' : '#67e8f9',
+    brightWhite: isLight ? bgElevated : bgSurface,
+  }
+}
+
 function shellNameForPlatform(platform: AppPlatform) {
   return platform === 'windows' ? 'cmd.exe' : 'bash'
 }
@@ -242,28 +305,7 @@ export function Terminal({
       fontFamily: 'JetBrains Mono, Fira Code, Cascadia Code, monospace',
       fontSize: 12,
       scrollback: 4000,
-      theme: {
-        background: '#0a0a0a',
-        foreground: '#e0e0e0',
-        cursor: '#7c3aed',
-        selectionBackground: '#222222',
-        black: '#0a0a0a',
-        red: '#f87171',
-        green: '#34d399',
-        yellow: '#fbbf24',
-        blue: '#60a5fa',
-        magenta: '#a78bfa',
-        cyan: '#22d3ee',
-        white: '#e0e0e0',
-        brightBlack: '#666666',
-        brightRed: '#fca5a5',
-        brightGreen: '#6ee7b7',
-        brightYellow: '#fde68a',
-        brightBlue: '#93c5fd',
-        brightMagenta: '#c4b5fd',
-        brightCyan: '#67e8f9',
-        brightWhite: '#f5f5f5',
-      },
+      theme: resolveTerminalTheme(),
     })
 
     const fitAddon = new FitAddon()
@@ -511,7 +553,7 @@ export function Terminal({
 
   if (!open) {
     return (
-      <div className="border-t border-border bg-[#0c0c0c]">
+      <div className="border-t border-border bg-base">
         <button
           type="button"
           className="flex h-11 w-full items-center justify-between px-3 text-[11px] uppercase tracking-[0.16em] text-text-secondary transition hover:bg-hover hover:text-text-primary"
@@ -530,7 +572,7 @@ export function Terminal({
 
   return (
     <section
-      className="relative border-t border-border bg-[#090909]"
+      className="relative border-t border-border bg-base"
       style={{ height }}
     >
       <div
@@ -553,13 +595,13 @@ export function Terminal({
                 }`}
               />
               <span>{t('terminal.title')}</span>
-              <span className="rounded-md border border-border bg-[#111111] px-2 py-1 text-[10px] text-text-secondary">
+              <span className="rounded-md border border-border bg-elevated px-2 py-1 text-[10px] text-text-secondary">
                 {shellName}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-secondary">
               <span>{t('terminal.noteFolder')}</span>
-              <span className="max-w-[560px] truncate rounded-md border border-border bg-[#111111] px-2 py-1 text-text-primary">
+              <span className="max-w-[560px] truncate rounded-md border border-border bg-elevated px-2 py-1 text-text-primary">
                 {displayNoteDirectory}
               </span>
             </div>
@@ -569,7 +611,7 @@ export function Terminal({
             {canRunSnippet ? (
               <button
                 type="button"
-                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-[#111111] px-3 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary disabled:opacity-40"
+                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-elevated px-3 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary disabled:opacity-40"
                 onClick={() => void runner.run()}
                 disabled={runner.running}
                 title={t('terminal.runCurrentNote')}
@@ -585,7 +627,7 @@ export function Terminal({
 
             <button
               type="button"
-              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-[#111111] px-3 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-elevated px-3 text-[11px] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
               onClick={clearViewport}
               title={t('terminal.clear')}
             >
@@ -595,7 +637,7 @@ export function Terminal({
 
             <button
               type="button"
-              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-[#111111] px-3 text-[11px] text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171] disabled:opacity-40"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-elevated px-3 text-[11px] text-text-secondary transition hover:border-red/30 hover:bg-red/10 hover:text-red disabled:opacity-40"
               onClick={() => void interruptTerminal()}
               disabled={!sessionReady}
               title={t('terminal.stop')}
@@ -606,7 +648,7 @@ export function Terminal({
 
             <button
               type="button"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-[#111111] text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-elevated text-text-secondary transition hover:border-focus hover:bg-hover hover:text-text-primary"
               onClick={() => onOpenChange(false)}
               title={t('terminal.toggle')}
             >
@@ -615,8 +657,8 @@ export function Terminal({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 bg-[#0a0a0a] px-2 py-2">
-          <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-border bg-black">
+        <div className="min-h-0 flex-1 bg-base px-2 py-2">
+          <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-border bg-surface">
             <div className="border-b border-border px-3 py-2 text-[11px] text-text-secondary">
               {sessionReady
                 ? t('terminal.sessionReadyShort', { shell: shellName })

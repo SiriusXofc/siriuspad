@@ -179,7 +179,7 @@
       },
       "appearance": {
         "title": "Aparência",
-        "description": "Zoom da interface, tema claro/escuro e fonte usada em toda a UI."
+        "description": "Zoom da interface, tema fixo ou automático e fonte usada em toda a UI."
       },
       "shortcuts": {
         "title": "Atalhos",
@@ -199,7 +199,7 @@
       },
       "language": {
         "title": "Idioma",
-        "description": "Idioma da interface."
+        "description": "Idioma da interface, manual ou seguindo o sistema."
       }
     },
     "fields": {
@@ -214,8 +214,13 @@
       "theme": "Tema",
       "themeLocked": "Tema fixo.",
       "themeHint": "Escolha entre visual claro e escuro sem perder o estilo técnico do app.",
+      "followSystemTheme": "Seguir tema do sistema",
+      "followSystemThemeHint": "Alterna automaticamente entre claro e escuro conforme o sistema operacional.",
+      "followSystemThemeActive": "Agora seguindo o tema {{theme}} detectado no sistema. Escolher um tema abaixo desativa o automático.",
+      "themeManualHint": "Escolha um tema fixo abaixo. Reative o automático quando quiser voltar a seguir o sistema.",
       "darkOnly": "Somente escuro",
       "selectedTheme": "Ativo",
+      "systemModeBadge": "Sistema",
       "uiZoom": "Zoom da interface",
       "uiZoomHint": "Aumenta ou reduz tudo no app, no estilo do zoom do navegador.",
       "uiZoomValue": "{{value}}% de escala",
@@ -225,6 +230,12 @@
       "githubTokenHint": "Armazenado localmente. Requer escopo gist.",
       "githubTokenPlaceholder": "ghp_...",
       "language": "Idioma",
+      "followSystemLanguage": "Seguir idioma do sistema",
+      "followSystemLanguageHint": "Troca a interface automaticamente conforme o idioma principal do dispositivo.",
+      "followSystemLanguageActive": "Agora seguindo o idioma {{language}} detectado no sistema. Escolher um idioma abaixo desativa o automático.",
+      "languageManualHint": "Escolha um idioma fixo abaixo. Reative o automático quando quiser voltar a seguir o sistema.",
+      "followingSystem": "Sistema",
+      "manualMode": "Manual",
       "enabled": "Ativado",
       "disabled": "Desativado",
       "visible": "Visível",
@@ -444,30 +455,30 @@
       },
       "ready": {
         "title": "Pronto para começar",
-        "description": "Se esquecer alguma coisa, o tutorial pode ser aberto de novo nas configurações. A ideia é ser rápido para começar e confortável para continuar."
+        "description": "Se esquecer alguma coisa, o tutorial pode ser aberto de novo nas configurações. A ideia é ser rápido para começar, confortável para continuar e fácil de adaptar ao seu sistema."
       }
     },
     "visuals": {
       "notesTitle": "Nota de exemplo",
-      "notesBody": "Corrigir fluxo de atualização e revisar atalhos da janela",
-      "welcomeBadge": "Bloco escuro, local e direto ao ponto para quem vive entre código, terminal e checklist.",
+      "notesBody": "Corrigir fluxo de atualização, revisar atalhos da janela e publicar release",
+      "welcomeBadge": "Bloco local e direto ao ponto para quem vive entre código, terminal e checklist.",
       "welcomePoint1": "Markdown para escrever rápido sem perder estrutura.",
       "welcomePoint2": "Workspaces para separar contexto sem bagunça.",
       "welcomePoint3": "Terminal, histórico e atalhos integrados ao fluxo.",
-      "welcomePoint4": "Projeto público, mantido por SiriusX e focado em uso prático.",
+      "welcomePoint4": "Tema e idioma podem acompanhar o sistema automaticamente nas configurações.",
       "notesChecklist1": "Escrever roteiro de teste do updater",
       "notesChecklist2": "Validar restart automático da release",
       "notesCalloutTitle": "Contexto destacado na nota",
-      "notesCalloutBody": "Use blocos > [!TIP] e > [!WARNING] para destacar informação importante.",
+      "notesCalloutBody": "Use blocos > [!TIP] e > [!WARNING] para destacar informação importante direto no texto.",
       "practiceStep1Title": "Crie uma nota nova",
-      "practiceStep1Body": "Use Ctrl+N, dê um título para a nota e escolha uma cor no painel direito. A cor precisa aparecer no header, na aba e na lista lateral.",
+      "practiceStep1Body": "Use Ctrl+N, dê um título para a nota e escolha uma cor no painel direito. A cor e o Markdown ao vivo precisam aparecer sem abrir outro modo.",
       "practiceStep2Title": "Adicione uma checklist",
       "practiceStep2Body": "No painel direito, abra os blocos da nota, crie pelo menos 2 itens na checklist e marque 1 como concluído. Depois confirme no texto que o quadrado da tarefa também pode ser clicado para alternar o estado.",
       "practiceStep3Title": "Insira um callout",
       "practiceStep3Body": "Ainda nos blocos da nota do painel direito, insira um callout e confirme que ele entra direto no conteúdo da nota. O bloco precisa aparecer formatado no próprio editor, sem painel separado.",
       "practiceStep4Title": "Teste o terminal",
       "practiceStep4Body": "Abra com Ctrl+`, rode um comando simples como `pwd`, `ls` ou `dir` e confirme se ele está na pasta da nota ativa.",
-      "practiceFooter": "Se esse roteiro funcionar, você já validou cor da nota, checklist, callouts e terminal sem depender de promessa vaga.",
+      "practiceFooter": "Se esse roteiro funcionar, você já validou cor da nota, checklist, callouts, Markdown ao vivo e terminal sem depender de promessa vaga.",
       "terminalSnippetLabel": "Bloco com linguagem",
       "terminalCommandLabel": "Comando de shell",
       "projectPoint1": "Desenvolvido por SiriusX e distribuído como projeto público no GitHub.",
@@ -475,7 +486,7 @@
       "projectPoint3": "Notas ficam locais; integrações externas são opcionais.",
       "projectPoint4": "Terminal e snippets rodam na sua máquina, então revise antes de executar.",
       "readyBadge": "Tudo fica salvo localmente e o app abre pronto para continuar.",
-      "readyHint": "Comece com Ctrl+N, escolha uma cor no painel direito, abra os blocos da nota no painel lateral para checklist e callout, marque tarefas clicando no quadrado dentro do texto e confirme que `#`, listas e callouts já aparecem formatados ao vivo no editor.",
+      "readyHint": "Comece com Ctrl+N, escolha uma cor no painel direito, abra os blocos da nota no painel lateral para checklist e callout, marque tarefas clicando no quadrado dentro do texto e confirme que `#`, listas, código inline e callouts já aparecem formatados ao vivo no editor. Se preferir, deixe tema e idioma seguirem o sistema nas configurações.",
       "readyPoint1": "Configurações agora mostram versão, licença, links do projeto e política de segurança.",
       "readyPoint2": "Você pode reabrir este tutorial a qualquer momento nas configurações.",
       "readyPoint3": "Se achar bug, use as issues. Se achar vulnerabilidade, use advisory privada."

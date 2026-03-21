@@ -179,7 +179,7 @@
       },
       "appearance": {
         "title": "Appearance",
-        "description": "Interface zoom, light/dark theme, and the font used across the UI."
+        "description": "Interface zoom, fixed or automatic theme, and the font used across the UI."
       },
       "shortcuts": {
         "title": "Shortcuts",
@@ -199,7 +199,7 @@
       },
       "language": {
         "title": "Language",
-        "description": "Interface language."
+        "description": "Interface language, either fixed or following the system."
       }
     },
     "fields": {
@@ -214,8 +214,13 @@
       "theme": "Theme",
       "themeLocked": "Fixed theme.",
       "themeHint": "Switch between light and dark looks while keeping the technical SiriusPad feel.",
+      "followSystemTheme": "Follow system theme",
+      "followSystemThemeHint": "Switches between light and dark automatically based on the operating system.",
+      "followSystemThemeActive": "Currently following the {{theme}} theme detected from the system. Choosing a theme below turns automatic mode off.",
+      "themeManualHint": "Choose a fixed theme below. Turn automatic mode back on whenever you want to follow the system again.",
       "darkOnly": "Dark only",
       "selectedTheme": "Active",
+      "systemModeBadge": "System",
       "uiZoom": "Interface zoom",
       "uiZoomHint": "Scales the whole app, similar to browser zoom.",
       "uiZoomValue": "{{value}}% scale",
@@ -225,6 +230,12 @@
       "githubTokenHint": "Stored locally. Requires gist scope.",
       "githubTokenPlaceholder": "ghp_...",
       "language": "Language",
+      "followSystemLanguage": "Follow system language",
+      "followSystemLanguageHint": "Switches the interface automatically based on the device primary language.",
+      "followSystemLanguageActive": "Currently following the {{language}} language detected from the system. Choosing a language below turns automatic mode off.",
+      "languageManualHint": "Choose a fixed language below. Turn automatic mode back on whenever you want to follow the system again.",
+      "followingSystem": "System",
+      "manualMode": "Manual",
       "enabled": "Enabled",
       "disabled": "Disabled",
       "visible": "Visible",
@@ -444,30 +455,30 @@
       },
       "ready": {
         "title": "Ready to go",
-        "description": "If you forget something, you can reopen the tutorial from settings. The goal is to be quick to start and comfortable to keep using."
+        "description": "If you forget something, you can reopen the tutorial from settings. The goal is to be quick to start, comfortable to keep using, and easy to adapt to your system."
       }
     },
     "visuals": {
       "notesTitle": "Example note",
-      "notesBody": "Fix updater flow and review window shortcuts",
-      "welcomeBadge": "A dark, local, no-nonsense pad for people who live between code, terminal, and checklists.",
+      "notesBody": "Fix updater flow, review window shortcuts, and publish the release",
+      "welcomeBadge": "A local, no-nonsense pad for people who live between code, terminal, and checklists.",
       "welcomePoint1": "Markdown for writing fast without losing structure.",
       "welcomePoint2": "Workspaces to separate context without clutter.",
       "welcomePoint3": "Terminal, history, and shortcuts wired into the flow.",
-      "welcomePoint4": "A public project maintained by SiriusX with a practical developer-first focus.",
+      "welcomePoint4": "Theme and language can follow your system automatically from settings.",
       "notesChecklist1": "Write updater test flow",
       "notesChecklist2": "Validate automatic release restart",
       "notesCalloutTitle": "Context highlighted in the note",
-      "notesCalloutBody": "Use > [!TIP] and > [!WARNING] blocks to highlight important information.",
+      "notesCalloutBody": "Use > [!TIP] and > [!WARNING] blocks to highlight important information directly in the text.",
       "practiceStep1Title": "Create a new note",
-      "practiceStep1Body": "Use Ctrl+N, give the note a title, and pick a color from the right panel. That color should appear in the header, tab, and note list.",
+      "practiceStep1Body": "Use Ctrl+N, give the note a title, and pick a color from the right panel. That color and the live Markdown styling should appear without opening another mode.",
       "practiceStep2Title": "Add a checklist",
       "practiceStep2Body": "In the right panel, open note blocks, create at least 2 checklist items, and mark 1 as done. Then confirm the task square inside the note text also toggles the state on click.",
       "practiceStep3Title": "Insert a callout",
       "practiceStep3Body": "Still in the right panel note blocks, insert a callout and confirm it lands directly in the note content. The block should be formatted inside the editor itself, not in a detached panel.",
       "practiceStep4Title": "Test the terminal",
       "practiceStep4Body": "Open it with Ctrl+`, run a simple command like `pwd`, `ls`, or `dir`, and confirm it starts in the active note folder.",
-      "practiceFooter": "If this script works, you have already validated note color, checklist, callouts, and terminal without relying on vague promises.",
+      "practiceFooter": "If this script works, you have already validated note color, checklist, callouts, live Markdown, and terminal without relying on vague promises.",
       "terminalSnippetLabel": "Language-aware block",
       "terminalCommandLabel": "Shell command",
       "projectPoint1": "Developed by SiriusX and shipped as a public GitHub project.",
@@ -475,7 +486,7 @@
       "projectPoint3": "Notes stay local; external integrations are optional.",
       "projectPoint4": "Terminal and snippets run on your machine, so review before executing.",
       "readyBadge": "Everything stays local and the app opens ready to continue.",
-      "readyHint": "Start with Ctrl+N, pick a color in the right panel, open note blocks in the side panel for checklist and callout, click task squares inside the note text to toggle them, and confirm that `#`, lists, and callouts already render live in the editor.",
+      "readyHint": "Start with Ctrl+N, pick a color in the right panel, open note blocks in the side panel for checklist and callout, click task squares inside the note text to toggle them, and confirm that `#`, lists, inline code, and callouts already render live in the editor. If you want, let theme and language follow the system from settings.",
       "readyPoint1": "Settings now show version, license, project links, and the security policy.",
       "readyPoint2": "You can reopen this tutorial anytime from settings.",
       "readyPoint3": "Use issues for bugs and a private advisory for vulnerabilities."
