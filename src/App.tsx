@@ -448,6 +448,26 @@ export default function App() {
     });
   };
 
+  const renameActiveNote = () => {
+    if (!notes.activeNote) {
+      return;
+    }
+
+    uiState.showPrompt({
+      title: t("note.renamePrompt"),
+      placeholder: t("note.titlePlaceholder"),
+      defaultValue: notes.activeNote.title,
+      confirmLabel: t("common.rename"),
+      cancelLabel: t("common.cancel"),
+      onConfirm: async (value) => {
+        const nextTitle = value.trim() || t("common.untitled");
+        notes.updateActiveNote({ title: nextTitle });
+        await notes.saveActiveNote();
+        uiState.closePrompt();
+      },
+    });
+  };
+
   const duplicateActiveNote = async () => {
     await notes.duplicateActiveNote();
   };
@@ -1545,6 +1565,8 @@ export default function App() {
             notes={workspaceScopedNotes}
             activeTag={notes.activeTag}
             onTagClick={(tag) => notes.setActiveTag(tag)}
+            onNoteChange={(patch) => notes.updateActiveNote(patch)}
+            onRenameNote={renameActiveNote}
             onColorSelect={(color) => {
               if (!notes.activeNote) {
                 return;
@@ -1570,6 +1592,8 @@ export default function App() {
                 notes={workspaceScopedNotes}
                 activeTag={notes.activeTag}
                 onTagClick={(tag) => notes.setActiveTag(tag)}
+                onNoteChange={(patch) => notes.updateActiveNote(patch)}
+                onRenameNote={renameActiveNote}
                 onColorSelect={(color) => {
                   if (!notes.activeNote) {
                     return;

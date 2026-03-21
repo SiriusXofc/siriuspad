@@ -1,4 +1,4 @@
-import { Info, Palette, Tags } from "lucide-react";
+import { Check, Info, Palette, PencilLine, Plus, Tags, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,15 +8,25 @@ import { getDateFnsLocale } from "@/lib/date";
 import { NOTE_COLOR_SWATCHES } from "@/lib/constants";
 import { PriorityDot } from "@/components/ui/PriorityDot";
 import { TagPill } from "@/components/ui/TagPill";
-import type { Note, NoteMetadata } from "@/types";
+import type { ChecklistItem, Note, NoteMetadata } from "@/types";
 
 interface RightPanelProps {
   note: Note | null;
   notes: NoteMetadata[];
   activeTag: string | null;
   onTagClick: (tag: string | null) => void;
+  onNoteChange: (patch: Partial<Note>) => void;
+  onRenameNote: () => void;
   onColorSelect: (color?: string) => void;
   mobile?: boolean;
+}
+
+function createChecklistItem(text: string): ChecklistItem {
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    text,
+    done: false,
+  };
 }
 
 function wordCount(content: string) {
@@ -67,6 +77,8 @@ export function RightPanel({
   notes,
   activeTag,
   onTagClick,
+  onNoteChange,
+  onRenameNote,
   onColorSelect,
   mobile = false,
 }: RightPanelProps) {
@@ -77,6 +89,7 @@ export function RightPanel({
   const [customColor, setCustomColor] = useState(
     note?.color ?? NOTE_COLOR_SWATCHES[4],
   );
+  const [mobileChecklistValue, setMobileChecklistValue] = useState("");
 
   const tagCounts = useMemo(() => {
     const map = new Map<string, number>();
@@ -104,6 +117,23 @@ export function RightPanel({
     { key: "Ctrl+`", label: t("terminal.toggle") },
     { key: "Ctrl+Enter", label: t("terminal.run") },
   ];
+
+  const updateChecklist = (nextChecklist: ChecklistItem[]) => {
+    onNoteChange({
+      checklist: nextChecklist,
+    });
+  };
+
+  const addMobileChecklistItem = () => {
+    const text = mobileChecklistValue.trim();
+
+    if (!text) {
+      return;
+    }
+
+    updateChecklist([...checklist, createChecklistItem(text)]);
+    setMobileChecklistValue("");
+  };
 
   return (
     <aside
@@ -221,6 +251,26 @@ export function RightPanel({
                 </div>
               </div>
 
+              <div className="mb-3 grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-[#101010] px-3 py-2 text-xs text-text-primary transition hover:border-focus hover:bg-hover"
+                  onClick={onRenameNote}
+                >
+                  <PencilLine className="h-3.5 w-3.5" />
+                  {t("note.renameAction")}
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-[#101010] px-3 py-2 text-xs text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171] disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => updateChecklist([])}
+                  disabled={!checklist.length}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {t("note.checklistClear")}
+                </button>
+              </div>
+
               <div className="mb-3">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-text-muted">
@@ -297,6 +347,130 @@ export function RightPanel({
                   </button>
                 </div>
               </div>
+
+              {mobile ? (
+                <div className="mt-4 border-t border-border pt-3">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.16em] text-text-muted">
+                        {t("note.checklistTitle")}
+                      </p>
+                      <p className="mt-1 text-xs text-text-secondary">
+                        {t("note.checklistHint")}
+                      </p>
+                    </div>
+                    <span
+                      className="rounded-md border px-2 py-1 text-[11px] text-text-primary"
+                      style={{
+                        borderColor: note.color ?? "var(--border)",
+                        backgroundColor: withAlpha(note.color, 0.14) ?? "#161616",
+                      }}
+                    >
+                      {checklistDoneCount}/{checklist.length}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-2">
+                    {checklist.length ? (
+                      checklist.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-2 rounded-md border border-border bg-[#0f0f0f] px-2 py-2"
+                        >
+                          <button
+                            type="button"
+                            className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border transition ${
+                              item.done
+                                ? "border-transparent text-black"
+                                : "border-border bg-[#111111] text-transparent hover:border-focus"
+                            }`}
+                            style={{
+                              backgroundColor: item.done
+                                ? note.color ?? "var(--accent)"
+                                : undefined,
+                            }}
+                            onClick={() =>
+                              updateChecklist(
+                                checklist.map((entry) =>
+                                  entry.id === item.id
+                                    ? { ...entry, done: !entry.done }
+                                    : entry,
+                                ),
+                              )
+                            }
+                            aria-label={
+                              item.done
+                                ? t("note.checklistMarkPending")
+                                : t("note.checklistMarkDone")
+                            }
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                          </button>
+
+                          <input
+                            className={`min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-text-muted ${
+                              item.done
+                                ? "text-text-secondary line-through"
+                                : "text-text-primary"
+                            }`}
+                            value={item.text}
+                            onChange={(event) =>
+                              updateChecklist(
+                                checklist.map((entry) =>
+                                  entry.id === item.id
+                                    ? { ...entry, text: event.target.value }
+                                    : entry,
+                                ),
+                              )
+                            }
+                            placeholder={t("note.checklistPlaceholder")}
+                          />
+
+                          <button
+                            type="button"
+                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-[#111111] text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171]"
+                            onClick={() =>
+                              updateChecklist(
+                                checklist.filter((entry) => entry.id !== item.id),
+                              )
+                            }
+                            aria-label={t("note.checklistRemove")}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-md border border-dashed border-border bg-[#0f0f0f] px-3 py-4 text-sm text-text-secondary">
+                        {t("note.checklistEmpty")}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      className={panelInputClassName()}
+                      placeholder={t("note.checklistPlaceholder")}
+                      value={mobileChecklistValue}
+                      onChange={(event) => setMobileChecklistValue(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          addMobileChecklistItem();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-border bg-[#161616] px-3 text-sm text-text-primary transition hover:border-focus hover:bg-hover"
+                      onClick={addMobileChecklistItem}
+                    >
+                      <Plus className="h-4 w-4" />
+                      {t("note.checklistAdd")}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </>
           ) : (
             <div className="rounded-md border border-dashed border-border bg-[#0f0f0f] px-3 py-4 text-sm text-text-secondary">

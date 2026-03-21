@@ -275,6 +275,7 @@ export function EditorPane({
             <MarkdownPreview
               content={note.content}
               accentColor={note.color}
+              onContentChange={onContentChange}
               onRunCodeInTerminal={
                 isMobile
                   ? undefined

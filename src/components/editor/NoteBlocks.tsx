@@ -147,6 +147,18 @@ export function NoteBlocks({
             </span>
           </div>
 
+          {checklist.length ? (
+            <div className="mb-3 flex justify-end">
+              <button
+                type="button"
+                className="rounded-md border border-border bg-[#101010] px-3 py-2 text-xs text-text-secondary transition hover:border-[#4a2020] hover:bg-[#2d1515] hover:text-[#f87171]"
+                onClick={() => updateChecklist([])}
+              >
+                {t('note.checklistClear')}
+              </button>
+            </div>
+          ) : null}
+
           <div className="grid gap-2">
             {checklist.length ? (
               checklist.map((item) => (

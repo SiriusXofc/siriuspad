@@ -11,10 +11,67 @@ import { splitMarkdownSections, type CalloutTone } from '@/lib/markdownBlocks'
 interface MarkdownPreviewProps {
   content: string
   accentColor?: string
+  onContentChange?: (nextContent: string) => void
   onRunCodeInTerminal?: (payload: {
     code: string
     language: string | null
   }) => void
+}
+
+const TASK_LIST_PATTERN = /^(\s*(?:[-*+]|\d+\.)\s+\[)( |x|X)(\].*)$/
+
+function toggleTaskListItem(
+  content: string,
+  targetIndex: number,
+  done: boolean,
+) {
+  let taskIndex = -1
+
+  return content
+    .split(/\r?\n/)
+    .map((line) => {
+      if (!TASK_LIST_PATTERN.test(line)) {
+        return line
+      }
+
+      taskIndex += 1
+
+      if (taskIndex !== targetIndex) {
+        return line
+      }
+
+      return line.replace(
+        TASK_LIST_PATTERN,
+        (_, start: string, __: string, end: string) =>
+          `${start}${done ? 'x' : ' '}${end}`,
+      )
+    })
+    .join('\n')
+}
+
+function resolveTaskListItemIndex(content: string, offset?: number) {
+  if (typeof offset !== 'number') {
+    return -1
+  }
+
+  let taskIndex = -1
+  let cursor = 0
+
+  for (const line of content.split(/\r?\n/)) {
+    const lineEnd = cursor + line.length
+
+    if (TASK_LIST_PATTERN.test(line)) {
+      taskIndex += 1
+
+      if (offset >= cursor && offset <= lineEnd) {
+        return taskIndex
+      }
+    }
+
+    cursor = lineEnd + 1
+  }
+
+  return -1
 }
 
 function extractCodeText(children: React.ReactNode): string {
@@ -59,6 +116,7 @@ function extractCodeLanguage(children: React.ReactNode): string | null {
 export function MarkdownPreview({
   content,
   accentColor,
+  onContentChange,
   onRunCodeInTerminal,
 }: MarkdownPreviewProps) {
   const { t } = useTranslation()
@@ -129,10 +187,37 @@ export function MarkdownPreview({
         },
         input(props) {
           if (props.type === 'checkbox') {
+            const currentTaskIndex = resolveTaskListItemIndex(
+              content,
+              (props.node as {
+                position?: {
+                  start?: {
+                    offset?: number
+                  }
+                }
+              })?.position?.start?.offset,
+            )
+
             return (
               <input
                 {...props}
-                className="mr-2 h-4 w-4 rounded border-border accent-[var(--accent)]"
+                checked={Boolean(props.checked)}
+                className="mr-2 h-4 w-4 cursor-pointer rounded border-border accent-[var(--accent)]"
+                onChange={(event) => {
+                  if (!onContentChange || currentTaskIndex < 0) {
+                    return
+                  }
+
+                  const nextContent = toggleTaskListItem(
+                    content,
+                    currentTaskIndex,
+                    event.target.checked,
+                  )
+
+                  if (nextContent !== content) {
+                    onContentChange(nextContent)
+                  }
+                }}
               />
             )
           }
@@ -231,14 +316,13 @@ export function MarkdownPreview({
           return (
             <div
               key={`callout-${index}`}
-              className="mb-4 overflow-hidden rounded-md border"
+              className="mb-4 rounded-md py-2 pl-4 pr-1"
               style={{
-                borderColor: palette.border,
-                backgroundColor: palette.background,
-                boxShadow: `inset 3px 0 0 ${palette.badge}`,
+                borderLeft: `3px solid ${palette.badge}`,
+                background: `linear-gradient(90deg, ${palette.background}, transparent 88%)`,
               }}
             >
-              <div className="flex flex-wrap items-center gap-3 border-b border-white/5 px-4 py-3">
+              <div className="mb-2 flex flex-wrap items-center gap-3">
                 <span
                   className="rounded-md border px-2 py-1 text-[10px] uppercase tracking-[0.18em]"
                   style={{
@@ -253,7 +337,7 @@ export function MarkdownPreview({
                   {section.title ?? palette.label}
                 </strong>
               </div>
-              <div className="px-4 py-4">
+              <div className="[&>*:last-child]:mb-0">
                 {section.content ? renderMarkdown(section.content, `callout-body-${index}`) : null}
               </div>
             </div>
