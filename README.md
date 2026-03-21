@@ -13,13 +13,29 @@ Projeto público mantido por **SiriusX**.
 
 ## Visão geral
 
-O **SiriusPad** é um app open source que nasceu mais por diversão, curiosidade e vontade de construir algo útil, mesmo sendo algo simples.
+O **SiriusPad** é um app desktop open source que nasceu mais por diversão, curiosidade e vontade de construir algo útil, mesmo sendo algo simples.
 
-Ele não tenta substituir tudo, não quer reinventar a forma de fazer anotações e nem competir com editores grandes, Notion ou coisas do tipo. A proposta é bem mais humilde: ser um cantinho prático para guardar comandos, snippets, bugs, ideias, checklists e qualquer anotação técnica que aparece no meio do uso.
+Ele não tenta substituir tudo, não quer reinventar a forma de fazer anotações e nem competir com editores grandes, Notion ou qualquer coisa do tipo. A proposta é bem mais humilde: ser um cantinho prático para guardar comandos, snippets, bugs, ideias, checklists e qualquer anotação técnica que aparece no meio do uso.
 
 Sim, dá para usar bloco de notas, VS Code, Discord salvo, arquivo solto ou qualquer outra coisa. A ideia aqui não é "você precisa disso", e sim "talvez isso deixe o processo um pouco mais confortável para alguém". Se ajudar alguém, ótimo. Se não ajudar, tudo bem também.
 
-As notas ficam no seu computador como arquivos Markdown. O uso principal do app é local, sem conta e sem obrigar sincronização externa.
+Ainda assim, eu quis deixar o projeto organizado, agradável de usar e com uma base boa o bastante para evoluir sem virar bagunça. As notas ficam no seu computador como arquivos Markdown. O fluxo principal é local-first, sem conta obrigatória e sem forçar sincronização externa.
+
+## Stack do projeto
+
+O SiriusPad hoje é construído principalmente com:
+
+- **Tauri v2** no shell desktop/mobile
+- **React 18** para a interface
+- **TypeScript** em toda a camada de app
+- **Vite** no fluxo de desenvolvimento e build web
+- **Zustand** para estado local
+- **CodeMirror 6** no editor
+- **Tailwind CSS** para a base visual
+- **i18next / react-i18next** para traduções
+- **xterm.js** no terminal embutido
+
+Também há integração com plugins do ecossistema Tauri para store local, shell, diálogo, sistema de arquivos, atalhos globais e updater.
 
 ## O que o app entrega hoje
 
