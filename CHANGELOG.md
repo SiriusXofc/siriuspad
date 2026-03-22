@@ -7,6 +7,23 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.28] - 2026-03-21
+
+### Changed
+
+- revisão geral do app para deixar a release mais segura e coerente com o que realmente está implementado
+- README, links públicos, scripts de instalação e templates do GitHub foram alinhados com o repositório oficial atual
+- instalador Linux agora também oferece fluxo simples para `.AppImage`, além do `.deb`
+- visão em grade de notas, toolbar de formatação e menu de contexto entraram no pacote final já integrados ao app
+
+### Fixed
+
+- recursos incompletos de IA, navegação web e consulta SQL que ainda não tinham backend ou segurança suficiente saíram do fluxo principal da aplicação
+- `Settings` e i18n ficaram alinhados entre `pt-BR`, `en` e `es`, inclusive com novas chaves de menu de contexto, grid geral e backup em nuvem
+- status do app e configuração de backup passaram a refletir apenas o que o SiriusPad realmente suporta hoje com Supabase
+- scripts e documentação não apontam mais para o repositório antigo nem prometem split preview que já não existe na interface
+- build local voltou a passar com `@supabase/supabase-js` instalado corretamente no ambiente
+
 ## [1.0.27] - 2026-03-21
 
 ### Changed

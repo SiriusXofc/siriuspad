@@ -99,12 +99,12 @@ jobs:
             Nova versão pública do SiriusPad.
 
             Destaques desta versão:
-            - tutorial inicial ficou mais claro, mais prático e mais coerente com o fluxo real do SiriusPad
-            - configurações agora podem seguir automaticamente o tema e o idioma do sistema
-            - tema claro recebeu contraste melhor, especialmente em tons neutros, avisos, tags e estados informativos
-            - escala padrão da interface ficou mais equilibrada no desktop, sem aquele visual exagerado em `100%`
-            - editor ao vivo continua mostrando títulos, listas, checklist, callouts e código sem depender de um preview separado
-            - pacote Linux segue com `.deb` e `.AppImage`, e o desktop continua com `.exe`, `.apk` beta e `latest.json`
+            - revisão geral para deixar o pacote final mais seguro, coerente e pronto para uso real
+            - recursos incompletos de IA, navegação web e consulta SQL saíram do fluxo principal até terem backend e segurança suficientes
+            - menu de contexto, grid geral de notas e toolbar de formatação entraram no app já integrados e validados no build local
+            - configurações e status de backup agora refletem apenas o suporte real a Supabase
+            - README, scripts de instalação e links públicos foram alinhados com o repositório oficial e com `.deb`, `.AppImage`, `.exe` e `.apk`
+            - traduções `pt-BR`, `en` e `es` foram revisadas para manter as mesmas chaves e rótulos
 
             Distribuição oficial:
             - `.deb` para Linux
