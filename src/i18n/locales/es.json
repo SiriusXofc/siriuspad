@@ -163,6 +163,7 @@
     "exportTxt": "Exportar nota activa como .txt",
     "exportJson": "Exportar nota activa como .json",
     "openAssistant": "Abrir Sirius AI",
+    "previewUpdate": "Simular pantalla de actualización",
     "openSettings": "Abrir configuración",
     "toggleLineNumbers": "Alternar números de línea",
     "toggleWordWrap": "Alternar ajuste de línea",
@@ -384,7 +385,9 @@
     "installing": "Instalando...",
     "installedRestart": "Actualización instalada. Reinicia para aplicar.",
     "installFailed": "Error en la actualización",
-    "tryAgain": "Intentar de nuevo"
+    "tryAgain": "Intentar de nuevo",
+    "previewInstalled": "Vista previa de actualización concluida",
+    "previewInstalledBody": "La simulación local fue cerrada. Abre la paleta de comandos para volver a mostrar la pantalla cuando quieras."
   },
   "terminal": {
     "title": "Terminal",

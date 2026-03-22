@@ -7,6 +7,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.30] - 2026-03-22
+
+### Added
+
+- paleta de comandos agora tem uma ação para simular a tela de atualização localmente, sem depender de release remota
+
+### Changed
+
+- a prévia local do updater pode ser aberta também no mobile para revisar o layout do modal
+
+### Fixed
+
+- fluxo de validação da UI de update ficou mais simples para testes rápidos antes de publicar versão nova
+
 ## [1.0.29] - 2026-03-21
 
 ### Added

@@ -13,8 +13,9 @@ import { syncAllNotes } from "@/lib/sync";
 import { useNotes } from "@/hooks/useNotes";
 import { useRunner } from "@/hooks/useRunner";
 import { useSearch } from "@/hooks/useSearch";
-import { useUpdater } from "@/hooks/useUpdater";
+import { useUpdater, type UpdateState } from "@/hooks/useUpdater";
 import {
+  APP_VERSION,
   DEFAULT_WORKSPACE_ID,
   UI_ZOOM_MAX,
   UI_ZOOM_BASELINE,
@@ -81,6 +82,39 @@ function getEffectiveUiZoom(uiZoom: number) {
   return Number((uiZoom * UI_ZOOM_BASELINE).toFixed(3));
 }
 
+function getPreviewUpdateVersion(version: string) {
+  const match = version.match(/^(\d+)\.(\d+)\.(\d+)$/);
+  if (!match) {
+    return `${version}-preview`;
+  }
+
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const patch = Number(match[3]) + 1;
+  return `${major}.${minor}.${patch}`;
+}
+
+function createPreviewUpdateState(): UpdateState {
+  return {
+    available: {
+      version: getPreviewUpdateVersion(APP_VERSION),
+      body: [
+        "Prévia local da tela de atualização do SiriusPad.",
+        "",
+        "Destaques desta versão:",
+        "- layout do modal validado sem depender de uma release real",
+        "- fluxo de download e instalação pode ser simulado localmente",
+        "- útil para revisar cópia, contraste e espaçamento do updater",
+      ].join("\n"),
+      date: new Date().toISOString(),
+    },
+    downloading: false,
+    downloadProgress: 0,
+    readyToInstall: false,
+    error: null,
+  };
+}
+
 function buildAssistantSystemPrompt(language: string) {
   return [
     "You are Sirius AI, the built-in assistant inside SiriusPad.",
@@ -135,6 +169,9 @@ export default function App() {
   const [assistantMessages, setAssistantMessages] = useState<AiChatMessage[]>([]);
   const [assistantBusy, setAssistantBusy] = useState(false);
   const [assistantError, setAssistantError] = useState<string | null>(null);
+  const [previewUpdateState, setPreviewUpdateState] = useState<UpdateState | null>(
+    null,
+  );
 
   const bootstrappedRef = useRef(false);
   const allowWindowCloseRef = useRef(false);
@@ -198,6 +235,7 @@ export default function App() {
     activeNoteDirectory,
   );
   const updater = useUpdater(settingsState.ready && !isMobile);
+  const effectiveUpdaterState = previewUpdateState ?? updater.state;
 
   const workspaceScopedNotes = notes.notes.filter((note) => {
     const matchesWorkspace = workspaceState.activeWorkspaceId
@@ -382,6 +420,16 @@ export default function App() {
   };
 
   const installPendingUpdate = async () => {
+    if (previewUpdateState) {
+      uiState.pushToast({
+        kind: "success",
+        title: t("updater.previewInstalled"),
+        description: t("updater.previewInstalledBody"),
+      });
+      setPreviewUpdateState(null);
+      return;
+    }
+
     try {
       await useNotesStore.getState().saveAllDirtyTabs();
       allowWindowCloseRef.current = true;
@@ -458,6 +506,61 @@ export default function App() {
 
   const saveCurrentNote = async () => {
     await notes.saveActiveNote();
+  };
+
+  const openUpdaterPreview = () => {
+    setPreviewUpdateState(createPreviewUpdateState());
+  };
+
+  const dismissUpdaterModal = () => {
+    if (previewUpdateState) {
+      setPreviewUpdateState(null);
+      return;
+    }
+
+    updater.dismiss();
+  };
+
+  const startPreviewDownload = async () => {
+    setPreviewUpdateState((current) => {
+      const base = current ?? createPreviewUpdateState();
+      return {
+        ...base,
+        downloading: true,
+        downloadProgress: 12,
+        readyToInstall: false,
+        error: null,
+      };
+    });
+
+    for (const progress of [28, 46, 63, 81, 100]) {
+      await new Promise((resolve) => window.setTimeout(resolve, 180));
+      setPreviewUpdateState((current) =>
+        current
+          ? {
+              ...current,
+              downloading: progress < 100,
+              downloadProgress: progress,
+              readyToInstall: progress >= 100,
+              error: null,
+            }
+          : current,
+      );
+    }
+  };
+
+  const retryUpdater = async () => {
+    if (previewUpdateState) {
+      if (previewUpdateState.readyToInstall) {
+        await installPendingUpdate();
+        return;
+      }
+
+      await startPreviewDownload();
+      return;
+    }
+
+    await updater.retry();
   };
 
   const createNote = async (workspaceId?: string) => {
@@ -1000,6 +1103,14 @@ export default function App() {
       group: t("commands.groups.app"),
       perform: async () => {
         setAssistantOpen(true);
+      },
+    },
+    {
+      id: "app:update-preview",
+      label: t("commands.previewUpdate"),
+      group: t("commands.groups.app"),
+      perform: async () => {
+        openUpdaterPreview();
       },
     },
     {
@@ -1846,13 +1957,13 @@ export default function App() {
         onCancel={uiState.closePrompt}
       />
 
-      {!isMobile ? (
+      {!isMobile || previewUpdateState ? (
         <UpdateModal
-          state={updater.state}
-          onDismiss={updater.dismiss}
-          onDownload={updater.startDownload}
+          state={effectiveUpdaterState}
+          onDismiss={dismissUpdaterModal}
+          onDownload={previewUpdateState ? startPreviewDownload : updater.startDownload}
           onInstall={installPendingUpdate}
-          onRetry={updater.retry}
+          onRetry={retryUpdater}
         />
       ) : null}
 

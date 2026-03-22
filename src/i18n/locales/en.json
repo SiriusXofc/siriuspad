@@ -163,6 +163,7 @@
     "exportTxt": "Export active note as .txt",
     "exportJson": "Export active note as .json",
     "openAssistant": "Open Sirius AI",
+    "previewUpdate": "Simulate update modal",
     "openSettings": "Open settings",
     "toggleLineNumbers": "Toggle line numbers",
     "toggleWordWrap": "Toggle word wrap",
@@ -384,7 +385,9 @@
     "installing": "Installing...",
     "installedRestart": "Update installed. Restart to apply.",
     "installFailed": "Update failed",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "previewInstalled": "Update preview finished",
+    "previewInstalledBody": "The local simulation was closed. Open the command palette to show the update screen again whenever you want."
   },
   "terminal": {
     "title": "Terminal",
