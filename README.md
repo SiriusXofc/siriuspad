@@ -132,9 +132,9 @@ npm run tauri:dev
 
 ## Suporte e reporte
 
-- bugs: https://github.com/SiriusXofc/siriuspad/issues
-- sugestões: use as issues do repositório
-- vulnerabilidades: https://github.com/SiriusXofc/siriuspad/security/advisories/new
+Se encontrar bug, comportamento estranho, falha de segurança ou quiser mandar sugestão, envie um e-mail para:
+
+- `siriusxofc.dev@gmail.com`
 
 ## Licença
 

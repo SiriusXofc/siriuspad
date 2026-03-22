@@ -278,11 +278,11 @@
       "licenseHint": "Uso, copia y distribución bajo MIT.",
       "projectType": "Proyecto",
       "publicProject": "Open source público",
-      "projectHint": "Código, issues, changelog y releases viven en el repositorio GitHub de SiriusPad.",
+      "projectHint": "Código, changelog y releases viven en el repositorio GitHub de SiriusPad.",
       "privacyTitle": "Privacidad local-first",
       "privacyBody": "Las notas se quedan en tu disco. SiriusPad no requiere cuenta para el flujo principal y los servicios externos solo se usan cuando activas algo como exportar Gist o revisar actualizaciones.",
       "securityTitle": "Seguridad y reportes",
-      "securityBody": "Las fallas de seguridad no deben ir a una issue pública. Usa la política de seguridad y, cuando haga falta, abre una advisory privada para corregirlas con responsabilidad.",
+      "securityBody": "Si encuentras una falla de seguridad, un bug sensible o algo sospechoso, envía un correo a {{email}}. Evita publicar esos detalles en páginas públicas.",
       "commandsTitle": "Terminal y snippets",
       "commandsBody": "El terminal embebido y el runner ejecutan comandos en tu máquina. Revisa scripts, snippets y comandos antes de ejecutarlos, especialmente si vienen de terceros.",
       "integrationsTitle": "Integraciones opcionales",
@@ -291,7 +291,7 @@
       "openChangelog": "Ver changelog",
       "openLicense": "Leer licencia",
       "openSecurity": "Política de seguridad",
-      "reportSecurity": "Reportar vulnerabilidad"
+      "reportSecurity": "Enviar correo de seguridad"
     },
     "reset": "Restablecer"
   },
@@ -512,7 +512,7 @@
       "readyHint": "Empieza con Ctrl+N, elige un color en el panel derecho, abre los bloques de la nota en el panel lateral para checklist y callout, marca tareas haciendo clic en el cuadrado dentro del texto y confirma que `#`, listas, código inline y callouts ya se renderizan en vivo en el editor. Si quieres, deja que tema e idioma sigan el sistema desde configuración.",
       "readyPoint1": "Configuración ahora muestra versión, licencia, enlaces del proyecto y política de seguridad.",
       "readyPoint2": "Puedes volver a abrir este tutorial en cualquier momento desde configuración.",
-      "readyPoint3": "Usa issues para bugs y advisory privada para vulnerabilidades."
+      "readyPoint3": "Si encuentras un bug, una falla sensible o algo sospechoso, envía un correo a siriusxofc.dev@gmail.com."
     }
   },
   "ai": {

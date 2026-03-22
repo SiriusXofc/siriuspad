@@ -6,7 +6,10 @@ export const APP_REPOSITORY_URL = 'https://github.com/SiriusXofc/siriuspad'
 export const APP_CHANGELOG_URL = `${APP_REPOSITORY_URL}/blob/main/CHANGELOG.md`
 export const APP_LICENSE_URL = `${APP_REPOSITORY_URL}/blob/main/LICENSE`
 export const APP_SECURITY_URL = `${APP_REPOSITORY_URL}/blob/main/SECURITY.md`
-export const APP_SECURITY_ADVISORY_URL = `${APP_REPOSITORY_URL}/security/advisories/new`
+export const APP_SUPPORT_EMAIL = 'siriusxofc.dev@gmail.com'
+export const APP_SUPPORT_EMAIL_URL = `mailto:${APP_SUPPORT_EMAIL}?subject=${encodeURIComponent(
+  'SiriusPad - suporte e segurança',
+)}`
 export const DEFAULT_WORKSPACE_ID = 'general'
 
 export const DEFAULT_SETTINGS: Settings = {

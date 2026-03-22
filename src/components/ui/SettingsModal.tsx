@@ -7,8 +7,9 @@ import {
   APP_LICENSE_URL,
   APP_MAINTAINER,
   APP_REPOSITORY_URL,
-  APP_SECURITY_ADVISORY_URL,
   APP_SECURITY_URL,
+  APP_SUPPORT_EMAIL,
+  APP_SUPPORT_EMAIL_URL,
   APP_VERSION,
   FONT_OPTIONS,
   LANGUAGE_OPTIONS,
@@ -169,7 +170,7 @@ export function SettingsModal({
     { label: t('settings.about.openChangelog'), href: APP_CHANGELOG_URL },
     { label: t('settings.about.openLicense'), href: APP_LICENSE_URL },
     { label: t('settings.about.openSecurity'), href: APP_SECURITY_URL },
-    { label: t('settings.about.reportSecurity'), href: APP_SECURITY_ADVISORY_URL },
+    { label: t('settings.about.reportSecurity'), href: APP_SUPPORT_EMAIL_URL },
   ]
 
   return (
@@ -731,7 +732,7 @@ export function SettingsModal({
             },
             {
               title: t('settings.about.securityTitle'),
-              body: t('settings.about.securityBody'),
+              body: t('settings.about.securityBody', { email: APP_SUPPORT_EMAIL }),
             },
             {
               title: t('settings.about.commandsTitle'),

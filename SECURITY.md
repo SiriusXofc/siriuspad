@@ -22,9 +22,9 @@ As áreas mais críticas hoje são:
 
 Se você encontrou uma vulnerabilidade no SiriusPad, **não abra issue pública**.
 
-Use uma Security Advisory privada:
+Envie um e-mail para:
 
-https://github.com/Nic85796/siriuspad/security/advisories/new
+`siriusxofc.dev@gmail.com`
 
 Inclua, se possível:
 
@@ -44,6 +44,6 @@ Inclua, se possível:
 ## Boas práticas para usuários
 
 - rode apenas comandos que você entende
-- não publique tokens, logs sensíveis ou notas privadas em issues
+- não publique tokens, logs sensíveis ou notas privadas em páginas públicas
 - prefira releases oficiais do GitHub do projeto
 - mantenha o app atualizado para receber correções de segurança

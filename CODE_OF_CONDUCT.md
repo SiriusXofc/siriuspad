@@ -38,5 +38,4 @@ Casos mais sérios podem levar à edição, remoção de conteúdo, bloqueio de 
 
 Se precisar reportar algo sensível, use:
 
-- security advisory privada: https://github.com/Nic85796/siriuspad/security/advisories/new
-- issues públicas: https://github.com/Nic85796/siriuspad/issues
+- e-mail de contato: siriusxofc.dev@gmail.com
