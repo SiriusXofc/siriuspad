@@ -11,6 +11,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     strategy:
@@ -25,10 +28,10 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -76,7 +79,7 @@ jobs:
 
       - name: Upload build artifacts
         if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/v'))
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SiriusPad-${{ matrix.platform }}
           path: |
@@ -96,23 +99,55 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "SiriusPad ${{ github.ref_name }}"
           releaseBody: |
-            Nova versão pública do SiriusPad.
+            Esta release consolida oficialmente o pacote atual do SiriusPad e publica uma rodada forte de estabilidade, experiência mobile, IA integrada, Git Sync nativo e melhoria de arquitetura.
 
-            Destaques desta versão:
-            - Git Sync nativo agora funciona de verdade no desktop, com backend Tauri para iniciar repo, configurar remoto e sincronizar as notas
-            - integrações ganharam o campo da URL Git sem remover nenhuma das novidades recentes de IA, updater e mobile
-            - traduções `pt-BR`, `en` e `es` foram alinhadas para Git Sync, Vim mode, updater, wikilinks e comandos móveis
-            - status bar, DevTools e sync do Supabase foram estabilizados sem cortar o fluxo novo do app
-            - build, lint e cargo check foram validados juntos antes desta release
+            ## Estabilidade e Arquitetura
 
-            Distribuição oficial:
+            - **Sincronização Cloud mais estável:** o cliente do Supabase agora é reutilizado por credencial, evitando múltiplas conexões desnecessárias e reduzindo erros de sync.
+            - **Atalhos globais corrigidos:** foi resolvido o conflito em que atalhos como o do terminal paravam de responder enquanto você estava digitando ou editando o conteúdo.
+            - **Git Sync nativo no desktop:** o SiriusPad agora consegue iniciar o repositório das notas, configurar remoto e sincronizar com `pull --rebase` e `push` via backend Tauri.
+            - **Cobertura de traduções ampliada:** `pt-BR`, `en` e `es` foram alinhados para Git Sync, Vim mode, updater, wikilinks, comandos móveis e estados novos da interface.
+
+            ## Sistema de Atualização Premium
+
+            - **Novo design do UpdateModal:** a tela de atualização foi redesenhada com visual mais moderno, gradientes, glassmorphism e etapas visuais de progresso.
+            - **Fluxo passo a passo:** o modal agora comunica melhor os estados de **download -> instalação -> reinício**, deixando o processo mais claro para o usuário.
+            - **Android com atualização guiada:** no mobile, quando existe nova versão, o app pode direcionar o usuário direto para baixar o APK beta no navegador.
+
+            ## Ferramentas de Desenvolvedor
+
+            - **DevTools interno (`F12`):** o app agora traz console e inspeção básica do estado local sem depender de ferramenta externa.
+            - **Proteção de dados locais no DevTools:** chaves sensíveis como token do GitHub, chave da IA e chave pública do Supabase passaram a aparecer mascaradas.
+            - **StatusBar mais inteligente:** a barra inferior foi refinada para telas pequenas e agora deixa mais claro o estado do sync com Supabase e Git.
+
+            ## Experiência Mobile
+
+            - **Barra de formatação Markdown:** adicionada uma barra rápida para escrita no mobile.
+            - **Gestos de swipe:** deslizar uma nota agora expõe ações rápidas como fixar e excluir.
+            - **Paleta de comandos em tela cheia no celular:** a busca ficou mais prática para uso com o polegar.
+            - **Mobile FAB inteligente:** o botão flutuante some enquanto você está editando para não atrapalhar a visão.
+            - **Pacote Android beta oficial:** o workflow publica o APK nomeado do SiriusPad direto na release.
+
+            ## Sirius AI
+
+            - **IA integrada ao contexto da nota ativa:** o Sirius AI pode ler a nota atual para ajudar com resumo, explicação técnica, brainstorming e apoio em bugs.
+            - **Suporte local e cloud:** o app aceita provedores compatíveis com OpenAI/Groq e também fluxos locais com **Ollama** ou **LM Studio**.
+            - **Preset de Ollama nas configurações:** configuração mais rápida para quem quer usar modelo local sem montar tudo manualmente.
+
+            ## Qualidade da release
+
+            - Workflow do GitHub Actions atualizado para runtimes compatíveis com **Node 24**.
+            - CI validado com `npm run build`, `npm run lint` e `cargo check`.
+
+            ## Distribuição oficial
+
             - `.deb` para Linux
-            - `.AppImage` como alternativa para Linux
+            - `.AppImage` para Linux
             - `.exe` para Windows
             - `.apk` beta para Android
-            - `latest.json` para o fluxo de auto-update
+            - `latest.json` para o fluxo de auto-update no desktop
 
-            Consulte o `CHANGELOG.md` para os detalhes completos da versão.
+            Consulte o `CHANGELOG.md` para o histórico técnico desta versão.
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
@@ -135,22 +170,22 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -164,7 +199,7 @@ jobs:
           targets: aarch64-linux-android
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v3.2.2
 
       - name: Install Android SDK packages
         shell: bash
@@ -230,7 +265,7 @@ jobs:
 
       - name: Upload Android build artifact
         if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/v'))
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SiriusPad-android
           path: ${{ steps.android_apk.outputs.named_apk }}

@@ -7,6 +7,35 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Não lançado]
 
+## [1.0.32] - 2026-03-22
+
+### Changed
+
+- workflow de release do GitHub Actions foi atualizado para usar ações compatíveis com a transição para **Node 24**, reduzindo risco de quebra futura nos runners do GitHub
+- runtime JavaScript das actions agora é forçado para Node 24 no CI, o que elimina o aviso de depreciação do Node 20 sem mexer no runtime do app
+- notes da release foram reescritas para documentar de forma completa o pacote atual do SiriusPad, incluindo IA, updater, mobile, DevTools, Supabase e Git Sync
+
+### Documented
+
+- **Estabilidade e Arquitetura**
+  - sincronização cloud com cliente Supabase reutilizado por credencial, evitando conexões duplicadas e erros de sync
+  - correção do conflito dos atalhos globais, incluindo cenários onde o terminal ou outros atalhos paravam durante a edição
+- **Sistema de Atualização Premium**
+  - UpdateModal com visual renovado, glassmorphism, gradientes e leitura mais clara do fluxo de download, instalação e reinício
+  - suporte para Android com direcionamento ao APK beta mais recente quando uma nova versão é detectada
+- **Ferramentas de Desenvolvedor**
+  - DevTools interno com `F12`, console, inspeção de estado local e masking de segredos na interface
+  - StatusBar mais clara em telas menores, com feedback melhor para sync em nuvem e Git
+- **Experiência Mobile**
+  - barra rápida de formatação Markdown
+  - ações por swipe na lista de notas
+  - paleta de comandos em tela cheia no celular
+  - Mobile FAB inteligente que sai de cena durante a edição
+- **Sirius AI**
+  - IA integrada à nota ativa para resumos, ajuda com bugs e explicações técnicas
+  - suporte a provedores cloud compatíveis com OpenAI/Groq e fluxos locais com Ollama e LM Studio
+  - preset de Ollama nas configurações para setup mais rápido
+
 ## [1.0.31] - 2026-03-22
 
 ### Added
